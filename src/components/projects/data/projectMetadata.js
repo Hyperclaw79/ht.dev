@@ -46,7 +46,7 @@ const metadata = [
     {
         name: 'Electon',
         title: 'Electon',
-        description: 'A voting based social networking app made during HPDF.\nA simple and clean interface which lets users compete is competitions and vote on it.\nHas support for content ranging from text to audio.',
+        description: 'A voting based social networking app made during HPDF. A simple and clean interface which lets users compete is competitions and vote on it. Has support for content ranging from text to audio.',
         image_url: null,
         tags: [
             'Python', 'Django', 'Flask', 'Git', 'ReactJS', 'Javascript', 'HTML5', 

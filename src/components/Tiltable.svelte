@@ -8,9 +8,17 @@
                     !elem.classList.contains("tracker")
         );
         elems.sort((a, b) => {
-            if (a.tagName === "BUTTON" || a.tagName === "A") {
+            if (
+                a.tagName === "BUTTON"
+                || a.tagName === "A"
+                || a.tagName === "INPUT"
+            ) {
                 return -1;
-            } else if (b.tagName === "BUTTON" || b.tagName === "A") {
+            } else if (
+                b.tagName === "BUTTON"
+                || b.tagName === "A"
+                || b.tagName === "INPUT"
+            ) {
                 return 1;
             } else {
                 return 0;
