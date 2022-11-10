@@ -14,7 +14,7 @@ const metadata = [
         name: 'HULK-v3',
         title: 'HULK v3',
         description: 'Asynchronous HTTP Botnet for Distributed Denial of Service (DDoS)',
-        image_url: 'https://repository-images.githubusercontent.com/95017325/017f0cec-42fd-4e28-9126-270c4c5bb719',
+        image_url: 'https://github.com/Hyperclaw79/HULK-v3/raw/async/assets/Hulk_demo.gif',
         tags: [
             'Python', 'Aiohttp', 'Asyncio', 'REST API',
             'Electron', 'NextJS', 'Named Pipes', 'Socket', 'Git'

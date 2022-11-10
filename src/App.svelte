@@ -3,7 +3,9 @@
 </script>
 
 <main>
-	<Project />
+	<section id="projects">
+		<Project />
+	</section>
 </main>
 
 <style>
