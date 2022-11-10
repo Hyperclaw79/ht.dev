@@ -43,7 +43,6 @@
     $: display_stats = all_stats_present && non_zero_stats;
 </script>
 
-<!-- <div class="ghCard" transition:fade> -->
 <div class="ghCard" transition:fly="{{ x: 100 * Math.pow(-1, odd_or_even)}}">
     <div class="titleHolder">
         <h2 class="title">
@@ -97,8 +96,8 @@
 
 <style>
     .ghCard {
-        --card-header-bg: #bf2828;
-        --card-bg: #333;
+        --card-header-bg: var(--theme-primary);
+        --card-bg: var(--theme-bg);
         --card-color: #eee;
         --tags-color: rgb(171, 171, 171);
         --stats-header-color: rgb(192, 192, 192);
@@ -188,6 +187,7 @@
         font-size: small;
         color: var(--tags-color);
         font-size: calc(var(--font-size) * 1);
+        font-family: 'M PLUS 1 Code', sans-serif;
     }
 
     .ghCard .statsHolder {
@@ -197,6 +197,7 @@
         margin-top: auto;
         backdrop-filter: contrast(0.75);
         border: 1px dashed black;
+        filter: drop-shadow(0px 2px 3px black);
     }
 
     .ghCard .statsHolder>div {
@@ -204,8 +205,9 @@
         flex-direction: column;
         margin-left: auto;
         margin-right: auto;
-        margin-top: -2em;
-        gap: 1em;
+        height: 100%;
+        justify-content: space-evenly;
+        align-items: center;
     }
 
     .ghCard .statsHolder>div>span {
@@ -253,6 +255,11 @@
 
         .ghCard .tags {
             font-size: calc(var(--font-size) * 1.5);
+        }
+
+        .ghCard .statsHolder>div img {
+            width: 5vw;
+            height: 5vw;
         }
 
     }

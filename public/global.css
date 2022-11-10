@@ -1,3 +1,9 @@
+:root {
+	--section-heading-font-size: 3vw;
+	--theme-primary: #bf2828;
+	--theme-bg: #333;
+}
+
 html, body {
 	position: relative;
 	width: 100%;
@@ -67,4 +73,20 @@ button:focus {
 
 h1, h2, h3, h4, h5, h6 {
 	user-select: none;
+}
+
+section:not(:last-child) {
+	margin-bottom: 4rem;
+}
+
+@media screen and (max-width: 800px) {
+	:root {
+		--section-heading-font-size: 5vw;
+	}
+}
+
+@media screen and (max-width: 640px) {
+	:root {
+		--section-heading-font-size: 8vw;
+	}
 }
