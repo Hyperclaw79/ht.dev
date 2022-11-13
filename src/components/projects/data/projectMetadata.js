@@ -3,7 +3,7 @@ const metadata = [
         name: 'PokeBall-SelfBot-Poketwo-Autocatcher',
         title: 'Pokeball Selfbot',
         description: 'This specific selfbot was designed to automatically catch pokemon spawned on Discord by Poketwo bot. It also offers other utility functions to automate features like trading, releasing, id search, etc. Currently the autocatcher is powered by AI making it possible to autocatch pokemons on multiple bots like PokeTwo, PokeRealm, etc.',
-        image_url: 'https://repository-images.githubusercontent.com/123975724/50a8f900-59c2-11ea-92bd-b38e67780b2b',
+        image_url: '/images/pokeball.png',
         tags: [
             'Python', 'discord.py', 'Asyncio', 'Pytorch', 'Deep CNN',
             'Imagehash', 'Pillow', 'JSON', 'REST API', 'Git', 'SQLite'
@@ -14,10 +14,11 @@ const metadata = [
         name: 'HULK-v3',
         title: 'HULK v3',
         description: 'Asynchronous HTTP Botnet for Distributed Denial of Service (DDoS)',
-        image_url: 'https://github.com/Hyperclaw79/HULK-v3/raw/async/assets/Hulk_demo.gif',
+        image_url: '/images/Hulk.gif',
         tags: [
             'Python', 'Aiohttp', 'Asyncio', 'REST API',
-            'Electron', 'NextJS', 'Named Pipes', 'Socket', 'Git'
+            'Electron', 'NextJS', 'Named Pipes', 'Socket', 'Git',
+            'Github Actions', 'CI/CD'
         ],
         is_on_github: true
     },
@@ -25,11 +26,12 @@ const metadata = [
         name: 'PokeGambler',
         title: 'PokéGambler',
         description: 'The PokeGambler Discord Bot uses pokemon themed playing cards for a fun gambling match.\nIt has a dedicated currency, profile system and other minigames.\nEarned pokechips can be cross-traded.',
-        image_url: 'https://repository-images.githubusercontent.com/365626442/772ccf1c-8cf3-4b15-b3f5-0ac193626e37',
+        image_url: '/images/pokegambler.png',
         tags: [
             'Python', 'Aiohttp', 'Asyncio', 'Discord.py',
             'Google K8s Engine', 'Github Actions', 'PIL',
-            'Git', 'MongoDB', 'Dataclasses'
+            'Git', 'MongoDB', 'Dataclasses', 'NextJS',
+            'REST API', 'CI/CD'
         ],
         is_on_github: true
     },
@@ -37,7 +39,7 @@ const metadata = [
         name: 'vssticky',
         title: 'VSSticky',
         description: 'Attach sticky notes on your files, from inside VS Code.',
-        image_url: 'https://github.com/Hyperclaw79/vssticky/raw/main/assets/vssticky_preview.gif',
+        image_url: '/images/vssticky.gif',
         tags: [
             'TypeScript', 'VS Code API', 'Git', 'Github Actions'
         ],

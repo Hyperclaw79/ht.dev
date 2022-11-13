@@ -1,13 +1,14 @@
 <script>
-    import { fly } from "svelte/transition";
     import Progressbar from "../Progressbar.svelte";
     import skills from "./skillsMetadata.js";
+
+    export let inview = false;
 </script>
 
-<div class="container" transition:fly="{{ x: -500 }}">
+<div class="container">
     <h1 class="font-effect-anaglyph">SKILLS</h1>
     <div class="skill-set">
-        <div class="skill-category">
+        <div class="skill-category" class:slide={inview}>
             <div class="title-holder">
                 <img src="/icons/technical.png" alt="technical icon" />
                 <h2>Technical Skills</h2>
@@ -24,7 +25,7 @@
                 </div>
             {/each}
         </div>
-        <div class="skill-category">
+        <div class="skill-category" class:slide={inview}>
             <div class="title-holder">
                 <img src="/icons/soft-skills.png" alt="soft-skills icon" />
                 <h2>Soft Skills</h2>
@@ -45,12 +46,7 @@
 </div>
 
 <style>
-	h1 {
-        margin: 0;
-        font-size: var(--section-heading-font-size);
-	}
-
-    .skill-set {
+	.skill-set {
         display: flex;
         flex-direction: row;
         justify-content: space-evenly;
@@ -59,8 +55,11 @@
         width: 80vw;
         margin-left: auto;
         margin-right: auto;
+        margin-top: 1em;
         text-transform: uppercase;
-        filter: drop-shadow(2px 4px 6px black);
+        box-shadow:
+            2px 4px 6px black,
+            -2px 4px 6px black;
         user-select: none;
     }
 
@@ -77,12 +76,21 @@
     
     .skill-category:nth-child(1) {
         box-shadow: 1px 2px 3px black;
+        transform: translateX(calc(100% + 1em));
+        transition: transform 400ms ease-in-out;
     }
 
+    
     .skill-category:nth-child(2) {
         box-shadow: -1px 2px 3px black;
+        transform: translateX(calc((100% + 1em) * -1));
+        transition: transform 400ms ease-in-out;
     }
     
+    .slide {
+        transform: none !important;
+    }
+
     .skill-category .title-holder {
         position: relative;
         width: 100%;
@@ -99,6 +107,10 @@
         gap: var(--icon-gap);
     }
 
+    .skill-category .title-holder>* {
+        filter: drop-shadow(2px 4px 6px black);
+    }
+
     .skill {
         display: flex;
         flex-direction: column;
@@ -112,6 +124,7 @@
         justify-content: flex-start;
         align-items: center;
         gap: var(--icon-gap);
+        filter: drop-shadow(2px 4px 6px black);
     }
 
     .skill-category img {

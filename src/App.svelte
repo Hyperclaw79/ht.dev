@@ -1,20 +1,18 @@
 <script>
-    import IntersectionObserver from './components/IntersectionObserver.svelte';
-	import Project from './components/projects/Projects.svelte';
-    import Skills from './components/skills/Skills.svelte';
+	import Project from "./components/projects/Projects.svelte";
+	import Skills from "./components/skills/Skills.svelte";
+	import IntersectionObserver from "./components/IntersectionObserver.svelte";
 </script>
 
 <main>
 	<section id="projects">
 		<Project />
 	</section>
-	<IntersectionObserver let:intersecting>
-		<section id="skills">
-			{#if intersecting}
-				<Skills />
-			{/if}
-		</section>
-	</IntersectionObserver>
+	<section id="skills">
+		<IntersectionObserver let:intersecting>
+			<Skills inview={intersecting}/>
+		</IntersectionObserver>
+	</section>
 </main>
 
 <style>
