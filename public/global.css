@@ -94,6 +94,15 @@ h1 {
 	:root {
 		--section-heading-font-size: 5vw;
 	}
+
+	/* Disable Scroll Snapping for smaller screens */
+	body {
+		scroll-snap-type: none;
+	}
+
+	section {
+		scroll-snap-align: none;
+	}
 }
 
 @media screen and (max-width: 640px) {

@@ -55,4 +55,11 @@
         /* To allow breathing room before next scroll snap */
         padding-bottom: 10rem;
 	}
+
+    @media screen and (max-width: 800px) {
+        /* Scroll Snapping is disabled for smaller screens */
+        .githubCards {
+            padding-bottom: 0;
+        }
+    }
 </style>
