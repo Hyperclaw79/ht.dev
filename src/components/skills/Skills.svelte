@@ -152,10 +152,12 @@
 
         .skill-category:nth-child(1) {
             box-shadow: 1px 2px 3px black;
+            transform: translateY(calc(100% + 1em));
         }
 
         .skill-category:nth-child(2) {
             box-shadow: 1px -2px 3px black;
+            transform: translateY(calc((100% + 1em) * -1));
         }
 
         .skill>div {
