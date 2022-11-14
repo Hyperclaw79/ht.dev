@@ -52,5 +52,7 @@
         margin-left: auto;
         margin-right: auto;
         user-select: none;
+        /* To allow breathing room before next scroll snap */
+        padding-bottom: 10rem;
 	}
 </style>
