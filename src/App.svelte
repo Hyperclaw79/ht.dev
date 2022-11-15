@@ -7,11 +7,13 @@
 
 <main>
 	<section id="projects">
-		<Project />
+		<IntersectionObserver let:intersecting >
+			<Project inview={intersecting} />
+		</IntersectionObserver>
 	</section>
 	<section id="skills">
-		<IntersectionObserver let:intersecting>
-			<Skills inview={intersecting}/>
+		<IntersectionObserver let:intersecting >
+			<Skills inview={intersecting} />
 		</IntersectionObserver>
 	</section>
 	<section id="achievements">

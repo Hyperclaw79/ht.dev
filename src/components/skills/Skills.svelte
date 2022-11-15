@@ -8,7 +8,7 @@
 <div class="container">
     <h1 class="font-effect-anaglyph">SKILLS</h1>
     <div class="skill-set">
-        <div class="skill-category" class:slide={inview}>
+        <div class="skill-category" class:clearTX={inview}>
             <div class="title-holder">
                 <img src="/icons/technical.png" alt="technical icon" />
                 <h2>Technical Skills</h2>
@@ -25,7 +25,7 @@
                 </div>
             {/each}
         </div>
-        <div class="skill-category" class:slide={inview}>
+        <div class="skill-category" class:clearTX={inview}>
             <div class="title-holder">
                 <img src="/icons/soft-skills.png" alt="soft-skills icon" />
                 <h2>Soft Skills</h2>
@@ -87,7 +87,7 @@
         transition: transform 400ms ease-in-out;
     }
     
-    .slide {
+    .clearTX {
         transform: none !important;
     }
 
@@ -152,12 +152,13 @@
 
         .skill-category:nth-child(1) {
             box-shadow: 1px 2px 3px black;
-            transform: translateY(calc(100% + 1em));
+            transform: none;
         }
 
         .skill-category:nth-child(2) {
             box-shadow: 1px -2px 3px black;
             transform: translateY(calc((100% + 1em) * -1));
+            transition-duration: 3s;
         }
 
         .skill>div {

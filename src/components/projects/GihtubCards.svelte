@@ -3,6 +3,8 @@
     import Tiltable from "../Tiltable.svelte";
     import GhCard from './GhCard.svelte';
 
+    export let inview = false;
+
 	let getProjectData = async () => {
 		return await Promise.all(repos.map(async (data) => {
             let {is_on_github, ...project} = data;
@@ -33,7 +35,7 @@
     {:then repos}
         {#each repos as card, idx (card.id || card.name)}
             <Tiltable>
-                <GhCard {...card} odd_or_even={idx}/>
+                <GhCard {...card} odd_or_even={idx} {inview}/>
             </Tiltable>
         {:else}
             <p>No projects found...</p>

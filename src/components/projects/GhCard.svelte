@@ -1,12 +1,13 @@
 <script>
-    import { fly, slide } from 'svelte/transition';
-
     export let name, title, description, image_url, tags;
     export let html_url = undefined;
     export let watchers_count = undefined;
     export let stargazers_count = undefined;
     export let forks_count = undefined;
     export let odd_or_even = undefined;
+
+    export let inview = false;
+
     $: card = {
         name,
         title,
@@ -43,58 +44,76 @@
     $: display_stats = all_stats_present && non_zero_stats;
 </script>
 
-<div class="ghCard" transition:fly="{{ x: 100 * Math.pow(-1, odd_or_even)}}">
-    <div class="titleHolder">
-        <h2 class="title">
-            <a
-                href={card.html_url}
-                target="_blank"
-                rel="noopener noreferrer"
-            >
-                {card.title}
-            </a>
-        </h2>
-    </div>
-    <div class="cardBody" transition:slide="{{delay: 250, duration: 300}}">
-        {#if card.image_url}
-            <img
-                src={card.image_url}
-                alt={card.name}
-            />
-        {:else}
-            <div class="fallback">
-                <span>
-                    No Image for this one...
-                </span>
-            </div>
-        {/if}
-        <pre class="description">{card.description}</pre>
-        <p class="tags">
-            Technologies Used: {card.tags.join(', ')}
-        </p>
-        {#if display_stats}
-            <div class="statsHolder">
-                <div>
-                    <span>STATS</span>
-                    <img src="/icons/github.png" alt="github icon" />
+<div
+    class="shrinker"
+    class:clearTX={inview}
+    style="transform: scaleY(0);"
+>
+    <div
+        class="ghCard"
+        style="transform: translateX({2 * Math.pow(-1, odd_or_even)}0vw);"
+        class:clearTX={inview}
+    >
+        <div class="titleHolder">
+            <h2 class="title">
+                <a
+                    href={card.html_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    {card.title}
+                </a>
+            </h2>
+        </div>
+        <div class="cardBody">
+            {#if card.image_url}
+                <img
+                    src={card.image_url}
+                    alt={card.name}
+                />
+            {:else}
+                <div class="fallback">
+                    <span>
+                        No Image for this one...
+                    </span>
                 </div>
-                <p class="stats">
-                    {#each Object.entries(stats) as [key, value]}
-                        <span class="stat {key}">
-                            <span class="statKey">
-                                <span>{@html value.icon}</span>
-                                <span>{key.toUpperCase()}</span>
+            {/if}
+            <pre class="description">{card.description}</pre>
+            <p class="tags">
+                Technologies Used: {card.tags.join(', ')}
+            </p>
+            {#if display_stats}
+                <div class="statsHolder">
+                    <div>
+                        <span>STATS</span>
+                        <img src="/icons/github.png" alt="github icon" />
+                    </div>
+                    <p class="stats">
+                        {#each Object.entries(stats) as [key, value]}
+                            <span class="stat {key}">
+                                <span class="statKey">
+                                    <span>{@html value.icon}</span>
+                                    <span>{key.toUpperCase()}</span>
+                                </span>
+                                <span class="statValue">{value.count}</span>
                             </span>
-                            <span class="statValue">{value.count}</span>
-                        </span>
-                    {/each}
-                </p>
-            </div>
-        {/if}
+                        {/each}
+                    </p>
+                </div>
+            {/if}
+        </div>
     </div>
 </div>
 
 <style>
+
+    .shrinker {
+        position: relative;
+        display: flex;
+        transform-origin: top;
+        transition: transform 1s ease-in-out;
+    }
+
     .ghCard {
         --card-header-bg: var(--theme-primary);
         --card-bg: var(--theme-bg);
@@ -112,7 +131,12 @@
         display: flex;
         flex-direction: column;
         filter: drop-shadow(2px 4px 6px black);
+        transition: transform 0.5s ease-in-out;
 	}
+
+    .clearTX {
+        transform: none !important;
+    }
 
     .ghCard .titleHolder {
         width: calc(100% + 2em);
@@ -246,6 +270,12 @@
 
     .ghCard .statValue {
         font-weight: bold;
+    }
+
+    @media screen and (max-width: 1332px) {
+        .ghCard {
+            transform: none !important;
+        }
     }
 
     @media screen and (max-width: 1200px) {
