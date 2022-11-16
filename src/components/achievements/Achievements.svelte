@@ -1,6 +1,6 @@
 <script>
     import IntersectionObserver from '../IntersectionObserver.svelte';
-    import metadata from './data/achievementMetadata.js';
+    import metadata from '../../data/achievementMetadata.js';
     import Listing from './Listing.svelte';
 </script>
 <IntersectionObserver let:intersecting>

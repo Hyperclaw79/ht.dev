@@ -1,6 +1,6 @@
 <script>
     import Progressbar from "../Progressbar.svelte";
-    import skills from "./skillsMetadata.js";
+    import skills from "../../data/skillsMetadata.js";
 
     export let inview = false;
 </script>

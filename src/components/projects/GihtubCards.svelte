@@ -1,5 +1,5 @@
 <script>
-	import repos from './data/projectMetadata.js';
+	import repos from '../../data/projectMetadata.js';
     import Tiltable from "../Tiltable.svelte";
     import GhCard from './GhCard.svelte';
 
