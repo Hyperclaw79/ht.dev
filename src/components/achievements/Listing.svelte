@@ -70,6 +70,7 @@
         display: flex;
         flex-direction: column;
         max-width: 80vw;
+        box-shadow: 2px 2px 2px 1px black;
         transition: transform 1s ease-in-out;
     }
 
