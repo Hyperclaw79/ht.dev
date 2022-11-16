@@ -3,6 +3,7 @@
 	import Skills from "./components/skills/Skills.svelte";
     import Achievements from "./components/achievements/Achievements.svelte";
 	import IntersectionObserver from "./components/IntersectionObserver.svelte";
+    import Footer from "./components/Footer.svelte";
 </script>
 
 <main>
@@ -19,8 +20,7 @@
 	<section id="achievements">
 		<Achievements />
 	</section>
-	<!-- Dummy Section to prevent scroll snap to top for Achievements -->
-	<section />
+	<Footer />
 </main>
 
 <style>

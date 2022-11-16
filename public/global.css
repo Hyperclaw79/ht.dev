@@ -1,7 +1,7 @@
 :root {
 	--section-heading-font-size: 3vw;
 	--theme-primary: #bf2828;
-	--theme-bg: #333;
+	--theme-bg: #232323;
 }
 
 html, body {
@@ -12,7 +12,6 @@ html, body {
 }
 
 body {
-	background: rgb(37, 37, 37);
 	background: url(https://i.pinimg.com/originals/20/ae/f2/20aef23d39a8dcb74bf663ed89ab08d6.gif);
 	backdrop-filter: contrast(0.85);
 	color: rgb(238, 238, 238);
@@ -24,6 +23,15 @@ body {
 
 section {
 	height: 100%;
+	scroll-snap-align: start;
+	margin-bottom: 4rem;
+}
+
+section:last-of-type {
+	padding-bottom: 4rem;
+}
+
+footer {
 	scroll-snap-align: start;
 }
 
@@ -81,10 +89,6 @@ h1, h2, h3, h4, h5, h6 {
 	user-select: none;
 }
 
-section:not(:last-child) {
-	margin-bottom: 4rem;
-}
-
 h1 {
 	margin: 0;
 	font-size: var(--section-heading-font-size);
@@ -100,7 +104,8 @@ h1 {
 		scroll-snap-type: none;
 	}
 
-	section {
+	section,
+	footer {
 		scroll-snap-align: none;
 	}
 }

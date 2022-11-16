@@ -6,7 +6,7 @@ const metadata = [
     },
     {
         name: 'Linkedin',
-        url: 'linkedin.com/in/harshith-thota-749851154',
+        url: 'https://linkedin.com/in/harshith-thota-749851154',
         icon: '/icons/linkedin.png'
     },
     {
