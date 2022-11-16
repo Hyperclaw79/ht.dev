@@ -12,7 +12,7 @@ html, body {
 }
 
 body {
-	background: url(https://i.pinimg.com/originals/20/ae/f2/20aef23d39a8dcb74bf663ed89ab08d6.gif);
+	background: black;
 	backdrop-filter: contrast(0.85);
 	color: rgb(238, 238, 238);
 	margin: 0;
