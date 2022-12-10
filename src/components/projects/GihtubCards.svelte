@@ -54,8 +54,9 @@
         margin-left: auto;
         margin-right: auto;
         user-select: none;
-        /* To allow breathing room before next scroll snap */
+        /* To allow breathing room before next scroll snap
         padding-bottom: 10rem;
+        */
 	}
 
     @media screen and (max-width: 800px) {

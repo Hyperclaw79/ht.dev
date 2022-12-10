@@ -8,7 +8,7 @@ html, body {
 	position: relative;
 	width: 100%;
 	scroll-behavior: smooth;
-	scroll-snap-type: y mandatory;
+	/* scroll-snap-type: y mandatory; */
 }
 
 body {
@@ -24,7 +24,7 @@ body {
 section {
 	height: 100%;
 	scroll-snap-align: start;
-	margin-bottom: 4rem;
+	margin-bottom: 8%;
 }
 
 section:last-of-type {

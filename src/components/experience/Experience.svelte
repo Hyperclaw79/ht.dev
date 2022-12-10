@@ -20,8 +20,8 @@
         justify-content: center;
         margin-left: auto;
         margin-right: auto;
-        /* To allow breathing room before next scroll snap */
-        padding-bottom: 10vw;
+        /* To allow breathing room before next scroll snap
+        padding-bottom: 10vw; */
     }
 
     .contents {
