@@ -1,4 +1,5 @@
 <script>
+	import Experience from './components/experience/Experience.svelte';
 	import Project from "./components/projects/Projects.svelte";
 	import Skills from "./components/skills/Skills.svelte";
     import Achievements from "./components/achievements/Achievements.svelte";
@@ -7,6 +8,9 @@
 </script>
 
 <main>
+	<section id="experience">
+		<Experience />
+	</section>
 	<section id="projects">
 		<IntersectionObserver let:intersecting >
 			<Project inview={intersecting} />

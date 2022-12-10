@@ -129,11 +129,6 @@
             padding: 2vw;
         }
 
-        .socials {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
         .social .icon {
             width: 4vw;
             height: 4vw;
@@ -145,7 +140,7 @@
         }
 
         .copyright {
-            --base-font-size: 5vw;
+            --base-font-size: 3vw;
         }
     }
 
