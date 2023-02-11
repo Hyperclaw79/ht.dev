@@ -1,10 +1,10 @@
 import skills from "../../data/skillsMetadata.js";
 
 // Helper functions
-const transpose = (matrix) => {
+export const transpose = (matrix) => {
     return matrix[0].map((col, c) => matrix.map((row, r) => matrix[r][c]));
 };
-const mutate = (arr, width, height) => {
+export const mutate = (arr, width, height) => {
     return arr.map((item) => ({
         x: item.x + (Math.random() * (width / 2)),
         y: item.y + (Math.random() * (height / 2))
@@ -12,7 +12,7 @@ const mutate = (arr, width, height) => {
     // return arr;
 };
 
-const generateGrid = (len) => {
+export const generateGrid = (len) => {
     const numRows = Math.ceil(Math.sqrt(len));
     const numCols = Math.ceil(len / numRows);
     const widthRanges = Array.from({ length: numRows }, (_, i) => (Math.ceil((window.innerWidth / numRows) * i)));
@@ -24,7 +24,7 @@ const generateGrid = (len) => {
     ));
     return mutate(transpose(grid).flat(1), window.innerWidth / numRows, window.innerHeight / numCols);
 };
-const getRandomRotation = () => {
+export const getRandomRotation = () => {
     return Math.floor(Math.random() * 120) - 60;
 };
 

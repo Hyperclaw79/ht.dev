@@ -34,6 +34,20 @@
             ],
             "type": "node",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Run Tests",
+            "type": "node",
+            "request": "launch",
+            "runtimeArgs": [
+                "--experimental-modules",
+                "--experimental-vm-modules",
+                "${workspaceRoot}/node_modules/jest/bin/jest.js"
+            ],
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "console": "integratedTerminal"
         }
     ],
     "compounds": [
