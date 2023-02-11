@@ -38,7 +38,7 @@
 		bottom: 0;
 		padding: 1rem;
 		background: var(--theme-bg);
-		user-select: none;
+        user-select: none;
 		box-shadow: 0px -2px 4px 1px black;
 	}
 

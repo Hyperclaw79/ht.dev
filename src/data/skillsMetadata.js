@@ -3,74 +3,74 @@ const skills = {
         {
             "name": "Python",
             "confidence": 100,
-            "icon": "/icons/python.webp"
+            "icon": "/icons/technical/python.webp"
         },
         {
             "name": "REST API",
             "confidence": 100,
-            "icon": "/icons/rest.png"
+            "icon": "/icons/technical/rest.png"
         },
         {
             "name": "GIT",
             "confidence": 100,
-            "icon": "/icons/git.png"
+            "icon": "/icons/technical/git.png"
         },
         {
             "name": "HTML5",
             "confidence": 100,
-            "icon": "/icons/html5.png"
+            "icon": "/icons/technical/html5.png"
         },
         {
             "name": "CSS3",
             "confidence": 95,
-            "icon": "/icons/css3.png"
+            "icon": "/icons/technical/css3.png"
         },
         {
             "name": "JavaScript",
             "confidence": 95,
-            "icon": "/icons/javascript.png"
+            "icon": "/icons/technical/javascript.png"
         },
         {
             "name": "ReactJS",
             "confidence": 85,
-            "icon": "/icons/reactjs.png"
+            "icon": "/icons/technical/reactjs.png"
         }
     ],
     "Soft Skills": [
         {
             "name": "Communication Skills",
             "confidence": 100,
-            "icon": "/icons/communication.png"
+            "icon": "/icons/soft/communication.png"
         },
         {
             "name": "Lateral Thinking",
             "confidence": 100,
-            "icon": "/icons/lateral-thinking.png"
+            "icon": "/icons/soft/lateral-thinking.png"
         },
         {
             "name": "Logical Analysis",
             "confidence": 95,
-            "icon": "/icons/logical-analysis.png"
+            "icon": "/icons/soft/logical-analysis.png"
         },
         {
             "name": "English",
             "confidence": 100,
-            "icon": "/icons/english.png"
+            "icon": "/icons/soft/english.png"
         },
         {
             "name": "Leadership",
             "confidence": 100,
-            "icon": "/icons/leadership.png"
+            "icon": "/icons/soft/leadership.png"
         },
         {
             "name": "Teamwork",
             "confidence": 100,
-            "icon": "/icons/teamwork.png"
+            "icon": "/icons/soft/teamwork.png"
         },
         {
             "name": "Adaptability",
             "confidence": 90,
-            "icon": "/icons/adaptability.png"
+            "icon": "/icons/soft/adaptability.png"
         }
     ]
 }

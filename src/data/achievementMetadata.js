@@ -4,7 +4,7 @@ const metadata = [
         type: "Certificate",
         from: {
             name: "Udemy",
-            icon: "/icons/udemy.webp"
+            icon: "/icons/achievements/udemy.webp"
         },
         year: "2020",
         image: "/images/pentest.jpg",
@@ -14,7 +14,7 @@ const metadata = [
         type: "Achievement",
         from: {
             name: "Hasura",
-            icon: "/icons/hasura.svg"
+            icon: "/icons/achievements/hasura.svg"
         },
         year: "2017",
         image: "/images/HPDF.jpg"
@@ -24,7 +24,7 @@ const metadata = [
         type: "Achievement",
         from: {
             name: "National Cyber Olympiad",
-            icon: "/icons/nco.png"
+            icon: "/icons/achievements/nco.png"
         },
         year: "2007",
         image: "/images/nco.png",
@@ -35,7 +35,7 @@ const metadata = [
         type: "Achievement",
         from: {
             name: "National Science Olympiad",
-            icon: "/icons/nso.png"
+            icon: "/icons/achievements/nso.png"
         },
         year: "2006",
         image: "/images/nso-gold.png",
