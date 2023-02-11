@@ -20,6 +20,20 @@
             "name": "Launch Chrome",
             "url": "http://localhost:8080",
             "webRoot": "${workspaceFolder}"
+        },
+        {
+            "name": "Linting",
+            "request": "launch",
+            "runtimeArgs": [
+                "run",
+                "lint"
+            ],
+            "runtimeExecutable": "npm",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node",
+            "console": "integratedTerminal"
         }
     ],
     "compounds": [

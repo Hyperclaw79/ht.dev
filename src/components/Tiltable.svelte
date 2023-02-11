@@ -25,6 +25,7 @@
             }
         });
         if (elems.length > 0) {
+            /* eslint no-empty: ["error", { allowEmptyCatch: true }] */
             try {
                 elems[0].click();
             } catch (e) { }

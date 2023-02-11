@@ -8,16 +8,20 @@ const commandsMap = {
         counter++;
         inputs.push({ progress: true, uuid: Date.now() + counter });
         counter++;
-        inputs.push({ action: () => {
-            let startBtn = document.querySelector("button[class~='startBtn']");
-            startBtn.click();
-        }, uuid: Date.now() + counter, timeout: 2000 });
+        inputs.push({
+            action: () => {
+                const startBtn = document.querySelector("button[class~='startBtn']");
+                startBtn.click();
+            },
+            uuid: Date.now() + counter,
+            timeout: 2000
+        });
     },
     clear: (inputs) => {
         inputs.length = 0;
     },
     ls: (inputs) => {
-        let sections = ['.', '..', ...[...document.querySelectorAll('main > section')].map((elem) => elem.id)];
+        const sections = [".", "..", ...[...document.querySelectorAll("main > section")].map((elem) => elem.id)];
         counter++;
         inputs.push({ output: sections, uuid: Date.now() + counter });
     },
@@ -28,11 +32,11 @@ const commandsMap = {
         inputs.push({ output: Object.keys(commandsMap), uuid: Date.now() + counter });
     },
     chdir: (inputs, cmd, data) => {
-        if (cmd.split(' ').length === 1) {
+        if (cmd.split(" ").length === 1) {
             counter++;
-            inputs.push({ output: 'Please specify a directory.', uuid: Date.now() + counter, error: true });
+            inputs.push({ output: "Please specify a directory.", uuid: Date.now() + counter, error: true });
         }
-        data.cwd = cmd.split(' ')[1];
+        data.cwd = cmd.split(" ")[1];
     },
     pwd: (inputs, cmd, data) => {
         counter++;
@@ -40,7 +44,7 @@ const commandsMap = {
     },
     echo: (inputs, cmd) => {
         counter++;
-        inputs.push({ output: cmd.split(' ').slice(1).join(' '), uuid: Date.now() + counter });
+        inputs.push({ output: cmd.split(" ").slice(1).join(" "), uuid: Date.now() + counter });
     }
 };
 
@@ -49,18 +53,18 @@ const execute = (inputs, cmd, data, commandsCache) => {
     inputs.forEach(element => {
         element.isLastInput = false;
     });
-    const cmd_word = cmd.toLowerCase().split(' ')[0];
-    if (!Object.keys(commandsMap).includes(cmd_word)) {
+    const cmdWord = cmd.toLowerCase().split(" ")[0];
+    if (!Object.keys(commandsMap).includes(cmdWord)) {
         if (cmd) {
             counter++;
             inputs.push({ output: `Command not found: ${cmd}`, uuid: Date.now() + counter, error: true });
         }
     } else {
-        commandsMap[cmd_word](inputs, cmd, data);
+        commandsMap[cmdWord](inputs, cmd, data);
     }
     counter++;
-    inputs.push({command: '', uuid: Date.now() + counter, isLastInput: true});
-    return inputs, data;
+    inputs.push({ command: "", uuid: Date.now() + counter, isLastInput: true });
+    return inputs;
 };
 
 export { execute, commandsMap };

@@ -12,6 +12,7 @@
     export let commandsCache = [];
 
     const commands = Object.keys(commandsMap);
+    //eslint-disable-next-line no-useless-escape
     const commandRegex = new RegExp(`^(${commands.join('|')})\s*(.*)$`, "i");
 
     onMount(() => {

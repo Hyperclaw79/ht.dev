@@ -15,7 +15,8 @@
     export let data;
 
     const handleExec = (command) => {
-        inputs, data = execute(inputs, command, data, commandsCache);
+        inputs = execute(inputs, command, data, commandsCache);
+        data = {...data};
         inputs = [...inputs].sort((a, b) => a.uuid - b.uuid);
     };
 
