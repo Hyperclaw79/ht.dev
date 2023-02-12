@@ -1,12 +1,16 @@
 <script>
+    import { writable } from 'svelte/store';
 	import repos from '../../data/projectMetadata.js';
     import Tiltable from "../Tiltable.svelte";
     import GhCard from './GhCard.svelte';
 
+    let projects = writable([]);
+
     export let inview = false;
 
 	let getProjectData = async () => {
-		return await Promise.all(repos.map(async (data) => {
+        if ($projects.length > 0) { return $projects; }
+		$projects = await Promise.all(repos.map(async (data) => {
             let {is_on_github, ...project} = data;
             if (is_on_github) {
                 let res = await fetch(`https://api.github.com/repos/hyperclaw79/${project.name}`)
@@ -26,6 +30,7 @@
                 return project;
             }
 		}))
+        return $projects;
 	};
 </script>
 
