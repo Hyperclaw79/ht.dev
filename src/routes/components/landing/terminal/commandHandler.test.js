@@ -55,19 +55,60 @@ describe("Execute", () => {
         const cmd = "help";
         const result = execute(inputs, cmd, data, commandsCache);
         expect(result[0]).toMatchObject({ output: "You can check out these commands:", uuid: expect.any(Number) });
-        expect(result[1]).toMatchObject({ output: ["start", "clear", "ls", "help", "chdir", "pwd", "echo"], uuid: expect.any(Number) });
+        expect(result[1]).toMatchObject({
+            output: ["start", "clear", "ls", "help", "cd", "su", "pwd", "echo"],
+            uuid: expect.any(Number)
+        });
+        expect(result[2]).toMatchObject({
+            output: "Type 'help <command>' to get more information about a command.",
+            uuid: expect.any(Number)
+        });
         runCommonTest(result);
     });
 
-    it("chdir command with no argument", () => {
-        const cmd = "chdir";
+    it("help command with invalid argument", () => {
+        const cmd = "help it";
+        const result = execute(inputs, cmd, data, commandsCache);
+        expect(result[0]).toMatchObject({ output: "Command not found: it", uuid: expect.any(Number) });
+        runCommonTest(result);
+    });
+
+    it("help command with valid argument", () => {
+        const cmd = "help help";
+        const result = execute(inputs, cmd, data, commandsCache);
+        expect(result[0]).toMatchObject({ output: "Displays a list of available commands.", uuid: expect.any(Number) });
+        expect(result[1]).toMatchObject({
+            output: "If a command is specified, it displays the description of the command.",
+            uuid: expect.any(Number)
+        });
+        runCommonTest(result);
+    });
+
+    it("cd command with no argument", () => {
+        const cmd = "cd";
         const result = execute(inputs, cmd, data, commandsCache);
         expect(result[0]).toMatchObject({ output: "Please specify a directory.", uuid: expect.any(Number), error: true });
+        expect(data.cwd).toEqual("~/Desktop");
         runCommonTest(result);
     });
 
-    it("chdir command with argument", () => {
-        const cmd = "chdir it";
+    it("su command with argument", () => {
+        const cmd = "su it";
+        const result = execute(inputs, cmd, data, commandsCache);
+        expect(data.user).toEqual("it@HT.Dev");
+        runCommonTest(result);
+    });
+
+    it("su command with no argument", () => {
+        const cmd = "su";
+        const result = execute(inputs, cmd, data, commandsCache);
+        expect(result[0]).toMatchObject({ output: "Please specify a user.", uuid: expect.any(Number), error: true });
+        expect(data.user).toEqual("root@HT.Dev");
+        runCommonTest(result);
+    });
+
+    it("cd command with argument", () => {
+        const cmd = "cd it";
         const result = execute(inputs, cmd, data, commandsCache);
         expect(data.cwd).toEqual("it");
         runCommonTest(result);

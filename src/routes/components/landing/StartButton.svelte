@@ -3,9 +3,15 @@
 
     export let binder;
     let activated = false;
+    const audio = new Audio("startSfx.mp3");
+
     onMount(() => {
+        binder.addEventListener("mouseover", () => {
+            audio.play();
+        });
         window.addEventListener("hoverStartBtn", (e) => {
             activated = e.detail.activated;
+            if (activated) { audio.play(); }
         });
     });
 </script>

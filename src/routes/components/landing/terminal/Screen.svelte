@@ -31,7 +31,7 @@
 <div class="screen" bind:this={screen}>
     <div class="innerDiv">
         <div class="banner">
-            <h1 class="title">HT"s Portfolio</h1>
+            <h1 class="title">HT's Portfolio</h1>
             <pre class="subtitle">
                 Enter the command <code>Start</code> or click the button.
                 Alternatively, you can use the <code>Help</code> command to play around.

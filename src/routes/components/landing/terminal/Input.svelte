@@ -27,6 +27,7 @@
                 cmdStackPointer = 1;
             }
             if (e.key === "Enter" && execCallback) {
+                line.dataset.cmdDesc = "";
                 execCallback(input.value);
             }
             if (e.key === "ArrowUp") {
@@ -35,13 +36,20 @@
                     cmdStackPointer++;
                     size = prevCmd.length || 1;
                     input.value = prevCmd;
+                    input.nextElementSibling.innerHTML = prevCmd;
                     input.focus();
+                    const cmdWord = prevCmd.split(" ")[0];
+                    if (commands.includes(cmdWord)) {
+                        line.dataset.cmdDesc = commandsMap[cmdWord].description;
+                    }
                 }
             }
             if (e.key === "ArrowDown") {
                 input.value = "";
                 size = 1;
                 input.focus();
+                line.dataset.cmdDesc = "";
+                input.nextElementSibling.innerHTML = "";
             }
             if (["ArrowLeft", "ArrowRight"].includes(e.key)) {
                 input.selectionStart = input.selectionEnd = input.value.length;
@@ -53,8 +61,10 @@
             const matches = commandRegex.exec(input.value);
             if (matches) {
                 input.nextElementSibling.innerHTML = matches[1];
+                line.dataset.cmdDesc = commandsMap[matches[1]].description;
             } else {
                 input.nextElementSibling.innerHTML = "";
+                line.dataset.cmdDesc = "";
             }
             if (input.value.toLowerCase() === "start") {
                 hovering = true;
@@ -143,6 +153,20 @@
         width: 100%;
         align-items: center;
         cursor: text;
+    }
+
+    .line::after {
+        content: attr(data-cmd-desc);
+        display: block;
+        position: absolute;
+        width: 60vw;
+        white-space: pre-wrap;
+        text-align: left;
+        margin-top: 10%;
+        margin-left: 3rem;
+        font-size: 1.5vw;
+        font-family: monospace;
+        color: grey;
     }
 
     .inputContainer {
