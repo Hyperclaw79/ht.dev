@@ -134,4 +134,20 @@ describe("Execute", () => {
         expect(result[0]).toMatchObject({ output: "it", uuid: expect.any(Number) });
         runCommonTest(result);
     });
+
+    it("typoed command", () => {
+        const cmd = "stars";
+        const result = execute(inputs, cmd, data, commandsCache);
+        expect(result[0]).toMatchObject({ output: "Command not found: stars", uuid: expect.any(Number), error: true });
+        expect(result[1]).toMatchObject({ output: "Did you mean: start?", uuid: expect.any(Number) });
+        runCommonTest(result);
+    });
+
+    it("invalid command", () => {
+        const cmd = "qwertyuioop";
+        const result = execute(inputs, cmd, data, commandsCache);
+        expect(result[0]).toMatchObject({ output: "Command not found: qwertyuioop", uuid: expect.any(Number), error: true });
+        expect(result.length).toBe(2);
+        runCommonTest(result);
+    });
 });

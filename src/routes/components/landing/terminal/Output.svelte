@@ -5,6 +5,9 @@
 
     const commands = Object.keys(commandsMap);
     const commandRegex = new RegExp(`^(${commands.join("|")})$`);
+    // eslint-disable-next-line no-useless-escape
+    const midCommandRegex = new RegExp(`(${commands.join("|")})\s*.*$`);
+    let cmdWord = null;
     
     const beep = () => {
         const audioContext = new AudioContext();
@@ -21,6 +24,10 @@
     };
 
     $: if (error) { beep(); }
+
+    $: if (midCommandRegex.exec(output)) {
+        cmdWord = midCommandRegex.exec(output)[1];
+    }
 </script>
 
 <div class="outputContainer">
@@ -30,7 +37,11 @@
         {/each}
     {:else}
         <span class="output" class:error>
-            {output}
+            {#if cmdWord}
+                {output.split(cmdWord)[0]}<span class="command">{cmdWord}</span>{output.split(cmdWord)?.[1]}
+            {:else}
+                {output}
+            {/if}
         </span>
     {/if}
 </div>

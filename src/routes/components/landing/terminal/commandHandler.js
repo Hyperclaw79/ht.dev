@@ -1,3 +1,5 @@
+import * as closest from "closest-match";
+
 let counter = 0;
 
 const commandsMap = {
@@ -108,6 +110,11 @@ const execute = (inputs, cmd, data, commandsCache) => {
         if (cmd) {
             counter++;
             inputs.push({ output: `Command not found: ${cmd}`, uuid: Date.now() + counter, error: true });
+            const closestMatch = closest.closestMatch(cmdWord, Object.keys(commandsMap));
+            if (closest.distance(cmdWord, closestMatch) < 3) {
+                counter++;
+                inputs.push({ output: `Did you mean: ${closestMatch}?`, uuid: Date.now() + counter });
+            }
         }
     } else {
         commandsMap[cmdWord].action(inputs, cmd, data);
