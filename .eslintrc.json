@@ -1,6 +1,7 @@
 {
     "env": {
         "browser": true,
+        "node": true,
         "es6": true,
         "jest": true
     },
@@ -15,10 +16,7 @@
         "svelte3"
     ],
     "ignorePatterns": [
-        "public/build/",
-        "node_modules/",
-        "rollup.config.js",
-        "scripts/setupTypeScript.js"
+        "build/"
     ],
     "overrides": [
         {
@@ -37,6 +35,8 @@
             {
                 "allowTemplateLiterals": true
             }
-        ]
+        ],
+        "import/first": "off",
+        "no-multiple-empty-lines": ["error", { "max": 1, "maxBOF": 2, "maxEOF": 0 }]
     }
 }

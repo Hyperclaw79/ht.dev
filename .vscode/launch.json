@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run Dev Server",
+            "name": "Dev",
             "request": "launch",
             "runtimeArgs": [
                 "run",
@@ -12,14 +12,22 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "type": "node"
+            "type": "node",
+            "console": "integratedTerminal"
         },
         {
-            "type": "chrome",
+            "name": "Build",
             "request": "launch",
-            "name": "Launch Chrome",
-            "url": "http://localhost:8080",
-            "webRoot": "${workspaceFolder}"
+            "runtimeArgs": [
+                "run",
+                "build"
+            ],
+            "runtimeExecutable": "npm",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node",
+            "console": "integratedTerminal"
         },
         {
             "name": "Linting",
@@ -48,15 +56,6 @@
                 "<node_internals>/**"
             ],
             "console": "integratedTerminal"
-        }
-    ],
-    "compounds": [
-        {
-            "name": "Launch Dev",
-            "configurations": [
-                "Run Dev Server",
-                "Launch Chrome"
-            ]
         }
     ]
 }
