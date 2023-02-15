@@ -166,6 +166,7 @@
 
     details {
         cursor: pointer;
+        user-select: none;
     }
 
     summary {
