@@ -24,9 +24,17 @@ export const DELETE = () => {
     });
 };
 
-export const GET = async () => {
-    const experience = await import("./getter.js");
-    const response = new Response(JSON.stringify(experience.default));
+export const GET = async ({ authData }) => {
+    if (!authData) {
+        const module = await import("$env/dynamic/private");
+        const { env } = module;
+        authData = { email: env.PB_EMAIL, password: env.PB_PASSWORD };
+    };
+
+    const module = await import("./getter.js");
+    const getter = module.default;
+    const experience = await getter(authData);
+    const response = new Response(JSON.stringify(experience));
     response.headers.set("Content-Type", "application/json");
     return response;
 };

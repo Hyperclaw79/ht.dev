@@ -24,9 +24,17 @@ export const DELETE = () => {
     });
 };
 
-export const GET = async () => {
-    const achievements = await import("./getter.js");
-    const response = new Response(JSON.stringify(achievements.default));
+export const GET = async ({ authData }) => {
+    if (!authData) {
+        const module = await import("$env/dynamic/private");
+        const { env } = module;
+        authData = { email: env.PB_EMAIL, password: env.PB_PASSWORD };
+    };
+
+    const module = await import("./getter.js");
+    const getter = module.default;
+    const achievements = await getter(authData);
+    const response = new Response(JSON.stringify(achievements));
     response.headers.set("Content-Type", "application/json");
     return response;
 };

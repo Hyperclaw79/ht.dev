@@ -5,6 +5,7 @@
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
+		"preview": "vite preview",
 		"lint": "eslint . --ext .js,.svelte",
 		"test": "node --experimental-vm-modules node_modules/jest/bin/jest"
 	},
@@ -27,6 +28,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"closest-match": "^1.3.3"
+		"closest-match": "^1.3.3",
+		"pocketbase": "^0.10.1"
 	}
 }

@@ -1,13 +1,14 @@
 /*
     This is a info getter file and should have the following structure:
     _getX() -> returns a list of X.
-    export default result of _getX();
+    export default _getX;
 */
 
-const _getAchievements = async () => {
-    // TODO: Implement a Database.
-    const achievements = await import("../../data/achievementMetadata.js");
-    return achievements.default;
+import { getRecords } from "../pbClient";
+
+const _getAchievements = async (authData) => {
+    const achievements = await getRecords({ collection: "achievements", authData });
+    return achievements;
 };
 
-export default (await _getAchievements());
+export default _getAchievements;

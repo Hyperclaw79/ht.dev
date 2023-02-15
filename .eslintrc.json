@@ -16,7 +16,8 @@
         "svelte3"
     ],
     "ignorePatterns": [
-        "build/"
+        "build/",
+        "data/"
     ],
     "overrides": [
         {

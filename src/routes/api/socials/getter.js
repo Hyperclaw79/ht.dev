@@ -1,13 +1,14 @@
 /*
     This is a info getter file and should have the following structure:
     _getX() -> returns a list of X.
-    export default result of _getX();
+    export default _getX;
 */
 
-const _getSocials = async () => {
-    // TODO: Implement a Database.
-    const socials = await import("../../data/socialMetadata.js");
-    return socials.default;
+import { getRecords } from "../pbClient";
+
+const _getSocials = async (authData) => {
+    const socials = await getRecords({ collection: "socials", authData });
+    return socials;
 };
 
-export default (await _getSocials());
+export default _getSocials;

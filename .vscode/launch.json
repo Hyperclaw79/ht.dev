@@ -16,11 +16,32 @@
             "console": "integratedTerminal"
         },
         {
+            "name": "PocketBase",
+            "request": "launch",
+            "command": "pocketbase.exe serve",
+            "type": "node-terminal",
+            "cwd": "${workspaceFolder}/src/routes/data"
+        },
+        {
             "name": "Build",
             "request": "launch",
             "runtimeArgs": [
                 "run",
                 "build"
+            ],
+            "runtimeExecutable": "npm",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Preview",
+            "request": "launch",
+            "runtimeArgs": [
+                "run",
+                "preview"
             ],
             "runtimeExecutable": "npm",
             "skipFiles": [
@@ -56,6 +77,24 @@
                 "<node_internals>/**"
             ],
             "console": "integratedTerminal"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Dev and PocketBase",
+            "configurations": [
+                "Dev",
+                "PocketBase"
+            ],
+            "stopAll": true
+        },
+        {
+            "name": "Build and Preview",
+            "configurations": [
+                "Build",
+                "PocketBase",
+                "Preview"
+            ]
         }
     ]
 }

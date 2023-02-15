@@ -5,7 +5,23 @@ import { jest } from "@jest/globals";
 
 jest.unstable_mockModule("./getter.js", () => {
     return {
-        default: [{ isOnGithub: true, alias: "repo", title: "Project Title", description: "Project Description" }]
+        default: () => Promise.resolve([
+            {
+                name: "repoName",
+                title: "Project Title",
+                alias: "repo",
+                description: "Project Description",
+                imageUrl: "/images/projects/repoName.png",
+                isOnGithub: true
+            },
+            {
+                name: "repoName2",
+                title: "Project Title 2",
+                alias: "repo2",
+                description: "Project Description 2",
+                isOnGithub: false
+            }
+        ])
     };
 });
 
@@ -23,7 +39,18 @@ describe("Unallowed Methods", () => {
 describe("GET method", () => {
     beforeEach(() => {
         global.fetch = jest.fn().mockImplementation(() => Promise.resolve({
-            json: () => Promise.resolve({ data: { repo: { name: "repoName", description: "repoDescription", htmlUrl: "https://github.com/hyperclaw79/repoName", watchers: { totalCount: 1 }, forkCount: 2, stargazerCount: 3 } } })
+            json: () => Promise.resolve({
+                data: {
+                    repo: {
+                        name: "repoName",
+                        description: "Project Description",
+                        htmlUrl: "https://github.com/hyperclaw79/repoName",
+                        watchers: { totalCount: 1 },
+                        forkCount: 2,
+                        stargazerCount: 3
+                    }
+                }
+            })
         }));
     });
 
@@ -32,11 +59,25 @@ describe("GET method", () => {
     });
 
     it("should return filtered projects in JSON string format", async () => {
-        const response = await GET({ token: "mocked_github_pat" });
+        const response = await GET({ authData: { email: "mock", password: "mock" }, token: "mocked_github_pat" });
         const responseBody = await response.json();
-        expect(responseBody).toEqual(
-            [{ name: "repoName", title: "Project Title", description: "repoDescription", htmlUrl: "https://github.com/hyperclaw79/repoName", watcherCount: 1, forkCount: 2, stargazerCount: 3 }]
-        );
+        expect(responseBody).toMatchObject([
+            {
+                name: "repoName",
+                title: "Project Title",
+                description: "Project Description",
+                htmlUrl: "https://github.com/hyperclaw79/repoName",
+                imageUrl: "/images/projects/repoName.png",
+                watcherCount: 1,
+                forkCount: 2,
+                stargazerCount: 3
+            },
+            {
+                name: "repoName2",
+                title: "Project Title 2",
+                description: "Project Description 2"
+            }
+        ]);
     });
 });
 

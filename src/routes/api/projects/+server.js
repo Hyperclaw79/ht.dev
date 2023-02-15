@@ -24,8 +24,15 @@ export const DELETE = () => {
     });
 };
 
-export const GET = async ({ token }) => {
-    const projects = (await import("./getter.js")).default;
+export const GET = async ({ authData, token }) => {
+    if (!authData) {
+        const module = await import("$env/dynamic/private");
+        const { env } = module;
+        authData = { email: env.PB_EMAIL, password: env.PB_PASSWORD };
+    };
+    const module = await import("./getter.js");
+    const getter = module.default;
+    const projects = await getter(authData);
     await _updateWithGHStats({ projects, token });
     const filteredProjects = projects.map((project) => {
         const { isOnGithub: isOnGH, alias, watchers, ...proj } = project;
@@ -69,7 +76,7 @@ export const _updateWithGHStats = async ({ projects, token }) => {
                 project.stargazerCount = repo?.stargazerCount || 0;
             }
         });
-    } catch (TypeError) {
+    } catch (err) {
         console.warn("Failed to fetch GitHub data.");
     }
 };

@@ -1,13 +1,18 @@
 /*
     This is a info getter file and should have the following structure:
     _getX() -> returns a list of X.
-    export default result of _getX();
+    export default _getX;
 */
 
-const _getExperience = async () => {
-    // TODO: Implement a Database.
-    const experience = await import("../../data/experienceMetadata.js");
-    return experience.default;
+import { getRecords } from "../pbClient";
+
+const _getExperience = async (authData) => {
+    const experience = await getRecords({
+        authData,
+        collection: "jobs",
+        keyOrder: ["name", "caption", "description", "type", "year", "skills", "children"]
+    });
+    return experience;
 };
 
-export default (await _getExperience());
+export default _getExperience;
