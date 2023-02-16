@@ -61,7 +61,7 @@
             const matches = commandRegex.exec(input.value);
             if (matches) {
                 input.nextElementSibling.innerHTML = matches[1];
-                line.dataset.cmdDesc = commandsMap[matches[1]].description;
+                line.dataset.cmdDesc = commandsMap[matches[1].toLowerCase()].description;
             } else {
                 input.nextElementSibling.innerHTML = "";
                 line.dataset.cmdDesc = "";
