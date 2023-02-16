@@ -23,21 +23,7 @@
             "cwd": "${workspaceFolder}/src/routes/data"
         },
         {
-            "name": "Build",
-            "request": "launch",
-            "runtimeArgs": [
-                "run",
-                "build"
-            ],
-            "runtimeExecutable": "npm",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "type": "node",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Preview",
+            "name": "Prod",
             "request": "launch",
             "runtimeArgs": [
                 "run",
@@ -48,7 +34,8 @@
                 "<node_internals>/**"
             ],
             "type": "node",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "preLaunchTask": "build"
         },
         {
             "name": "Linting",
@@ -83,18 +70,18 @@
         {
             "name": "Dev and PocketBase",
             "configurations": [
-                "Dev",
-                "PocketBase"
+                "PocketBase",
+                "Dev"
             ],
             "stopAll": true
         },
         {
-            "name": "Build and Preview",
+            "name": "Prod and PocketBase",
             "configurations": [
-                "Build",
-                "PocketBase",
-                "Preview"
-            ]
+                "Prod",
+                "PocketBase"
+            ],
+            "stopAll": true
         }
     ]
 }
