@@ -7,7 +7,8 @@
 
     onMount(() => {
         binder.addEventListener("mouseover", () => {
-            audio.play();
+            const userInteracted = navigator?.userActivation?.hasBeenActive ?? true;
+            if (userInteracted) { audio.play(); }
         });
         window.addEventListener("hoverStartBtn", (e) => {
             activated = e.detail.activated;
