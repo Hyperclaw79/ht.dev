@@ -59,7 +59,7 @@
         <div class="titleHolder">
             <h2 class="title">
                 <a
-                    href={card.html_url}
+                    href={card.htmlUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                 >
