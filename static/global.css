@@ -106,6 +106,52 @@ h1, h2, h3, h4, h5, h6 {
 h1 {
 	margin: 0;
 	font-size: var(--section-heading-font-size);
+	letter-spacing: 1vw;
+	text-transform: uppercase;
+}
+
+h1[class~="font-effect-anaglyph"] span {
+    display: inline-block;
+}
+
+h1[class~="font-effect-anaglyph"] span:hover {
+    animation: wiggle 2s ease;
+}
+
+@keyframes wiggle {
+    0% {
+        transform: scale(1, 1);
+    }
+    10% {
+        transform: scale(2, 0.5);
+    }
+    20% {
+        transform: scale(0.5, 2);
+    }
+    30% {
+        transform: scale(1.75, 0.75);
+    }
+    40% {
+        transform: scale(0.75, 1.75);
+    }
+    50% {
+        transform: scale(1.5, 0.5);
+    }
+    60% {
+        transform: scale(0.5, 1.5);
+    }
+    70% {
+        transform: scale(1.2, 0.8);
+    }
+    80% {
+        transform: scale(0.8, 1.2);
+    }
+    90% {
+        transform: scale(1.1, 0.9);
+    }
+    100% {
+        transform: scale(1, 1);
+    }
 }
 
 @media screen and (max-width: 800px) {
