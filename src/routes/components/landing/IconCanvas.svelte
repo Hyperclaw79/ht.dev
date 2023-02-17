@@ -1,10 +1,19 @@
 <script>
-    import { getIcons, getIconData } from "./utils.js";
+    import { getContext } from "svelte";
+    import { getIconData } from "./utils.js";
+
+    const { skills } = Object.fromEntries(getContext("api"));
+
+    const icons = (skillObj) => {
+        return getIconData(skillObj["Technical Skills"].sort(
+            () => Math.random() - 0.5).map((skill) => skill.icon
+        ));
+    };
 </script>
 
 <div>
-    {#await getIcons() then icons}
-        {#each getIconData(icons) as icon}
+    {#if $skills && $skills["Technical Skills"] && $skills["Soft Skills"]}
+        {#each icons($skills) as icon}
             <img
                 key={icon.icon}
                 class="icon"
@@ -17,7 +26,7 @@
                 `}
             />
         {/each}
-    {/await}
+    {/if}
 </div>
 
 <style>

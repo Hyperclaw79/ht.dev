@@ -1,33 +1,21 @@
 <script>
-    import { writable } from "svelte/store";
+    import { getContext } from "svelte";
     import Tiltable from "../Tiltable.svelte";
     import GhCard from "./GhCard.svelte";
 
-    const projects = writable([]);
-
     export let inview = false;
-
-    const getProjectData = async () => {
-        if ($projects.length > 0) { return $projects; }
-        const response = await fetch("/api/projects");
-        const data = await response.json();
-        $projects = data;
-        return $projects;
-    };
+    
+    const { projects } = Object.fromEntries(getContext("api"));
 </script>
 
 <div class="githubCards">
-    {#await getProjectData()}
-        <p>Loading...</p>
-    {:then repos}
-        {#each repos as card, idx (card.id || card.name)}
-            <Tiltable>
-                <GhCard {...card} oddOrEven={idx} {inview}/>
-            </Tiltable>
-        {:else}
-            <p>No projects found...</p>
-        {/each}
-    {/await}
+    {#each $projects as card, idx (card.id || card.name)}
+        <Tiltable>
+            <GhCard {...card} oddOrEven={idx} {inview}/>
+        </Tiltable>
+    {:else}
+        <p>No projects found...</p>
+    {/each}
 </div>
 
 <style>

@@ -1,4 +1,6 @@
 <script>
+    import { onMount, setContext } from "svelte";
+    import { writable } from "svelte/store";
     import Landing from "./components/landing/Landing.svelte";
     import Experience from "./components/experience/Experience.svelte";
     import Project from "./components/projects/Projects.svelte";
@@ -6,18 +8,35 @@
     import Achievements from "./components/achievements/Achievements.svelte";
     import IntersectionObserver from "./components/IntersectionObserver.svelte";
     import Footer from "./components/Footer.svelte";
-    import { onMount } from "svelte";
 
     let landing;
+    const achievements = writable([]);
+    const experience = writable([]);
+    const projects = writable([]);
+    const skills = writable([]);
+    const socials = writable([]);
+    const apiMap = new Map(Object.entries({
+        achievements,
+        experience,
+        projects,
+        skills,
+        socials
+    }));
+    setContext("api", apiMap);
 
     const launch = () => {
         document.querySelector("body").style.overflow = "auto";
         landing.style.marginBottom = "0px";
     };
 
-    onMount(() => {
+    onMount(async () => {
         history.scrollRestoration = "manual";
         location.href = "#landing";
+        for (const [key, value] of apiMap) {
+            await fetch(`/api/${key}`).then(
+                async (res) => value.set(await res.json())
+            );
+        }
     });
 </script>
 

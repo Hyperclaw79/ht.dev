@@ -27,14 +27,6 @@ export const getRandomRotation = () => {
     return Math.floor(Math.random() * 120) - 60;
 };
 
-export const getIcons = async () => {
-    const skills = await fetch("/api/skills").then((res) => res.json());
-    const icons = skills["Technical Skills"].sort(
-        () => Math.random() - 0.5
-    ).map((skill) => skill.icon);
-    return icons;
-};
-
 export const getIconData = (icons) => {
     const grid = generateGrid(icons.length);
 

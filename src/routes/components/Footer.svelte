@@ -1,40 +1,30 @@
 <script>
-    import { writable } from "svelte/store";
+    import { getContext } from "svelte";
 
-    const socials = writable([]);
-
-    const getSocials = async () => {
-        if ($socials.length > 0) { return $socials; }
-        const response = await fetch("/api/socials");
-        const data = await response.json();
-        $socials = data;
-        return $socials;
-    };
+    const { socials } = Object.fromEntries(getContext("api"));
 </script>
 
 <footer>
     <div class="content">
         <div class="socials">
-            {#await getSocials() then socials}
-                {#if socials}
-                    {#each socials as social (social.name)}
-                        <a
-                            href={social.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="social"
-                        >
-                            <img
-                                class="icon"
-                                src={social.icon}
-                                alt={social.name}
-                                title={social.name}
-                            />
-                            <span class="social-name">{social.name}</span>
-                        </a>
-                    {/each}
-                {/if}
-            {/await}
+            {#if $socials}
+                {#each $socials as social (social.name)}
+                    <a
+                        href={social.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="social"
+                    >
+                        <img
+                            class="icon"
+                            src={social.icon}
+                            alt={social.name}
+                            title={social.name}
+                        />
+                        <span class="social-name">{social.name}</span>
+                    </a>
+                {/each}
+            {/if}
         </div>
         <div class="copyright">
             <span>© Harshith Thota </span>

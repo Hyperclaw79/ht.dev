@@ -1,63 +1,53 @@
 <script>
+    import { getContext } from "svelte";
     import Progressbar from "../Progressbar.svelte";
-    import { writable } from "svelte/store";
 
-    const skills = writable({});
-
-    const getSkills = async () => {
-        if ($skills.length > 0) { return $skills; }
-        const response = await fetch("/api/skills");
-        const data = await response.json();
-        $skills = data;
-        return $skills;
-    };
+    const { skills } = Object.fromEntries(getContext("api"));
 
     export let inview = false;
 </script>
 
-{#await getSkills() then skills}
-    {#if skills}
-        <div class="container">
-            <h1 class="font-effect-anaglyph">SKILLS</h1>
-            <div class="skill-set">
-                <div class="skill-category" class:clearTX={inview}>
-                    <div class="title-holder">
-                        <img src="/icons/technical.png" alt="technical icon" />
-                        <h2>Technical Skills</h2>
-                    </div>
-                    {#each skills["Technical Skills"] as skill}
-                        <div class="skill">
-                            <div>
-                                {#if skill.icon}
-                                    <img src={skill.icon} alt={skill.name} />
-                                {/if}
-                                <h3>{skill.name}</h3>
-                            </div>
-                            <Progressbar width={100} value={skill.confidence} />
-                        </div>
-                    {/each}
+{#if $skills && $skills["Technical Skills"] && $skills["Soft Skills"]}
+    <div class="container">
+        <h1 class="font-effect-anaglyph">SKILLS</h1>
+        <div class="skill-set">
+            <div class="skill-category" class:clearTX={inview}>
+                <div class="title-holder">
+                    <img src="/icons/technical.png" alt="technical icon" />
+                    <h2>Technical Skills</h2>
                 </div>
-                <div class="skill-category" class:clearTX={inview}>
-                    <div class="title-holder">
-                        <img src="/icons/soft-skills.png" alt="soft-skills icon" />
-                        <h2>Soft Skills</h2>
-                    </div>
-                    {#each skills["Soft Skills"] as skill}
-                        <div class="skill">
-                            <div>
-                                {#if skill.icon}
-                                    <img src={skill.icon} alt={skill.name} />
-                                {/if}
-                                <h3>{skill.name}</h3>
-                            </div>
-                            <Progressbar width={100} value={skill.confidence} />
+                {#each $skills["Technical Skills"] as skill}
+                    <div class="skill">
+                        <div>
+                            {#if skill.icon}
+                                <img src={skill.icon} alt={skill.name} />
+                            {/if}
+                            <h3>{skill.name}</h3>
                         </div>
-                    {/each}
+                        <Progressbar width={100} value={skill.confidence} />
+                    </div>
+                {/each}
+            </div>
+            <div class="skill-category" class:clearTX={inview}>
+                <div class="title-holder">
+                    <img src="/icons/soft-skills.png" alt="soft-skills icon" />
+                    <h2>Soft Skills</h2>
                 </div>
+                {#each $skills["Soft Skills"] as skill}
+                    <div class="skill">
+                        <div>
+                            {#if skill.icon}
+                                <img src={skill.icon} alt={skill.name} />
+                            {/if}
+                            <h3>{skill.name}</h3>
+                        </div>
+                        <Progressbar width={100} value={skill.confidence} />
+                    </div>
+                {/each}
             </div>
         </div>
-    {/if}
-{/await}
+    </div>
+{/if}
 
 <style>
     .skill-set {

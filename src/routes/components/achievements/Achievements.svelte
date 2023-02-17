@@ -1,17 +1,9 @@
 <script>
     import IntersectionObserver from "../IntersectionObserver.svelte";
     import Listing from "./Listing.svelte";
-    import { writable } from "svelte/store";
+    import { getContext } from "svelte";
 
-    const achievements = writable([]);
-
-    const getAchievements = async () => {
-        if ($achievements.length > 0) { return $achievements; }
-        const response = await fetch("/api/achievements");
-        const data = await response.json();
-        $achievements = data;
-        return $achievements;
-    };
+    const { achievements } = Object.fromEntries(getContext("api"));
 </script>
 <IntersectionObserver let:intersecting>
     <div class="container">
@@ -19,13 +11,11 @@
             Achievements & Certificates
         </h1>
         <div class="contents">
-            {#await getAchievements() then achievements}
-                {#if achievements}
-                    {#each achievements as data, idx (data.name)}
-                        <Listing {...data} {idx} inview={intersecting} />
-                    {/each}
-                {/if}
-            {/await}
+            {#if $achievements}
+                {#each $achievements as data, idx (data.name)}
+                    <Listing {...data} {idx} inview={intersecting} />
+                {/each}
+            {/if}
         </div>
     </div>
 </IntersectionObserver>

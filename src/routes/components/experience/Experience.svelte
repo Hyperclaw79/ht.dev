@@ -1,30 +1,20 @@
 <script>
+    import { getContext } from "svelte";
     import Recursor from "./Recursor.svelte";
-    import { writable } from "svelte/store";
 
-    const experience = writable({});
-
-    const getExperience = async () => {
-        if ($experience.length > 0) { return $experience; }
-        const response = await fetch("/api/experience");
-        const data = await response.json();
-        $experience = data;
-        return $experience;
-    };
+    const { experience } = Object.fromEntries(getContext("api"));
 </script>
 
-{#await getExperience() then experience}
-    {#if experience}
-        <div class="container">
-            <h1 class="font-effect-anaglyph">
-                Experience
-            </h1>
-            <div class="contents">
-                <Recursor node={experience} />
-            </div>
+{#if $experience}
+    <div class="container">
+        <h1 class="font-effect-anaglyph">
+            Experience
+        </h1>
+        <div class="contents">
+            <Recursor node={$experience} />
         </div>
-    {/if}
-{/await}
+    </div>
+{/if}
 
 <style>
     .container {
