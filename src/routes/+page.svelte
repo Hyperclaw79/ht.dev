@@ -8,6 +8,8 @@
     import Achievements from "./components/achievements/Achievements.svelte";
     import IntersectionObserver from "./components/IntersectionObserver.svelte";
     import Footer from "./components/Footer.svelte";
+    import About from "./components/about/About.svelte";
+    import MobileFallback from "./components/landing/MobileFallback.svelte";
 
     let landing;
     const achievements = writable([]);
@@ -30,6 +32,15 @@
     };
 
     onMount(async () => {
+        document.querySelectorAll("h1").forEach((h1) => {
+            const text = h1.innerText;
+            h1.innerHTML = "";
+            text.split("").forEach((char) => {
+                const span = document.createElement("span");
+                span.innerText = char;
+                h1.appendChild(span);
+            });
+        });
         history.scrollRestoration = "manual";
         location.href = "#landing";
         for (const [key, value] of apiMap) {
@@ -45,7 +56,14 @@
         <section id="landing" bind:this={landing}>
             <Landing on:shrunkEvent={launch} />
         </section>
+    {:else}
+        <MobileFallback />
     {/if}
+    <section id="about">
+        <IntersectionObserver let:intersecting >
+            <About inview={intersecting} />
+        </IntersectionObserver>
+    </section>
     <section id="experience">
         <Experience />
     </section>
