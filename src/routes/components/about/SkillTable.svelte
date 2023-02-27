@@ -5,11 +5,11 @@
     export let show;
     let tags;
 
-    const { experience } = Object.fromEntries(getContext("api"));
-
-    function getSkills (parsee) {
+    const { experience, projects } = Object.fromEntries(getContext("api"));
+    
+    function getSkills (exprnc, proj = []) {
         let skills = [];
-        parsee.forEach((exp) => {
+        exprnc.forEach((exp) => {
             if (exp.skills) {
                 skills = [...skills, ...exp.skills];
             }
@@ -17,9 +17,14 @@
                 skills = [...skills, ...getSkills(exp.children)];
             }
         });
+        proj.forEach((prj) => {
+            skills = [...skills, ...(prj.tags || [])];
+        });
         return skills;
     }
-    $: tags = [...new Set(getSkills($experience))];
+    $: if ($experience.length > 0 && $projects.length > 0) {
+        tags = [...new Set(getSkills($experience, $projects))];
+    }
 </script>
 
 <div class="container">

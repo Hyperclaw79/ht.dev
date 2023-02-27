@@ -2,6 +2,7 @@
     import TagCloud from "tagcloud";
 
     export let tags;
+    let binder;
 
     const colors = [
         "#ddd",
@@ -26,9 +27,9 @@
         "#be28bf"
     ];
 
-    $: if (tags) {
+    $: if (tags?.length > 0 && binder) {
         TagCloud("span[class~=holder]", tags, {
-            radius: 200,
+            radius: window.innerWidth > 600 ? 300 : 100,
             maxSpeed: "fast",
             initSpeed: "fast",
             direction: 135,
@@ -40,7 +41,7 @@
     }
 </script>
 
-<span class="holder" />
+<span class="holder" bind:this={binder} />
 
 <style>
     .holder {
@@ -61,6 +62,11 @@
     @media screen and (max-width: 600px) {
         .holder {
             font-size: 2.5vw;
+        }
+
+        :global(.tagcloud) {
+            width: 50vw !important;
+            height: 50vw !important;
         }
     }
 </style>

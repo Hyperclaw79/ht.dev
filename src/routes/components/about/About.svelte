@@ -9,7 +9,7 @@
     const data = [
         `Hey there! 👋 Glad to see you checkout out my portfolio.
         I'm an enthusiastic Python Developer with 4+ years of professional experience in developing various applications using the latest technologies and industry practices.
-        I have worked on applications ranging from Cloud ECommerce websites to Satellite Communication systems to Payment Gateways.
+        I have worked on applications ranging from Satellite Communication systems to Cloud ECommerce websites to Payment Gateways.
         I also have a bit of Frontend experience from my hobby projects.`,
         `I'm actively looking for interesting projects to collaborate on.
         Let's build something amazing together!`
