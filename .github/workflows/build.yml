@@ -3,6 +3,8 @@ name: Build and Lint
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'svelteapp/**'
   pull_request:
     branches: [ main ]
 

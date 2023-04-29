@@ -1,5 +1,7 @@
 # 🚀 HT Developer Portfolio 🚀
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Hyperclaw79/ht.dev/build.yml?style=for-the-badge)
+![Vercel](https://vercelbadge.vercel.app/api/Hyperclaw79/ht.dev?style=for-the-badge)
+![Checkly](https://api.checklyhq.com/v1/badges/checks/ec3abe6a-d733-43eb-964a-99d06a61efb7?style=for-the-badge&theme=default)
 
 Welcome to my developer portfolio website, built using SvelteKit and PocketBase. The website showcases my skills, projects, and experiences as a developer.
 
