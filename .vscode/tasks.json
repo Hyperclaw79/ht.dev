@@ -8,6 +8,7 @@
 				"kind": "build",
 				"isDefault": true
 			},
+			"path": "svelteapp",
 			"problemMatcher": [],
 			"label": "build",
 			"detail": "vite build",

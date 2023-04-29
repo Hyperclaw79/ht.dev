@@ -1,0 +1,36 @@
+name: Build and Lint
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  Build_and_Lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./svelteapp
+    strategy:
+        matrix:
+            task: [build, lint]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 'latest'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Validate Unit Tests
+      if: matrix.task == 'build'
+      run: npm test
+
+    - name: Run ${{ matrix.task }} task
+      run: npm run ${{ matrix.task }}

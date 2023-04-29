@@ -4,66 +4,73 @@
         {
             "name": "Dev",
             "request": "launch",
+            "type": "node",
+            "cwd": "${workspaceFolder}/svelteapp",
+            "envFile": "${workspaceFolder}/.env",
+            "runtimeExecutable": "npm",
             "runtimeArgs": [
                 "run",
                 "dev"
             ],
-            "runtimeExecutable": "npm",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "type": "node",
             "console": "integratedTerminal"
-        },
-        {
-            "name": "PocketBase",
-            "request": "launch",
-            "command": "pocketbase.exe serve",
-            "type": "node-terminal",
-            "cwd": "${workspaceFolder}/src/routes/data"
         },
         {
             "name": "Prod",
             "request": "launch",
+            "type": "node",
+            "cwd": "${workspaceFolder}/svelteapp",
+            "envFile": "${workspaceFolder}/.env",
+            "runtimeExecutable": "npm",
             "runtimeArgs": [
                 "run",
                 "preview"
             ],
-            "runtimeExecutable": "npm",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "type": "node",
             "console": "integratedTerminal",
             "preLaunchTask": "build"
         },
         {
             "name": "Linting",
             "request": "launch",
+            "type": "node",
+            "cwd": "${workspaceFolder}/svelteapp",
+            "envFile": "${workspaceFolder}/.env",
+            "runtimeExecutable": "npm",
             "runtimeArgs": [
                 "run",
                 "lint"
             ],
-            "runtimeExecutable": "npm",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "type": "node",
             "console": "integratedTerminal"
         },
         {
             "name": "Run Tests",
-            "type": "node",
             "request": "launch",
+            "type": "node",
+            "cwd": "${workspaceFolder}/svelteapp",
+            "runtimeExecutable": "npm",
             "runtimeArgs": [
-                "--experimental-modules",
-                "--experimental-vm-modules",
-                "${workspaceRoot}/node_modules/jest/bin/jest.js"
+                "run",
+                "test"
             ],
             "skipFiles": [
                 "<node_internals>/**"
             ],
             "console": "integratedTerminal"
+        },
+        {
+            "name": "PocketBase",
+            "request": "launch",
+            "type": "node-terminal",
+            "cwd": "${workspaceFolder}/database",
+            "command": "pocketbase.exe serve"
         }
     ],
     "compounds": [
