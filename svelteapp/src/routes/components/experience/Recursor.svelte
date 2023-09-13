@@ -15,6 +15,7 @@
             });
         }
     });
+    $: console.log(node);
 </script>
 
 {#if Array.isArray(node)}
@@ -22,7 +23,7 @@
         <svelte:self node={child} />
     {/each}
 {:else}
-    <div class={`node ${node.type}`} data-year={node.year?.replace(" – ", "\n↓\n")}>
+    <div class={`node ${node.type}`} data-year={node.year?.split(" – ").reverse().join("\n↑\n")}>
         <svelte:element this={headTag} class="heading">
             {node.name}
             {#if node.year}
