@@ -6,7 +6,7 @@
 import { getRecords } from "../pbClient";
 
 const _getProjects = async (authData) => {
-    const projects = await getRecords({ collection: "projects", authData, sort: { field: "updated", order: "desc" } });
+    const projects = await getRecords({ collection: "projects", authData, sort: "-isOnGithub,-updated" });
     return projects;
 };
 
