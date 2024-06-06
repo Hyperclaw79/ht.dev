@@ -3,20 +3,25 @@
     import Typewriter from "../Typewriter.svelte";
     import Header from "./Header.svelte";
     import SkillTable from "./SkillTable.svelte";
+    import { extractEndYear, firstExpJob } from "../../../utils";
 
     export let inview;
+    
+    const { experience } = Object.fromEntries(getContext("api"));
 
-    const yearsElapsed = () => {
-        const start = new Date(2019, 0, 2);
-        const now = new Date();
-        const diff = now - start;
-        const years = diff / (1000 * 60 * 60 * 24 * 365);
-        return years.toFixed(1);
-    };
+    let start = new Date(2019, 0, 2);
+    let end = new Date();
+    
+    $: yearsElapsed = ((end - start) / (1000 * 60 * 60 * 24 * 365)).toFixed(1);
 
-    const data = [
+    $: if ($experience.length > 0) {
+        start = new Date(firstExpJob($experience).year.split(" – ")[0]);
+        end = extractEndYear($experience[0]);
+    }
+    
+    $: data = [
         `Hey there! 👋 Glad to see you checkout my portfolio.
-        I'm an enthusiastic Python Developer with ${yearsElapsed()} years of professional experience in developing various applications using the latest technologies and industry practices.
+        I'm an enthusiastic Python Developer with ${yearsElapsed} years of professional experience in developing various applications using the latest technologies and industry practices.
         I have worked on applications ranging from Satellite Communication systems to Cloud ECommerce websites to Payment Gateways.
         I also have a bit of Frontend and CI/CD experience from my hobby projects.`,
         `I'm actively looking for interesting projects to collaborate on.

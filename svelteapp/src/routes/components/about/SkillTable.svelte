@@ -11,7 +11,12 @@
         let skills = [];
         exprnc.forEach((exp) => {
             if (exp.skills) {
-                skills = [...skills, ...exp.skills];
+                const nonInternalSkills = exp.skills.filter(
+                    (skill) => !["internal", "proprietary", "private"].some(
+                        keyword => skill.toLowerCase().includes(keyword)
+                    )
+                );
+                skills = [...skills, ...nonInternalSkills];
             }
             if (exp.children) {
                 skills = [...skills, ...getSkills(exp.children)];

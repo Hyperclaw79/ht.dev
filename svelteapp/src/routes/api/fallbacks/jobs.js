@@ -1,8 +1,32 @@
 const experience = [
     {
+        name: "Miratech",
+        type: "Job",
+        year: "2023-09 – Present",
+        children: [
+            {
+                name: "Senior Software Engineer",
+                type: "Role",
+                children: [
+                    {
+                        name: "BlackRock (Client)",
+                        type: "Product",
+                        description: `
+                        • Automated a data acquisition pipeline and exposed the service as an API, facilitating the onboarding of a new Vendor.
+                        • Significantly refactored a Quality Check module to prevent thousands of false positives in the exceptions dashboard.
+                        `,
+                        skills: [
+                            "Python", "Azure ADO", "Aqua Data Studio", "Aladdiin", "Other Proprietary Internal Tools"
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
         name: "Epicor Software Corporation, Bangalore",
         type: "Job",
-        year: "2020-12 – Present",
+        year: "2020-12 – 2023-08",
         children: [
             {
                 name: "Product Developer",
