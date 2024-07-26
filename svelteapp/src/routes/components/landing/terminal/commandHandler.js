@@ -42,7 +42,8 @@ const commandsMap = {
     ls: {
         description: "Lists the available sections.",
         action: (inputs) => {
-            const sections = [".", "..", ...[...document.querySelectorAll("main > section")].map((elem) => elem.id)];
+            const sections = [".", "..", ...[...document.querySelectorAll("main > section")].map((elem) => elem.id)]
+                .filter((elem) => elem !== "downloadResume");
             counter++;
             inputs.push({ output: sections, uuid: Date.now() + counter });
         }

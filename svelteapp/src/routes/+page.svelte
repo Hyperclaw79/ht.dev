@@ -10,6 +10,7 @@
     import Footer from "./components/Footer.svelte";
     import About from "./components/about/About.svelte";
     import MobileFallback from "./components/landing/MobileFallback.svelte";
+    import DownloadResume from "./components/DownloadResume.svelte";
 
     let landing;
     const achievements = writable([]);
@@ -79,6 +80,9 @@
     </section>
     <section id="achievements">
         <Achievements />
+    </section>
+    <section id="downloadResume">
+        <DownloadResume />
     </section>
     <Footer />
 </main>

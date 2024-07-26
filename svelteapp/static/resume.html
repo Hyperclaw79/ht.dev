@@ -1,0 +1,512 @@
+<html lang="en">
+
+<head>
+   <meta charset="UTF-8">
+   <title>Harshith Thota - Resume</title>
+   <style>
+      :root,
+      :host {
+         --body-color: #FFFFFF;
+         --body-bg: #121212;
+         --img-color: #ffffff;
+         --container-bg: rgba(0, 0, 0, 0.85);
+         --header-bg: linear-gradient(to right, #06262c, #093e42);
+         --header-h3-color: #ddd;
+         --avatar-border: white;
+         --section-title-bg: rgba(68, 68, 68, 0.8);
+         --section-gradient: linear-gradient(45deg, rgba(0, 188, 212, 0.1), transparent);
+         --company-bg: rgba(50, 50, 50, 0.8);
+         --card-shadow: rgba(0, 0, 0, 0.8);
+         --achv-subcolor: #aaa;
+         font-family: Arial, sans-serif;
+      }
+
+      @media (prefers-color-scheme: light) {
+
+         :root,
+         :host {
+            --body-color: #333333;
+            --body-bg: #f4f4f4;
+            --img-color: #333333;
+            --container-bg: rgba(255, 255, 255, 0.5);
+            --header-bg: linear-gradient(to right, #91dcf0, #287ce9);
+            --header-h3-color: #666;
+            --avatar-border: #333;
+            --section-title-bg: rgba(204, 204, 204, 0.8);
+            --section-gradient: linear-gradient(45deg, rgba(0, 187, 212, 0.1), transparent);
+            --company-bg: rgba(245, 245, 245, 0.8);
+            --card-shadow: rgba(0, 0, 0, 0.1);
+            --achv-subcolor: #888;
+         }
+      }
+
+      html,
+      body {
+         margin: 0;
+         padding: 0;
+      }
+
+      .container {
+         font-family: monospace;
+         color: var(--body-color);
+         background: var(--body-bg);
+         width: 794px;
+         /* Width for A4 paper */
+         margin: 10mm auto;
+         padding: 0 10mm;
+         background: var(--container-bg);
+         border-radius: 15px;
+         position: relative;
+         overflow: hidden;
+      }
+
+      .icon {
+         display: inline-block;
+      }
+
+      .section:before,
+      .section:after {
+         content: '';
+         position: absolute;
+         width: 100%;
+         height: 100%;
+         background: var(--section-gradient);
+         top: 0;
+         left: 0;
+         z-index: 0;
+         pointer-events: none;
+      }
+
+      .header,
+      .footer {
+         text-align: center;
+         padding: 20px 0;
+         border-radius: 15px 15px 0 0;
+         transform: scaleX(1.2);
+      }
+
+      .header {
+         display: grid;
+         grid-template-columns: 1fr 2fr;
+         justify-items: center;
+         align-items: center;
+         background: var(--header-bg);
+      }
+
+      .header>* {
+         transform: scale(calc(1 / 1.2));
+      }
+
+      .header h1,
+      .header h3 {
+         margin: 0;
+         letter-spacing: unset;
+      }
+
+      .header h1 {
+         font-size: 24px;
+         /* Adjusted font size for A4 */
+      }
+
+      .header h3 {
+         font-size: 16px;
+         /* Adjusted font size for A4 */
+         margin-bottom: 20px;
+         color: var(--header-h3-color);
+      }
+
+      .header .avatar img {
+         width: 100px;
+         /* Reduced size for A4 */
+         border-radius: 50%;
+         border: 5px solid var(--avatar-border);
+         filter: saturate(1.5);
+      }
+
+      .details {
+         margin-left: -50%;
+      }
+
+      .footer {
+         font-size: 12px;
+         border-radius: 0 0 15px 15px;
+         filter: grayscale(1);
+      }
+
+      .section-title {
+         display: flex;
+         align-items: center;
+         gap: 20px;
+         background: var(--section-title-bg);
+         padding: 10px 15px;
+         margin: 20px 0 10px 0;
+         font-size: 20px;
+         /* Adjusted for A4 */
+         font-weight: bold;
+         border-left: 5px solid #00BCD4;
+         position: relative;
+         transform: scaleX(1.1);
+      }
+
+      .content {
+         position: relative;
+         z-index: 1;
+      }
+
+      .content p {
+         line-height: 1.6;
+      }
+
+      .contact-info {
+         display: grid;
+         grid-template-columns: 1fr 1fr;
+         width: 100%;
+         margin-left: 20%;
+      }
+
+      .contact-info span {
+         text-align: left;
+      }
+
+      .contact-info a {
+         color: inherit;
+         text-decoration: none;
+      }
+
+      .contact-info img {
+         vertical-align: middle;
+         margin-right: 10px;
+      }
+
+      ul {
+         list-style-type: none;
+         padding-left: 0;
+      }
+
+      ul li {
+         margin-bottom: 10px;
+      }
+
+      .company,
+      .specialization {
+         padding: 10px;
+         /* Adjusted padding for A4 */
+         margin-bottom: 10px;
+         /* Adjusted margin for A4 */
+         border-radius: 10px;
+         background: var(--company-bg);
+      }
+
+      .experience ul li strong,
+      .education ul li strong {
+         display: block;
+         font-size: 18px;
+         /* Adjusted font size for A4 */
+         font-weight: bold;
+         margin-top: 10px;
+         margin-bottom: 5px;
+      }
+
+      .experience ul li .role,
+      .education ul li .institution {
+         font-size: 16px;
+         /* Adjusted font size for A4 */
+         font-style: italic;
+         color: #00BCD4;
+      }
+
+      .experience ul li .period {
+         display: block;
+         font-size: 12px;
+         /* Adjusted font size for A4 */
+         color: #888;
+         margin-bottom: 10px;
+      }
+
+      .experience ul li .exp_projects {
+         margin-left: 10px;
+         /* Adjusted margin for A4 */
+      }
+
+      .experience ul li .exp_projects .project {
+         margin-bottom: 10px;
+         padding: 5px;
+         padding-top: 0;
+         border-left: 2px solid #00BCD4;
+      }
+
+      .experience ul li .tasks {
+         margin-left: 10px;
+         /* Adjusted margin for A4 */
+      }
+
+      .experience ul li .tasks.role-tasks {
+         padding-left: 10px;
+         padding-top: 10px;
+         border-left: 2px solid #00BCD4;
+      }
+
+      .experience ul li .tasks.project-tasks {
+         margin-left: 10px;
+      }
+
+      .experience ul li .tasks li {
+         font-size: 14px;
+         /* Adjusted font size for A4 */
+         list-style-type: disc;
+         margin-left: 10px;
+      }
+
+      .section.projects .content .projects {
+         display: grid;
+         grid-template-columns: 1fr;
+         gap: 10px;
+      }
+
+      .project-card {
+         background: var(--company-bg);
+         padding: 10px;
+         border-radius: 10px;
+         position: relative;
+         overflow: hidden;
+      }
+
+      .project-card img {
+         width: 100%;
+         height: auto;
+         border-radius: 10px 10px 0 0;
+         display: block;
+      }
+
+      .project-title {
+         font-size: 18px;
+         /* Adjusted font size for A4 */
+         font-weight: bold;
+         margin: 10px 0;
+      }
+
+      .project-title a {
+         color: #00BCD4;
+         text-decoration: none;
+      }
+
+      .project-description {
+         font-size: 14px;
+         /* Adjusted font size for A4 */
+         margin: 10px 0;
+      }
+
+      .project-tags {
+         display: flex;
+         flex-wrap: wrap;
+      }
+
+      .project-tag {
+         background: #00BCD4;
+         color: #fff;
+         padding: 5px 10px;
+         margin: 5px;
+         border-radius: 5px;
+         font-size: 12px;
+         /* Adjusted font size for A4 */
+      }
+
+      .project-meta {
+         display: flex;
+         justify-content: flex-start;
+         font-size: 10px;
+         /* Adjusted font size for A4 */
+         color: #888;
+         margin-bottom: 10px;
+         gap: 10px;
+      }
+
+      .project-meta span {
+         display: flex;
+         align-items: center;
+         gap: 5px;
+      }
+
+      .project-meta img {
+         width: 14px;
+         /* Adjusted size for A4 */
+         height: 14px;
+         /* Adjusted size for A4 */
+         vertical-align: middle;
+      }
+
+      .skills ul {
+         display: flex;
+         flex-wrap: wrap;
+         justify-content: space-between;
+      }
+
+      .skills ul li {
+         width: 45%;
+         background: var(--company-bg);
+         margin-bottom: 10px;
+         padding: 10px;
+         border-radius: 5px;
+      }
+
+      .skills img {
+         width: 20px;
+         height: 20px;
+         margin-right: 10px;
+      }
+
+      .education ul {
+         display: grid;
+         grid-template-columns: 1fr 1fr;
+         column-gap: 1em;
+      }
+
+      .achievements .content {
+         display: flex;
+         flex-wrap: wrap;
+         justify-content: space-between;
+      }
+
+      .achievement-card {
+         background: var(--company-bg);
+         width: 45%;
+         margin-bottom: 20px;
+         padding: 15px;
+         border-radius: 10px;
+         display: flex;
+         align-items: center;
+         gap: 10px;
+      }
+
+      .achievement-card img {
+         width: 20px;
+         height: 20px;
+         margin-right: 10px;
+      }
+
+      .achievement-info {
+         display: flex;
+         flex-direction: column;
+      }
+
+      .achievement-info strong {
+         font-size: 14px;
+         /* Adjusted font size for A4 */
+         font-weight: bold;
+      }
+
+      .achievement-info span {
+         font-size: 12px;
+         /* Adjusted font size for A4 */
+         color: var(--achv-subcolor);
+      }
+   </style>
+</head>
+
+<body>
+   <div class="container">
+      <div class="header">
+         <div class="avatar">
+            <img
+               src="https://media.licdn.com/dms/image/D4D03AQGqn3_BFdOGJA/profile-displayphoto-shrink_200_200/0/1719310799351?e=2147483647&v=beta&t=YPJ6jAgy9YAzNt_NScO7Rd8uR6mn5PB_bPYrll_Sjr8">
+         </div>
+         <div class="details">
+            <h1>Harshith Thota</h1>
+            <h3>Senior Software Engineer | Python Developer</h3>
+            <div class="contact-info">
+               <span>
+                  <div class="icon">
+                     <img src="https://img.icons8.com/ios-filled/50/transparent/phone.png" alt="Phone" width="20">
+                  </div>
+                  <a></a>
+               </span>
+               <span>
+                  <div class="icon">
+                     <img src="https://img.icons8.com/ios-filled/50/transparent/github.png" alt="Github" width="20">
+                  </div>
+                  <a></a>
+               </span>
+               <span>
+                  <div class="icon">
+                     <img src="https://img.icons8.com/ios-filled/50/transparent/email.png" alt="Gmail" width="20">
+                  </div>
+                  <a></a>
+               </span>
+               <span>
+                  <div class="icon">
+                     <img src="https://img.icons8.com/ios-filled/50/transparent/linkedin.png" alt="Linkedin" width="20">
+                  </div>
+                  <a></a>
+               </span>
+               <span>
+                  <div class="icon">
+                     <img src="https://img.icons8.com/ios-filled/50/transparent/place-marker.png" alt="Location"
+                        width="20">
+                  </div>
+                  <a></a>
+               </span>
+               <span>
+                  <div class="icon">
+                     <img src="https://img.icons8.com/ios-filled/50/transparent/web.png" alt="Website" width="20">
+                  </div>
+                  <a></a>
+               </span>
+            </div>
+         </div>
+      </div>
+      <div class="section experience">
+         <div class="section-title">
+            <div class="icon"><img src="https://img.icons8.com/ios-filled/20/transparent/briefcase.png"
+                  alt="Experience Icon"></div> <span>Professional Experience</span>
+         </div>
+         <div class="content">
+            <ul></ul>
+         </div>
+      </div>
+      <div class="section projects">
+         <div class="section-title">
+            <div class="icon"><img src="https://img.icons8.com/ios-filled/20/transparent/project.png"
+                  alt="Projects Icon"></div> <span>Projects</span>
+         </div>
+         <div class="content">
+            <div class="projects"></div>
+         </div>
+      </div>
+      <div class="section skills">
+         <div class="section-title">
+            <div class="icon"><img src="https://img.icons8.com/ios-filled/20/transparent/settings.png"
+                  alt="Technical Skills Icon"></div> <span>Technical Skills</span>
+         </div>
+         <div class="content technical-skills">
+            <ul></ul>
+         </div>
+         <div class="section-title">
+            <div class="icon"><img src="https://img.icons8.com/ios-filled/20/transparent/teamwork.png"
+                  alt="Soft Skills Icon"></div> <span>Soft Skills</span>
+         </div>
+         <div class="content soft-skills">
+            <ul></ul>
+         </div>
+      </div>
+      <div class="section education">
+         <div class="section-title">
+            <div class="icon"><img src="https://img.icons8.com/ios-filled/20/000000/graduation-cap.png" alt="Education Icon"></div> Education
+         </div>
+         <div class="content">
+            <ul></ul>
+         </div>
+      </div>      
+      <div class="section achievements">
+         <div class="section-title">
+            <div class="icon"><img src="https://img.icons8.com/ios-filled/20/transparent/trophy.png"
+                  alt="Achievements Icon"></div> <span>Achievements & Certificates</span>
+         </div>
+         <div class="content"></div>
+      </div>
+      <div class="footer">
+         <p>© 2024 Harshith Thota. All rights reserved.</p>
+      </div>
+   </div>
+</body>
+
+</html>

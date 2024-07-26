@@ -24,19 +24,21 @@
         <div class="socials">
             {#if socials}
                 {#each socials as social (social.name)}
-                    <a
-                        href={social.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="social"
-                    >
-                        <img
-                            class="icon"
-                            src={social.icon}
-                            alt={social.name}
-                            title={social.name}
-                        />
-                    </a>
+                    {#if social.url && social.icon}
+                        <a
+                            href={social.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="social"
+                        >
+                            <img
+                                class="icon"
+                                src={social.icon}
+                                alt={social.name}
+                                title={social.name}
+                            />
+                        </a>
+                    {/if}
                 {/each}
             {/if}
         </div>

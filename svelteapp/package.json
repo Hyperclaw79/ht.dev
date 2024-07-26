@@ -30,6 +30,8 @@
 	"type": "module",
 	"dependencies": {
 		"closest-match": "^1.3.3",
+		"dom-to-image-more": "^3.3.0",
+		"jspdf": "^2.5.1",
 		"pocketbase": "^0.10.1",
 		"TagCloud": "^2.3.2"
 	}

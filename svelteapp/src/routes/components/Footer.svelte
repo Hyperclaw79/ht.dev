@@ -9,26 +9,28 @@
         <div class="socials">
             {#if $socials}
                 {#each $socials as social (social.name)}
-                    <a
-                        href={social.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="social"
-                    >
-                        <img
-                            class="icon"
-                            src={social.icon}
-                            alt={social.name}
-                            title={social.name}
-                        />
-                        <span class="social-name">{social.name}</span>
-                    </a>
+                    {#if social.url && social.icon}
+                        <a
+                            href={social.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="social"
+                        >
+                            <img
+                                class="icon"
+                                src={social.icon}
+                                alt={social.name}
+                                title={social.name}
+                            />
+                            <span class="social-name">{social.name}</span>
+                        </a>
+                    {/if}
                 {/each}
             {/if}
         </div>
         <div class="copyright">
             <span>© Harshith Thota </span>
-            <span>2022</span>
+            <span>{new Date().getFullYear()}</span>
         </div>
     </div>
 </footer>
