@@ -11,7 +11,6 @@
     const { experience, projects, skills, achievements, socials } = Object.fromEntries(getContext("api"));
     const education = writable([]);
     fetch("/api/education").then((res) => res.json()).then((data) => education.set(data));
-    // const education = fetch("/api/education").then((res) => res.json());
 
     const getResumeText = async () => {
         const response = await fetch("/resume.html");
@@ -87,7 +86,8 @@
                 }
 
                 if (role.description) {
-                    jobLi.appendChild(createTasks(role.description, true));
+                    const taskHolder = createElement("div", ["task-holder"]);
+                    taskHolder.appendChild(createTasks(role.description, true));
                     const projectTags = createElement("div", ["project-tags"]);
                     role.skills.forEach((tag) => {
                         projectTags.appendChild(
@@ -95,7 +95,8 @@
                         );
                         fullSkillList.push(tag);
                     });
-                    jobLi.appendChild(projectTags);
+                    taskHolder.appendChild(projectTags);
+                    jobLi.appendChild(taskHolder);
                 }
             });
             expRoot.appendChild(jobLi);
@@ -305,23 +306,42 @@
 
     // Function to convert HTML to PDF and trigger download
     const downloadPDF = async () => {
-        const getPostion = (anchor) => {
-            const posObj = { url: anchor.href };
-            if (anchor.closest(".contact-info")) {
-                anchor = anchor.parentElement;
+        const getPostion = (element, anchor = false, pageNum = 0) => {
+            const posObj = anchor ? { url: element.href } : { text: element.textContent };
+            if (element.closest(".contact-info")) {
+                element = element.parentElement;
             }
-            const targetRect = anchor.getBoundingClientRect();
-            const hostRect = anchor.getRootNode().host.getBoundingClientRect();
+            const targetRect = element.getBoundingClientRect();
+            const hostRect = element.getRootNode().host.getBoundingClientRect();
+
+            let left = targetRect.left - hostRect.left;
+            let top = targetRect.top - hostRect.top;
+
+            if (!anchor) {
+                const style = getComputedStyle(element);
+                left = left + parseFloat(style.paddingLeft);
+                top += parseFloat(style.paddingTop);
+                if (pageNum === 0) {
+                    // margin top of container: 10mm = 37.795px
+                    const additionalTop = element.closest(".company").querySelector(".exp_projects") &&
+                        element.closest(".task-holder")
+                        ? parseFloat(style.height) / 2
+                        : 37.795 / 2;
+                    top += additionalTop;
+                } else {
+                    top += parseFloat(style.height);
+                }
+            }
 
             return {
-                top: targetRect.top - hostRect.top,
-                left: targetRect.left - hostRect.left,
+                left,
+                top,
                 width: targetRect.width,
                 height: targetRect.height,
                 ...posObj
             };
         };
-        const createPage = (elements) => {
+        const createPage = (elements, pageNum = 0) => {
             const newRoot = hiddenDiv.cloneNode(true);
             const shadowRoot = newRoot.attachShadow({ mode: "open" });
             shadowRoot.appendChild(hiddenDiv.shadowRoot.querySelector("style").cloneNode(true));
@@ -332,8 +352,14 @@
             newContainer.style.margin = "0";
             shadowRoot.appendChild(newContainer);
             document.body.appendChild(newRoot);
-            const linkPositions = [...shadowRoot.querySelectorAll("a")].map(getPostion);
-            return { host: shadowRoot.host, linkPositions };
+            const linkPositions = [...shadowRoot.querySelectorAll("a")].map(
+                (elem) => getPostion(elem, true)
+            );
+            const searchables = [
+                ...shadowRoot.querySelectorAll(".project-tag"),
+                ...shadowRoot.querySelectorAll(".skills li>span")
+            ].map((elem) => getPostion(elem, false, pageNum));
+            return { host: shadowRoot.host, linkPositions, searchables };
         };
         const splitPages = async () => {
             const containerNode = hiddenDiv.shadowRoot.querySelector(".container");
@@ -345,7 +371,9 @@
             const lastPage = [sections.pop(), footer];
             lastPage.unshift(sections.pop());
             // Handle the combination of header and first section
-            const pages = [firstPage, ...sections.map((sect) => [sect]), lastPage].map(createPage);
+            const pages = [firstPage, ...sections.map((sect) => [sect]), lastPage].map(
+                (elements, idx) => createPage(elements, idx)
+            );
             await new Promise((resolve) => setTimeout(resolve, 500));
             const pageObjects = await Promise.all(pages.map(async (page) => {
                 const url = await domtoimage.toPng(page.host);
@@ -353,7 +381,13 @@
                 const img = new Image();
                 img.src = url;
                 await img.decode();
-                return { url, width: img.width, height: img.height, linkPositions: page.linkPositions };
+                return {
+                    url,
+                    width: img.width,
+                    height: img.height,
+                    linkPositions: page.linkPositions,
+                    searchables: page.searchables
+                };
             }));
             return pageObjects;
         };
@@ -362,10 +396,17 @@
             isDownloading = true;
             const pageObjects = await splitPages();
             const pdf = new Jspdf("p", "px", [pageObjects[0].width, pageObjects[0].height]);
+            pdf.setFontSize(16);
+            pdf.setCharSpace(1);
             pageObjects.forEach((page, i) => {
                 pdf.addImage(page.url, "PNG", 0, 0, page.width, page.height);
                 page.linkPositions.forEach((link) => {
                     pdf.link(link.left, link.top, link.width, link.height, { url: link.url });
+                });
+                page.searchables.forEach((searchable) => {
+                    pdf.text(searchable.text, searchable.left, searchable.top, {
+                        renderingMode: "invisible"
+                    });
                 });
                 if (i < pageObjects.length - 1) {
                     const nextHeight = pageObjects[i + 1].height;
