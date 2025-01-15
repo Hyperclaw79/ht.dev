@@ -50,7 +50,7 @@ describe("extractEndYear", () => {
         const job = { year: "2019" };
         const result = extractEndYear(job);
         const dt = new Date();
-        const expectedDate = new Date(`${dt.getFullYear()}-${dt.getMonth()}`);
+        const expectedDate = new Date(`${dt.getFullYear()}-${dt.getMonth() + 1}`);
         expect(result).toEqual(expectedDate);
     });
 });

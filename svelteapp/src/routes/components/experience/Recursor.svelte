@@ -1,7 +1,7 @@
 <script>
     import { onMount } from "svelte";
 
-    export let node;
+    export let node, nodeIdx;
     const headingMap = {
         Job: "h2",
         Role: "h3",
@@ -19,8 +19,8 @@
 </script>
 
 {#if Array.isArray(node)}
-    {#each node as child}
-        <svelte:self node={child} />
+    {#each node as child, idx}
+        <svelte:self node={child} nodeIdx={idx} />
     {/each}
 {:else}
     <div class={`node ${node.type}`} data-year={node.year?.split(" – ").reverse().join("\n↑\n")}>
@@ -51,12 +51,12 @@
                             ? "Click to Close"
                             : "Click for details";
                     }
-                }>
+                } open={nodeIdx === 0}>
                     <summary>Click for Details</summary>
                     <div class="children">
-                        {#each node.children as child}
+                        {#each node.children as child, idx}
                             <div>
-                                <svelte:self node={child} />
+                                <svelte:self node={child} nodeIdx={idx} />
                             </div>
                         {/each}
                     </div>
@@ -72,15 +72,15 @@
     }
 
     h2 {
-        font-size: calc(var(--base-font-size) * 2.25vw);
+        font-size: calc(var(--base-font-size) * 1.75);
     }
 
     h3 {
-        font-size: calc(var(--base-font-size) * 2vw);
+        font-size: calc(var(--base-font-size) * 1.5);
     }
 
     h4 {
-        font-size: calc(var(--base-font-size) * 1.75vw);
+        font-size: calc(var(--base-font-size) * 1.25);
     }
 
     .node {

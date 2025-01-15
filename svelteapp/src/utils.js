@@ -17,7 +17,7 @@ export const extractEndYear = (job) => {
     }
     if (endYear === "Present") {
         const dt = new Date();
-        endYear = `${dt.getFullYear()}-${dt.getMonth()}`;
+        endYear = `${dt.getFullYear()}-${dt.getMonth() + 1}`;
     }
     endYear = new Date(endYear);
     return endYear;
