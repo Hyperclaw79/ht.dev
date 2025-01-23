@@ -8,8 +8,6 @@
 	--theme-primary: #bf2828;
 	--theme-bg: #232323;
 	--theme-bg-dark: #020000;
-	scrollbar-color: transparent transparent;
-	scrollbar-width: thin;
 }
 
 html, body {

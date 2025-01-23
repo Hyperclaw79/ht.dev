@@ -160,6 +160,45 @@
         --shadow-size: 4px;
         --node-color: #cc8006;
     }
+    
+    .Product,
+    .Role:not(:has(.Product)) {
+        padding: 0 1vw 1vw 1vw;
+    }
+
+    .Product .heading,
+    .Role:not(:has(.Product)) .heading {
+        width: 100%;
+        margin-left: -1vw;
+        margin-bottom: 1vw;
+    }
+
+    .Product .contents,
+    .Role:not(:has(.Product)) .contents {
+        overflow-y: auto;
+        max-height: 18rem;
+    }
+
+    .Product .contents::-webkit-scrollbar,
+    .Role:not(:has(.Product)) .contents::-webkit-scrollbar {
+        width: 0.25rem;
+    }
+
+    .Product .contents::-webkit-scrollbar-thumb,
+    .Role:not(:has(.Product)) .contents::-webkit-scrollbar-thumb {
+        background: var(--node-color);
+        border-radius: 0.25rem;
+    }
+
+    .Product .contents::-webkit-scrollbar-track,
+    .Role:not(:has(.Product)) .contents::-webkit-scrollbar-track {
+        background: color-mix(
+            in oklab,
+            var(--theme-bg) 90%,
+            white
+        );
+        border-radius: 0.25rem;
+    }
 
     .mobile-only {
         display: none;
