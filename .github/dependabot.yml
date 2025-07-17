@@ -9,3 +9,7 @@ updates:
     directory: "/svelteapp" # Location of package manifests
     schedule:
       interval: "weekly"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
