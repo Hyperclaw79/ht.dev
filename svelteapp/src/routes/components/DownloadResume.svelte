@@ -356,8 +356,32 @@
                 (elem) => getPostion(elem, true)
             );
             const searchables = [
+                // Header information
+                ...shadowRoot.querySelectorAll(".header h1"),
+                ...shadowRoot.querySelectorAll(".header h3"),
+                ...shadowRoot.querySelectorAll(".contact-info a"),
+                // Section titles
+                ...shadowRoot.querySelectorAll(".section-title span"),
+                // Experience section
+                ...shadowRoot.querySelectorAll(".experience .company > strong"),
+                ...shadowRoot.querySelectorAll(".experience .role"),
+                ...shadowRoot.querySelectorAll(".experience .period"),
+                ...shadowRoot.querySelectorAll(".experience .project > strong"),
+                ...shadowRoot.querySelectorAll(".experience .tasks li"),
+                ...shadowRoot.querySelectorAll(".experience .project-tag"),
+                // Projects section
+                ...shadowRoot.querySelectorAll(".project-title a"),
+                ...shadowRoot.querySelectorAll(".project-description"),
                 ...shadowRoot.querySelectorAll(".project-tag"),
-                ...shadowRoot.querySelectorAll(".skills li>span")
+                // Skills section
+                ...shadowRoot.querySelectorAll(".skills li>span"),
+                // Education section
+                ...shadowRoot.querySelectorAll(".education .specialization > strong"),
+                ...shadowRoot.querySelectorAll(".education .institution"),
+                ...shadowRoot.querySelectorAll(".education .period"),
+                // Achievements section
+                ...shadowRoot.querySelectorAll(".achievement-info strong"),
+                ...shadowRoot.querySelectorAll(".achievement-info span")
             ].map((elem) => getPostion(elem, false, pageNum));
             return { host: shadowRoot.host, linkPositions, searchables };
         };
