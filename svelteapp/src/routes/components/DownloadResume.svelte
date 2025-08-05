@@ -356,8 +356,33 @@
                 (elem) => getPostion(elem, true)
             );
             const searchables = [
-                ...shadowRoot.querySelectorAll(".project-tag"),
-                ...shadowRoot.querySelectorAll(".skills li>span")
+                // Header information
+                ...shadowRoot.querySelectorAll("h1, h3"),
+                // Contact information
+                ...shadowRoot.querySelectorAll(".contact-info a"),
+                // Section titles
+                ...shadowRoot.querySelectorAll(".section-title span"),
+                // Experience section - company names, roles, periods
+                ...shadowRoot.querySelectorAll(".experience .company strong"),
+                ...shadowRoot.querySelectorAll(".experience .role"),
+                ...shadowRoot.querySelectorAll(".experience .period"),
+                // Experience section - project names and task descriptions
+                ...shadowRoot.querySelectorAll(".experience .project strong"),
+                ...shadowRoot.querySelectorAll(".experience .tasks li"),
+                // Project section - titles and descriptions
+                ...shadowRoot.querySelectorAll(".project-title a"),
+                ...shadowRoot.querySelectorAll(".project-description"),
+                // Skills section - both technical and soft skills
+                ...shadowRoot.querySelectorAll(".skills li>span"),
+                // Education section
+                ...shadowRoot.querySelectorAll(".education .specialization strong"),
+                ...shadowRoot.querySelectorAll(".education .institution"),
+                ...shadowRoot.querySelectorAll(".education .period"),
+                // Achievements section
+                ...shadowRoot.querySelectorAll(".achievement-info strong"),
+                ...shadowRoot.querySelectorAll(".achievement-info span"),
+                // Project and skill tags (original ATS content)
+                ...shadowRoot.querySelectorAll(".project-tag")
             ].map((elem) => getPostion(elem, false, pageNum));
             return { host: shadowRoot.host, linkPositions, searchables };
         };
