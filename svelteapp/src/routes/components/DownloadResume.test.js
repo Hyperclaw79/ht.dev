@@ -2,14 +2,14 @@
  * @jest-environment jsdom
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeEach } from "@jest/globals";
 
-describe('DownloadResume ATS Text Extraction', () => {
+describe("DownloadResume ATS Text Extraction", () => {
     // Mock DOM elements for testing the ATS text extraction
     beforeEach(() => {
-        // Create a mock shadow root with resume content
-        document.body.innerHTML = '';
-        const container = document.createElement('div');
+    // Create a mock shadow root with resume content
+        document.body.innerHTML = "";
+        const container = document.createElement("div");
         container.innerHTML = `
             <div class="container">
                 <div class="header">
@@ -101,36 +101,36 @@ describe('DownloadResume ATS Text Extraction', () => {
         document.body.appendChild(container);
     });
 
-    it('should extract comprehensive text content for ATS compatibility', () => {
-        // Simulate the searchable element selection logic from our fix
+    it("should extract comprehensive text content for ATS compatibility", () => {
+    // Simulate the searchable element selection logic from our fix
         const searchableSelectors = [
             // Header information
-            'h1, h3',
+            "h1, h3",
             // Contact information
-            '.contact-info a',
+            ".contact-info a",
             // Section titles
-            '.section-title span',
+            ".section-title span",
             // Experience section - company names, roles, periods
-            '.experience .company strong',
-            '.experience .role',
-            '.experience .period',
+            ".experience .company strong",
+            ".experience .role",
+            ".experience .period",
             // Experience section - project names and task descriptions
-            '.experience .project strong',
-            '.experience .tasks li',
+            ".experience .project strong",
+            ".experience .tasks li",
             // Project section - titles and descriptions
-            '.project-title a',
-            '.project-description',
+            ".project-title a",
+            ".project-description",
             // Skills section - both technical and soft skills
-            '.skills li>span',
+            ".skills li>span",
             // Education section
-            '.education .specialization strong',
-            '.education .institution',
-            '.education .period',
+            ".education .specialization strong",
+            ".education .institution",
+            ".education .period",
             // Achievements section
-            '.achievement-info strong',
-            '.achievement-info span',
+            ".achievement-info strong",
+            ".achievement-info span",
             // Project and skill tags (original ATS content)
-            '.project-tag'
+            ".project-tag"
         ];
 
         const allSearchableElements = [];
@@ -145,86 +145,86 @@ describe('DownloadResume ATS Text Extraction', () => {
             .filter(text => text.length > 0);
 
         // Verify that we're capturing comprehensive content, not just keywords
-        
+
         // Header information
-        expect(extractedText).toContain('John Doe');
-        expect(extractedText).toContain('Senior Software Engineer');
-        expect(extractedText).toContain('john@example.com');
-        expect(extractedText).toContain('https://github.com/johndoe');
+        expect(extractedText).toContain("John Doe");
+        expect(extractedText).toContain("Senior Software Engineer");
+        expect(extractedText).toContain("john@example.com");
+        expect(extractedText).toContain("https://github.com/johndoe");
 
         // Section titles
-        expect(extractedText).toContain('Professional Experience');
-        expect(extractedText).toContain('Projects');
-        expect(extractedText).toContain('Technical Skills');
-        expect(extractedText).toContain('Soft Skills');
-        expect(extractedText).toContain('Education');
-        expect(extractedText).toContain('Achievements & Certificates');
+        expect(extractedText).toContain("Professional Experience");
+        expect(extractedText).toContain("Projects");
+        expect(extractedText).toContain("Technical Skills");
+        expect(extractedText).toContain("Soft Skills");
+        expect(extractedText).toContain("Education");
+        expect(extractedText).toContain("Achievements & Certificates");
 
         // Experience details
-        expect(extractedText).toContain('Tech Company');
-        expect(extractedText).toContain('Software Engineer');
-        expect(extractedText).toContain('2020-2023');
-        expect(extractedText).toContain('Developed web applications');
-        expect(extractedText).toContain('Led team of 5 developers');
-        expect(extractedText).toContain('E-commerce Platform');
-        expect(extractedText).toContain('Built shopping cart functionality');
+        expect(extractedText).toContain("Tech Company");
+        expect(extractedText).toContain("Software Engineer");
+        expect(extractedText).toContain("2020-2023");
+        expect(extractedText).toContain("Developed web applications");
+        expect(extractedText).toContain("Led team of 5 developers");
+        expect(extractedText).toContain("E-commerce Platform");
+        expect(extractedText).toContain("Built shopping cart functionality");
 
         // Project details
-        expect(extractedText).toContain('Portfolio Website');
-        expect(extractedText).toContain('Personal portfolio showcasing projects');
+        expect(extractedText).toContain("Portfolio Website");
+        expect(extractedText).toContain("Personal portfolio showcasing projects");
 
         // Skills
-        expect(extractedText).toContain('JavaScript');
-        expect(extractedText).toContain('Python');
-        expect(extractedText).toContain('Leadership');
-        expect(extractedText).toContain('Communication');
+        expect(extractedText).toContain("JavaScript");
+        expect(extractedText).toContain("Python");
+        expect(extractedText).toContain("Leadership");
+        expect(extractedText).toContain("Communication");
 
         // Education
-        expect(extractedText).toContain('Computer Science');
-        expect(extractedText).toContain('University of Technology');
-        expect(extractedText).toContain('2016-2020');
+        expect(extractedText).toContain("Computer Science");
+        expect(extractedText).toContain("University of Technology");
+        expect(extractedText).toContain("2016-2020");
 
         // Achievements
-        expect(extractedText).toContain('AWS Certified');
-        expect(extractedText).toContain('Amazon Web Services (2022)');
+        expect(extractedText).toContain("AWS Certified");
+        expect(extractedText).toContain("Amazon Web Services (2022)");
 
         // Project tags (original keyword stuffing that we're keeping)
-        expect(extractedText).toContain('React');
-        expect(extractedText).toContain('Node.js');
-        expect(extractedText).toContain('CSS');
+        expect(extractedText).toContain("React");
+        expect(extractedText).toContain("Node.js");
+        expect(extractedText).toContain("CSS");
 
         // Verify that we have significantly more content than just the original keywords
-        const originalKeywordCount = extractedText.filter(text => 
-            ['.project-tag', '.skills li>span'].some(selector => 
+        const originalKeywordCount = extractedText.filter(text =>
+            [".project-tag", ".skills li>span"].some(selector =>
                 document.querySelector(selector)?.textContent === text
             )
         ).length;
 
         const totalTextCount = extractedText.length;
-        
+
         // We should have much more content than just the original keywords
         expect(totalTextCount).toBeGreaterThan(originalKeywordCount * 3);
-        
+
         // Verify we have comprehensive text content
         expect(totalTextCount).toBeGreaterThan(20); // Should have plenty of text elements
     });
 
-    it('should maintain backward compatibility with original ATS keywords', () => {
-        // Ensure we still include the original project tags and skills
-        const projectTags = Array.from(document.querySelectorAll('.project-tag'))
-            .map(elem => elem.textContent.trim());
-        
-        const skillNames = Array.from(document.querySelectorAll('.skills li>span'))
+    it("should maintain backward compatibility with original ATS keywords", () => {
+    // Ensure we still include the original project tags and skills
+        const projectTags = Array.from(document.querySelectorAll(".project-tag"))
             .map(elem => elem.textContent.trim());
 
-        expect(projectTags).toContain('React');
-        expect(projectTags).toContain('Node.js');
-        expect(projectTags).toContain('JavaScript');
-        expect(projectTags).toContain('CSS');
+        const skillNames = Array.from(document.querySelectorAll(".skills li>span"))
+            .map(elem => elem.textContent.trim());
 
-        expect(skillNames).toContain('JavaScript');
-        expect(skillNames).toContain('Python');
-        expect(skillNames).toContain('Leadership');
-        expect(skillNames).toContain('Communication');
+        expect(projectTags).toContain("React");
+        expect(projectTags).toContain("Node.js");
+        expect(projectTags).toContain("JavaScript");
+        expect(projectTags).toContain("CSS");
+
+        expect(skillNames).toContain("JavaScript");
+        expect(skillNames).toContain("Python");
+        expect(skillNames).toContain("Leadership");
+        expect(skillNames).toContain("Communication");
     });
 });
