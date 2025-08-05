@@ -366,15 +366,17 @@
                 ...shadowRoot.querySelectorAll(".experience .company > strong"),
                 ...shadowRoot.querySelectorAll(".experience .role"),
                 ...shadowRoot.querySelectorAll(".experience .period"),
-                ...shadowRoot.querySelectorAll(".experience .project > strong"),
+                ...shadowRoot.querySelectorAll(".experience .exp_projects .project > strong"),
                 ...shadowRoot.querySelectorAll(".experience .tasks li"),
+                ...shadowRoot.querySelectorAll(".experience .role-tasks li"),
                 ...shadowRoot.querySelectorAll(".experience .project-tag"),
                 // Projects section
                 ...shadowRoot.querySelectorAll(".project-title a"),
                 ...shadowRoot.querySelectorAll(".project-description"),
-                ...shadowRoot.querySelectorAll(".project-tag"),
+                ...shadowRoot.querySelectorAll(".projects .project-tag"),
                 // Skills section
-                ...shadowRoot.querySelectorAll(".skills li>span"),
+                ...shadowRoot.querySelectorAll(".technical-skills li span"),
+                ...shadowRoot.querySelectorAll(".soft-skills li span"),
                 // Education section
                 ...shadowRoot.querySelectorAll(".education .specialization > strong"),
                 ...shadowRoot.querySelectorAll(".education .institution"),
