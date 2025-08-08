@@ -383,7 +383,7 @@
                 ...shadowRoot.querySelectorAll(".achievement-info span"),
                 // Project and skill tags (original ATS content)
                 ...shadowRoot.querySelectorAll(".project-tag")
-            ].map((elem) => getPostion(elem, false, pageNum));
+            ].filter(elem => elem && elem.textContent && elem.textContent.trim()).map((elem) => getPostion(elem, false, pageNum));
             return { host: shadowRoot.host, linkPositions, searchables };
         };
         const splitPages = async () => {
