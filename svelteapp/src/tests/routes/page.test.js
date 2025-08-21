@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import { render, waitFor } from '@testing-library/svelte';
-import Page from './+page.svelte';
+import Page from '../../routes/+page.svelte';
 
 // Simple mock function
 const createMockFunction = () => {

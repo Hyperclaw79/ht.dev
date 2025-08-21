@@ -7,17 +7,20 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"lint": "eslint . --ext .js,.svelte",
-		"test": "NODE_OPTIONS='--experimental-vm-modules' jest",
-		"test:coverage": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage",
-		"test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watch"
+		"test": "node --experimental-vm-modules node_modules/jest/bin/jest",
+		"test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest --coverage",
+		"test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest --watch"
 	},
 	"devDependencies": {
+		"@babel/core": "^7.28.3",
+		"@babel/preset-env": "^7.28.3",
 		"@sveltejs/adapter-auto": "^2.0.0",
 		"@sveltejs/adapter-vercel": "^3.1.0",
 		"@sveltejs/kit": "^1.30.4",
 		"@testing-library/jest-dom": "^6.8.0",
 		"@testing-library/svelte": "^5.2.8",
 		"@types/jest": "^29.4.0",
+		"babel-jest": "^30.0.5",
 		"eslint": "^8.28.0",
 		"eslint-config-standard": "^17.0.0",
 		"eslint-plugin-import": "^2.27.5",

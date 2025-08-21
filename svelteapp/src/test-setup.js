@@ -23,28 +23,14 @@ global.restoreConsole = () => {
     global.console = originalConsole;
 };
 
-// Mock IntersectionObserver - Now checking if jest is available
-if (typeof jest !== 'undefined') {
-    // Use proper Jest mocking when available
-    global.IntersectionObserver = jest.fn().mockImplementation((callback, options) => ({
-        observe: jest.fn(),
-        unobserve: jest.fn(),
-        disconnect: jest.fn(),
-        callback,
-        options
-    }));
-} else {
-    // Fallback for when jest is not available in setup
-    global.IntersectionObserver = function(callback, options) {
-        return {
-            observe: function() {},
-            unobserve: function() {},
-            disconnect: function() {},
-            callback,
-            options
-        };
-    };
-}
+// Mock IntersectionObserver using Jest mocking
+global.IntersectionObserver = jest.fn().mockImplementation((callback, options) => ({
+    observe: jest.fn(),
+    unobserve: jest.fn(),
+    disconnect: jest.fn(),
+    callback,
+    options
+}));
 
 // Mock AudioContext
 const mockAudioContext = function() {

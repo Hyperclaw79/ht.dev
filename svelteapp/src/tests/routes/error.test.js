@@ -1,5 +1,5 @@
 import { render } from '@testing-library/svelte';
-import ErrorPage from './+error.svelte';
+import ErrorPage from '../../routes/+error.svelte';
 
 describe('Error page (+error.svelte)', () => {
     it('should render error message', () => {

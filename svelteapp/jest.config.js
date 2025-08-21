@@ -4,7 +4,6 @@ export default {
         "**/?(*.)+(spec|test).svelte"
     ],
     testEnvironment: "jsdom",
-    preset: null,
     extensionsToTreatAsEsm: [".svelte"],
     transform: {
         "^.+\\.svelte$": ["svelte-jester", { 
@@ -13,7 +12,8 @@ export default {
             "compilerOptions": {
                 "dev": false
             }
-        }]
+        }],
+        "^.+\\.js$": "babel-jest"
     },
     moduleNameMapper: {
         "^src/(.*)": "<rootDir>/src/$1",
@@ -21,6 +21,7 @@ export default {
         "^\\$app/stores$": "<rootDir>/src/test-mocks/app-stores.js",
         "^\\$app/(.*)": "<rootDir>/src/test-mocks/app-$1.js"
     },
+    setupFiles: ["<rootDir>/src/jest-globals.js"],
     setupFilesAfterEnv: ["<rootDir>/src/test-setup.js"],
     moduleFileExtensions: ["js", "svelte"],
     transformIgnorePatterns: [
@@ -32,6 +33,7 @@ export default {
         "!src/**/*.spec.{js,svelte}",
         "!src/**/*.test.old.js",
         "!src/test-setup.js",
+        "!src/jest-globals.js",
         "!src/app.html"
     ],
     coverageReporters: ["text", "lcov", "html"]
