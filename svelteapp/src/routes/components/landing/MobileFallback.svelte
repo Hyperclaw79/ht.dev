@@ -76,7 +76,7 @@
         --y-end: 4vh;
         animation: moveDown 1s ease-in-out infinite;
     }
-    
+
     .scroll-down .chevron {
         --x-start: 0;
         --x-end: 0;
@@ -88,7 +88,7 @@
         border-top: 5vw solid white;
         animation: moveDown 1s ease-in-out infinite;
     }
-    
+
     .scroll-down .chevron::after {
         --x-start: -5vw;
         --x-end: -5vw;

@@ -106,7 +106,6 @@
         filter: brightness(1.1);
     }
 
-
     @media screen and (max-width: 640px) {
         .login-form h2 {
             color: transparent;

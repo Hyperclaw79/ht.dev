@@ -35,18 +35,32 @@
     </div>
     <div class="content">
         {#if image}
-            <!-- svelte-ignore a11y-click-events-have-key-events -->
             <div class="assetHolder">
-                <img
-                    src={image}
-                    alt={name}
-                    class="asset"
-                    class:zoom={zoomed}
-                    class:glow={assetZoomable && mustClick}
-                    on:click={zoomIn}
-                    bind:this={zoomable}
-                    title={assetZoomable ? "Click to zoom" : ""}
-                />
+                {#if assetZoomable}
+                    <button
+                        class="image-button"
+                        on:click={zoomIn}
+                        title="Click to zoom"
+                        style="border: none; background: none; padding: 0; cursor: pointer;"
+                    >
+                        <img
+                            src={image}
+                            alt={name}
+                            class="asset"
+                            class:zoom={zoomed}
+                            class:glow={mustClick}
+                            bind:this={zoomable}
+                        />
+                    </button>
+                {:else}
+                    <img
+                        src={image}
+                        alt={name}
+                        class="asset"
+                        class:zoom={zoomed}
+                        bind:this={zoomable}
+                    />
+                {/if}
             </div>
         {:else}
             <div class="fallback">

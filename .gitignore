@@ -5,6 +5,7 @@
 svelteapp/node_modules
 svelteapp/build
 svelteapp/.svelte-kit
+svelteapp/.vercel
 svelteapp/vite.config.js.timestamp-*
 svelteapp/vite.config.ts.timestamp-*
 database

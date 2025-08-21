@@ -94,6 +94,7 @@
                         {#each Object.entries(stats) as [key, value]}
                             <span class="stat {key}">
                                 <span class="statKey">
+                                    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                                     <span>{@html value.icon}</span>
                                     <span>{key.toUpperCase()}</span>
                                 </span>

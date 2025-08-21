@@ -553,6 +553,9 @@
     <p>Get a copy of my dynamically generated resume.</p>
     <div class="content">
         <div class="resume-preview" class:disabled={isDownloading}
+            role="button"
+            tabindex="0"
+            aria-label="Download resume as PDF"
             on:click={thumbnailSrc && !isDownloading && downloadPDF}
             on:keydown={thumbnailSrc && !isDownloading && downloadPDF}
         >

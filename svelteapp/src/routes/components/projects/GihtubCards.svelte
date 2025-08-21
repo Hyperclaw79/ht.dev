@@ -4,7 +4,7 @@
     import GhCard from "./GhCard.svelte";
 
     export let inview = false;
-    
+
     const { projects } = Object.fromEntries(getContext("api"));
 </script>
 

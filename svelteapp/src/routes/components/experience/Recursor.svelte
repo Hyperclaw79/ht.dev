@@ -99,7 +99,6 @@
             var(--outer-shadow-size) var(--outer-shadow-size) 1px 1px black;
     }
 
-    
     .node .heading {
         background: var(--node-color);
         width: calc(100% + 2vw);
@@ -108,7 +107,7 @@
         padding: 1vw;
         box-shadow: 0px var(--shadow-size) 2px 0px black;
     }
-    
+
     .Job {
         --shadow-size: 12px;
         position: relative;
@@ -160,7 +159,7 @@
         --shadow-size: 4px;
         --node-color: #cc8006;
     }
-    
+
     .Product,
     .Role:not(:has(.Product)) {
         padding: 0 1vw 1vw 1vw;

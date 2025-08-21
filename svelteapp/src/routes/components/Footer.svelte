@@ -60,7 +60,7 @@
         align-items: center;
         gap: 1vw;
     }
-    
+
     .social,
     .social:visited,
     .social:active {

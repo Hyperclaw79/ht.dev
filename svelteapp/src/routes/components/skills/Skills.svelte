@@ -77,20 +77,19 @@
         backdrop-filter: contrast(1.25);
         padding: 2rem;
     }
-    
+
     .skill-category:nth-child(1) {
         box-shadow: 1px 2px 3px black;
         transform: translateX(calc(100% + 1em));
         transition: transform 400ms ease-in-out;
     }
 
-    
     .skill-category:nth-child(2) {
         box-shadow: -1px 2px 3px black;
         transform: translateX(calc((100% + 1em) * -1));
         transition: transform 400ms ease-in-out;
     }
-    
+
     .clearTX {
         transform: none !important;
     }

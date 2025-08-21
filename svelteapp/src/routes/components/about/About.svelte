@@ -6,19 +6,19 @@
     import { extractEndYear, firstExpJob } from "../../../utils";
 
     export let inview;
-    
+
     const { experience } = Object.fromEntries(getContext("api"));
 
     let start = new Date(2019, 0, 2);
     let end = new Date();
-    
+
     $: yearsElapsed = ((end - start) / (1000 * 60 * 60 * 24 * 365)).toFixed(1);
 
     $: if ($experience.length > 0) {
         start = new Date(firstExpJob($experience).year.split(" – ")[0]);
         end = extractEndYear($experience[0]);
     }
-    
+
     $: data = [
         `Hey there! 👋 Glad to see you checkout my portfolio.
         I'm an enthusiastic Python Developer with ${yearsElapsed} years of professional experience in developing various applications using the latest technologies and industry practices.
@@ -34,7 +34,7 @@
     let showSkills = false;
 
     const { socials } = Object.fromEntries(getContext("api"));
-    
+
     $: if (inview) {
         needToType = true;
         cleanContent = false;
