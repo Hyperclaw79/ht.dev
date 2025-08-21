@@ -74,7 +74,7 @@
         position: relative;
         transition: all 1s ease;
     }
-    
+
     .name > * {
         overflow: hidden;
         display: inline-block;
@@ -107,7 +107,7 @@
         animation: squeeze 3s ease infinite;
         transform-origin: left;
     }
-    
+
     .name > span.cap {
         display: inline;
     }
@@ -125,7 +125,7 @@
         transform-style: preserve-3d;
         animation: flipper 3s ease infinite;
     }
-    
+
     .codeChild::after {
         content: attr(data-switched);
         text-align: var(--align);
@@ -214,7 +214,7 @@
         align-items: center;
         gap: 1vw;
     }
-    
+
     .social,
     .social:visited,
     .social:active {

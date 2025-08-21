@@ -26,7 +26,7 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class="tilting-card-content" on:click={clickCallback}>
+<div class="tilting-card-content" role="button" tabindex="0" on:click={clickCallback}>
     <slot />
 
     <div class="mouse-position-tracker">

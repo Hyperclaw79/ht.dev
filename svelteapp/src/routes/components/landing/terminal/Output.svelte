@@ -8,7 +8,7 @@
     // eslint-disable-next-line no-useless-escape
     const midCommandRegex = new RegExp(`(${commands.join("|")})\s*.*$`);
     let cmdWord = null;
-    
+
     const beep = () => {
         const audioContext = new AudioContext();
         const oscillator = audioContext.createOscillator();
@@ -60,7 +60,7 @@
         white-space: pre-wrap;
         text-align: left;
     }
-    
+
     .command {
         color: rgb(11, 117, 93);
     }

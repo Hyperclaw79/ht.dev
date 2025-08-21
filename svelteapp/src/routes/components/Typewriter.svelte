@@ -5,7 +5,7 @@
     export let needToType = false;
     export let callback;
     export let cleaner;
-    
+
     let content = "";
     let textHolder;
     let rafId;

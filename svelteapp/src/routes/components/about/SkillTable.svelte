@@ -6,7 +6,7 @@
     let tags;
 
     const { experience, projects } = Object.fromEntries(getContext("api"));
-    
+
     function getSkills (exprnc, proj = []) {
         let skills = [];
         exprnc.forEach((exp) => {
@@ -74,14 +74,14 @@
         text-align: center;
         transition: all 1s ease-in-out;
     }
-    
+
     .header {
         background-color: #1a1a1a;
         color: #ddd;
         padding: 8px;
         border: 1px solid #ddd;
     }
-    
+
     .section {
         overflow: hidden;
         max-height: 0;
@@ -103,7 +103,7 @@
     .slid {
         transform: none;
     }
-    
+
     .section.shown {
         max-height: 1000px;
         transition: max-height 1s ease-in-out;
@@ -122,12 +122,12 @@
         padding: 0.5em;
         flex: 1 1 0;
     }
-    
+
     .row:nth-child(even) {
         background-color: #000;
         color: #ddd;
     }
-    
+
     .row:nth-child(even) .cell {
         border: 1px solid #ddd;
     }

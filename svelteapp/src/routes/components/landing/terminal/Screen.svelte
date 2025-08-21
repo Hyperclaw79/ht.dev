@@ -69,7 +69,7 @@
         z-index: 1;
         box-shadow: 0 0 4px 4px rgba(0, 0, 0, 0.5);
     }
-    
+
     .innerDiv {
         --scrollbar-color: #d9d9d970;
         position: relative;
