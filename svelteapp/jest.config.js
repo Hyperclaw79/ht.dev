@@ -11,8 +11,7 @@ export default {
             "compilerOptions": {
                 "dev": false
             }
-        }],
-        "^.+\\.js$": "babel-jest"
+        }]
     },
     moduleNameMapper: {
         "^src/(.*)": "<rootDir>/src/$1"

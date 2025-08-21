@@ -6,15 +6,25 @@
     export let timeout = 0;
     export let noProgress = false;
 
+    const safeExecuteAction = () => {
+        try {
+            if (typeof action === 'function') {
+                action();
+            }
+        } catch (error) {
+            console.error('Action execution error:', error);
+        }
+    };
+
     onMount(() => {
         if (timeout === 0) {
-            action();
+            safeExecuteAction();
         } else if (noProgress) {
-            setTimeout(action, timeout);
+            setTimeout(safeExecuteAction, timeout);
         }
     });
 </script>
 
 {#if timeout > 0 && !noProgress}
-    <AsciiProgress {timeout} callback={action} />
+    <AsciiProgress {timeout} callback={safeExecuteAction} />
 {/if}

@@ -62,8 +62,9 @@ describe('Typewriter component', () => {
         
         const { component } = render(Typewriter, { props: defaultProps });
         
-        // Trigger typing
+        // Trigger typing - wait a tick for reactivity
         component.$set({ needToType: true });
+        await new Promise(resolve => setTimeout(resolve, 0));
         
         expect(animationFrameCalled).toBe(true);
     });
@@ -91,16 +92,23 @@ describe('Typewriter component', () => {
         }, { timeout: 2000 });
     });
 
-    it('handles cleaner prop to clear content', () => {
-        const { container, component } = render(Typewriter, { props: defaultProps });
+    it('handles cleaner prop to clear content', async () => {
+        const { container, component } = render(Typewriter, { 
+            props: { 
+                ...defaultProps,
+                data: "Hello"
+            }
+        });
         
-        // First set some content (simulate partial typing)
-        const textSpan = container.querySelector('span:first-child');
-        textSpan.textContent = "Hello";
+        // Start typing to get some content
+        component.$set({ needToType: true });
+        await new Promise(resolve => setTimeout(resolve, 50)); // Give it time to type something
         
         // Now trigger cleaner
         component.$set({ cleaner: true });
+        await new Promise(resolve => setTimeout(resolve, 0)); // Wait for reactive update
         
+        const textSpan = container.querySelector('span:first-child');
         expect(textSpan.textContent).toBe('');
     });
 
@@ -145,8 +153,9 @@ describe('Typewriter component', () => {
             } 
         });
         
-        // Trigger typing
+        // Trigger typing - wait a tick for reactivity
         component.$set({ needToType: true });
+        await new Promise(resolve => setTimeout(resolve, 0));
         
         expect(animationFrameCalled).toBe(true);
     });

@@ -103,8 +103,9 @@ describe('Action component', () => {
             } 
         });
         
-        // Should render an empty container since no AsciiProgress
-        expect(container.innerHTML.trim()).toBe('<!---->');
+        // Should not contain AsciiProgress component
+        expect(container.querySelector('.progress')).toBeNull();
+        expect(container.innerHTML.trim()).toBe('');
     });
 
     it('does not render AsciiProgress when timeout is 0', () => {
@@ -118,8 +119,9 @@ describe('Action component', () => {
             } 
         });
         
-        // Should render an empty container since timeout is 0
-        expect(container.innerHTML.trim()).toBe('<!---->');
+        // Should not contain AsciiProgress component since timeout is 0
+        expect(container.querySelector('.progress')).toBeNull();
+        expect(container.innerHTML.trim()).toBe('');
     });
 
     it('handles default noProgress prop (false)', () => {
@@ -299,13 +301,108 @@ describe('Action component', () => {
             } 
         });
         
-        // Should render AsciiProgress
-        expect(container.firstChild).toBeTruthy();
+        // Should have rendered AsciiProgress
+        expect(container.querySelector('.progress')).toBeTruthy();
         
-        // Wait for action to eventually be called through AsciiProgress
-        await waitFor(() => {
-            expect(actionCalled).toBe(true);
-        }, { timeout: 1000 });
+        // Wait for timeout and callback
+        await new Promise(resolve => setTimeout(resolve, 300));
+        expect(actionCalled).toBe(true);
+    });
+
+    it('handles sync action execution', () => {
+        let actionCalled = false;
+        const mockAction = () => {
+            actionCalled = true;
+        };
+        
+        render(Action, { 
+            props: { 
+                action: mockAction,
+                timeout: 0,
+                noProgress: false
+            } 
+        });
+        
+        // Action should be called immediately
+        expect(actionCalled).toBe(true);
+    });
+
+    it('handles async action execution with noProgress', async () => {
+        let actionCalled = false;
+        const mockAction = () => {
+            actionCalled = true;
+        };
+        
+        render(Action, { 
+            props: { 
+                action: mockAction,
+                timeout: 50,
+                noProgress: true
+            } 
+        });
+        
+        // Action should not be called immediately
+        expect(actionCalled).toBe(false);
+        
+        // Wait for timeout
+        await new Promise(resolve => setTimeout(resolve, 100));
+        expect(actionCalled).toBe(true);
+    });
+
+    it('does not execute action if timeout is greater than 0 and noProgress is false', () => {
+        let actionCalled = false;
+        const mockAction = () => {
+            actionCalled = true;
+        };
+        
+        render(Action, { 
+            props: { 
+                action: mockAction,
+                timeout: 1000,
+                noProgress: false
+            } 
+        });
+        
+        // Action should not be called immediately (waiting for progress bar)
+        expect(actionCalled).toBe(false);
+    });
+
+    it('handles function type checking properly', () => {
+        const nonFunction = "not a function";
+        
+        expect(() => {
+            render(Action, { 
+                props: { 
+                    action: nonFunction,
+                    timeout: 0,
+                    noProgress: false
+                } 
+            });
+        }).not.toThrow();
+    });
+
+    it('handles null action prop', () => {
+        expect(() => {
+            render(Action, { 
+                props: { 
+                    action: null,
+                    timeout: 0,
+                    noProgress: false
+                } 
+            });
+        }).not.toThrow();
+    });
+
+    it('handles undefined action prop during setTimeout', () => {
+        expect(() => {
+            render(Action, { 
+                props: { 
+                    action: undefined,
+                    timeout: 100,
+                    noProgress: true
+                } 
+            });
+        }).not.toThrow();
     });
 
     it('handles component lifecycle correctly', () => {
