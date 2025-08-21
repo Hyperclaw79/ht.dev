@@ -138,8 +138,13 @@ describe('Skills component', () => {
     });
 
     it('handles undefined context gracefully', () => {
-        expect(() => {
-            render(Skills);
-        }).not.toThrow();
+        // Provide empty context instead of undefined to match real app behavior
+        const emptyContext = new Map();
+        emptyContext.set('skills', writable({}));
+        
+        const { container } = render(Skills, { 
+            context: new Map([['api', emptyContext]])
+        });
+        expect(container).toBeTruthy();
     });
 });

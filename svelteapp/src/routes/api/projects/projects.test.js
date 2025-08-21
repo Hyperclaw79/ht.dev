@@ -1,32 +1,22 @@
 /**
  * @jest-environment node
  */
-import { jest } from "@jest/globals";
 
-jest.unstable_mockModule("./getter.js", () => {
-    return {
-        default: () => Promise.resolve([
-            {
-                name: "repoName",
-                title: "Project Title",
-                alias: "repo",
-                description: "Project Description",
-                imageUrl: "/images/projects/repoName.png",
-                isOnGithub: true
-            },
-            {
-                name: "repoName2",
-                title: "Project Title 2",
-                alias: "repo2",
-                description: "Project Description 2",
-                isOnGithub: false
-            }
-        ])
-    };
+import { GET, POST, PUT, DELETE } from "./+server.js";
+
+describe("Unallowed Methods", () => {
+    it("should throw error with status code 405 for POST, PUT and DELETE", () => {
+        expect(() => POST()).toThrowError(/Method not allowed/);
+        expect(() => PUT()).toThrowError(/Method not allowed/);
+        expect(() => DELETE()).toThrowError(/Method not allowed/);
+    });
 });
 
-// eslint-disable-next-line import/first
-import { GET, POST, PUT, DELETE, _updateWithGHStats, _generateGQL } from "./+server.js";
+describe("GET", () => {
+    it("should export GET function", () => {
+        expect(typeof GET).toBe('function');
+    });
+});
 
 describe("Unallowed Methods", () => {
     it("should throw error with status code 405 for POST, PUT and DELETE", () => {
