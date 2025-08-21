@@ -12,27 +12,58 @@
     const education = writable([]);
     fetch("/api/education").then((res) => res.json()).then((data) => education.set(data));
 
+    const containerMargin = 35;
+
     const getResumeText = async () => {
         const response = await fetch("/resume.html");
         return await response.text();
     };
 
     // Helper function to create an element with optional classes and text content
-    const createElement = (tag, classNames = [], textContent = "") => {
+    const createElement = (tag, {
+        classes = [],
+        text = "",
+        children = [],
+        attributes = {}
+    } = {}) => {
         const element = document.createElement(tag);
-        classNames.forEach((className) => element.classList.add(className));
-        if (textContent) element.textContent = textContent;
+        classes.forEach((className) => element.classList.add(className));
+        if (text) element.textContent = text;
+        children.forEach((child) => element.appendChild(child));
+        Object.entries(attributes).forEach(([key, value]) => {
+            element.setAttribute(key, value);
+        });
         return element;
     };
 
     // Helper function to create and append tasks
     const createTasks = (description, roleTask = false) => {
-        const tasksUl = createElement("ul", ["tasks", ...(roleTask ? ["role-tasks"] : [])]);
-        description.split("\r\n").forEach((task) => {
-            const taskLi = createElement("li", [], task.replace("• ", ""));
-            tasksUl.appendChild(taskLi);
-        });
+        const tasksUl = createElement(
+            "ul",
+            {
+                classes: ["tasks", ...(roleTask ? ["role-tasks"] : [])],
+                children: description.split("\r\n").map((task) => (
+                    createElement("li", {
+                        children: [createElement("span", { text: task.replace("• ", "") })]
+                    })
+                ))
+            }
+        );
         return tasksUl;
+    };
+
+    // Helper function to create the project tags
+    const createProjectTags = (skills) => {
+        const projectTags = createElement("div", {
+            classes: ["project-tags"],
+            children: skills.map((tag) => (
+                createElement("div", {
+                    classes: ["project-tag"],
+                    children: [createElement("span", { text: tag })]
+                })
+            ))
+        });
+        return projectTags;
     };
 
     // Helper function to modify the social links
@@ -51,51 +82,52 @@
     const createExperience = (expRoot, exp) => {
         expRoot.innerHTML = "";
         exp.forEach((job) => {
-            const jobLi = createElement("li", ["company"]);
-            jobLi.appendChild(createElement("strong", [], job.name));
+            const jobLi = createElement("li", {
+                classes: ["company"],
+                children: [createElement("strong", { text: job.name })]
+            });
 
             job.children.forEach((role) => {
-                jobLi.appendChild(createElement("span", ["role"], role.name));
-                jobLi.appendChild(createElement("span", ["period"], job.year));
+                jobLi.appendChild(createElement("span", {
+                    classes: ["role"],
+                    text: role.name
+                }));
+                jobLi.appendChild(createElement("span", {
+                    classes: ["period"],
+                    text: job.year
+                }));
 
                 if (role.children && role.children.length > 0) {
-                    const roleUl = createElement("ul", ["exp_projects"]);
-                    role.children.forEach((product) => {
-                        const productLi = createElement("li", ["project"]);
-                        productLi.appendChild(
-                            createElement("strong", [], product.name)
-                        );
+                    const roleUl = createElement("ul", {
+                        classes: ["exp_projects"],
+                        children: role.children.map((product) => {
+                            const productLi = createElement("li", {
+                                classes: ["project"],
+                                children: [
+                                    createElement("strong", { text: product.name })
+                                ]
+                            });
 
-                        if (product.description) {
-                            productLi.appendChild(
-                                createTasks(product.description)
-                            );
-                        }
-                        const projectTags = createElement("div", ["project-tags"]);
-
-                        product.skills.forEach((tag) => {
-                            projectTags.appendChild(
-                                createElement("span", ["project-tag"], tag)
-                            );
-                            fullSkillList.push(tag);
-                        });
-                        productLi.appendChild(projectTags);
-                        roleUl.appendChild(productLi);
+                            if (product.description) {
+                                productLi.appendChild(
+                                    createTasks(product.description)
+                                );
+                            }
+                            productLi.appendChild(createProjectTags(product.skills));
+                            return productLi;
+                        })
                     });
                     jobLi.appendChild(roleUl);
                 }
 
                 if (role.description) {
-                    const taskHolder = createElement("div", ["task-holder"]);
-                    taskHolder.appendChild(createTasks(role.description, true));
-                    const projectTags = createElement("div", ["project-tags"]);
-                    role.skills.forEach((tag) => {
-                        projectTags.appendChild(
-                            createElement("span", ["project-tag"], tag)
-                        );
-                        fullSkillList.push(tag);
+                    const taskHolder = createElement("div", {
+                        classes: ["task-holder"],
+                        children: [
+                            createTasks(role.description, true),
+                            createProjectTags(role.skills)
+                        ]
                     });
-                    taskHolder.appendChild(projectTags);
                     jobLi.appendChild(taskHolder);
                 }
             });
@@ -107,50 +139,99 @@
     const createProjects = (projectsRoot, prjs) => {
         projectsRoot.innerHTML = "";
         prjs.forEach((project) => {
-            const projectCard = createElement("div", ["project-card"]);
-
-            const projectTitle = createElement("div", ["project-title"]);
-            const projectLink = createElement("a", [], project.title);
-            projectLink.href = project.htmlUrl || "#";
-            projectLink.target = "_blank";
-            projectLink.rel = "noopener noreferrer";
-            projectTitle.appendChild(projectLink);
-            projectCard.appendChild(projectTitle);
+            const projectCard = createElement("div", {
+                classes: ["project-card"],
+                children: [
+                    createElement("div", {
+                        classes: ["project-title"],
+                        children: [
+                            createElement("a", {
+                                text: project.title,
+                                classes: [],
+                                attributes: {
+                                    href: project.htmlUrl || "#",
+                                    target: "_blank",
+                                    rel: "noopener noreferrer"
+                                }
+                            })
+                        ]
+                    })
+                ]
+            });
 
             const watcherCount = project.watcherCount || 0;
             const forkCount = project.forkCount || 0;
             const stargazerCount = project.stargazerCount || 0;
 
             if (watcherCount || forkCount || stargazerCount) {
-                const projectMeta = createElement("div", ["project-meta"]);
-                const watchers = createElement("span");
-                watchers.innerHTML = `<div class="icon"><img src="https://img.icons8.com/material-rounded/24/transparent/visible.png" alt="Watchers"></div> ${watcherCount}`;
-                const forks = createElement("span");
-                forks.innerHTML = `<div class="icon"><img src="https://img.icons8.com/material-outlined/24/transparent/code-fork.png" alt="Forks"></div> ${forkCount}`;
-                const stars = createElement("span");
-                stars.innerHTML = `<div class="icon"><img src="https://img.icons8.com/material-rounded/24/transparent/star.png" alt="Stars"></div> ${stargazerCount}`;
-                projectMeta.appendChild(watchers);
-                projectMeta.appendChild(forks);
-                projectMeta.appendChild(stars);
-                projectCard.appendChild(projectMeta);
+                projectCard.appendChild(
+                    createElement("div", {
+                        classes: ["project-meta"],
+                        children: [
+                            createElement("span", {
+                                children: [createElement("div", {
+                                    classes: ["icon"],
+                                    children: [
+                                        createElement("img", {
+                                            attributes: {
+                                                src: "https://img.icons8.com/material-rounded/24/transparent/visible.png",
+                                                alt: "Watchers"
+                                            }
+                                        }),
+                                        createElement("span", {
+                                            text: watcherCount.toLocaleString()
+                                        })
+                                    ]
+                                })]
+                            }),
+                            createElement("span", {
+                                children: [createElement("div", {
+                                    classes: ["icon"],
+                                    children: [
+                                        createElement("img", {
+                                            attributes: {
+                                                src: "https://img.icons8.com/material-outlined/24/transparent/code-fork.png",
+                                                alt: "Forks"
+                                            }
+                                        }),
+                                        createElement("span", {
+                                            text: forkCount.toLocaleString()
+                                        })
+                                    ]
+                                })]
+                            }),
+                            createElement("span", {
+                                children: [createElement("div", {
+                                    classes: ["icon"],
+                                    children: [
+                                        createElement("img", {
+                                            attributes: {
+                                                src: "https://img.icons8.com/material-rounded/24/transparent/star.png",
+                                                alt: "Stars"
+                                            }
+                                        }),
+                                        createElement("span", {
+                                            text: stargazerCount.toLocaleString()
+                                        })
+                                    ]
+                                })]
+                            })
+                        ]
+                    })
+                );
             }
 
             projectCard.appendChild(
                 createElement(
                     "div",
-                    ["project-description"],
-                    project.description
+                    {
+                        text: project.description,
+                        classes: ["project-description"]
+                    }
                 )
             );
 
-            const projectTags = createElement("div", ["project-tags"]);
-            project.tags.forEach((tag) => {
-                projectTags.appendChild(
-                    createElement("span", ["project-tag"], tag)
-                );
-                fullSkillList.push(tag);
-            });
-            projectCard.appendChild(projectTags);
+            projectCard.appendChild(createProjectTags(project.tags));
 
             projectsRoot.appendChild(projectCard);
         });
@@ -160,12 +241,19 @@
     const createSkills = (skillsRoot, skls) => {
         skillsRoot.innerHTML = "";
         skls.forEach((skill) => {
-            const sklSpan = createElement("span", [], skill.name);
-            const sklIcon = createElement("img");
-            sklIcon.src = skill.icon;
-            const sklLi = createElement("li", []);
-            sklLi.appendChild(sklIcon);
-            sklLi.appendChild(sklSpan);
+            const sklLi = createElement("li", {
+                children: [
+                    createElement("img", {
+                        attributes: {
+                            src: skill.icon,
+                            alt: skill.name
+                        }
+                    }),
+                    createElement("span", {
+                        text: skill.name
+                    })
+                ]
+            });
             skillsRoot.appendChild(sklLi);
         });
     };
@@ -174,11 +262,23 @@
     const createEducation = (educationRoot, edu) => {
         educationRoot.innerHTML = "";
         edu.forEach((education) => {
-            const educationLi = createElement("li", ["specialization"]);
-            educationLi.appendChild(createElement("strong", [], education.specialization));
-            educationLi.appendChild(createElement("span", ["institution"], education.institution));
-            educationLi.appendChild(createElement("br"));
-            educationLi.appendChild(createElement("span", ["period"], education.period));
+            const educationLi = createElement("li", {
+                classes: ["specialization"],
+                children: [
+                    createElement("strong", {
+                        text: education.specialization
+                    }),
+                    createElement("span", {
+                        classes: ["institution"],
+                        text: education.institution
+                    }),
+                    createElement("br"),
+                    createElement("span", {
+                        classes: ["period"],
+                        text: education.period
+                    })
+                ]
+            });
             educationRoot.appendChild(educationLi);
         });
     };
@@ -187,25 +287,28 @@
     const createAchievements = (achievementsRoot, achv) => {
         achievementsRoot.innerHTML = "";
         achv.forEach((achievement) => {
-            const achievementCard = createElement("div", ["achievement-card"]);
-            const img = createElement("img");
-            img.src = achievement.from.icon;
-            img.alt = achievement.name;
-            achievementCard.appendChild(img);
-
-            const achievementInfo = createElement("div", ["achievement-info"]);
-            achievementInfo.appendChild(
-                createElement("strong", [], achievement.name)
-            );
-            achievementInfo.appendChild(
-                createElement(
-                    "span",
-                    [],
-                    `${achievement.from.name} (${achievement.year})`
-                )
-            );
-
-            achievementCard.appendChild(achievementInfo);
+            const achievementCard = createElement("div", {
+                classes: ["achievement-card"],
+                children: [
+                    createElement("img", {
+                        attributes: {
+                            src: achievement.from.icon,
+                            alt: achievement.name
+                        }
+                    }),
+                    createElement("div", {
+                        classes: ["achievement-info"],
+                        children: [
+                            createElement("strong", {
+                                text: achievement.name
+                            }),
+                            createElement("span", {
+                                text: `${achievement.from.name} (${achievement.year})`
+                            })
+                        ]
+                    })
+                ]
+            });
             achievementsRoot.appendChild(achievementCard);
         });
     };
@@ -247,7 +350,7 @@
         );
         createAchievements(achievementsRoot, $achievements || []);
 
-        const footer = hiddenDiv.shadowRoot.querySelector(".footer>p");
+        const footer = hiddenDiv.shadowRoot.querySelector(".footer>span");
         footer.textContent = footer.textContent.replace(/\d{4}/, new Date().getFullYear());
     };
 
@@ -275,12 +378,12 @@
     };
 
     const getHiddenDiv = async (htmlContent) => {
-        hiddenDiv = document.createElement("div");
-        hiddenDiv.classList.add("hidden-div");
-        hiddenDiv.style.position = "absolute";
-        hiddenDiv.style.left = "-9999px";
-        hiddenDiv.style.top = "-9999px";
-        // Create a shadow root to encapsulate the styles
+        hiddenDiv = createElement("div", {
+            classes: ["hidden-div"],
+            attributes: {
+                style: "position: absolute; left: -9999px; top: -9999px;"
+            }
+        });
         const shadowRoot = hiddenDiv.attachShadow({ mode: "open" });
         shadowRoot.innerHTML = htmlContent;
         document.body.appendChild(hiddenDiv);
@@ -306,61 +409,60 @@
 
     // Function to convert HTML to PDF and trigger download
     const downloadPDF = async () => {
-        const getPostion = (element, anchor = false, pageNum = 0) => {
-            const posObj = anchor ? { url: element.href } : { text: element.textContent };
-            if (element.closest(".contact-info")) {
-                element = element.parentElement;
-            }
-            const targetRect = element.getBoundingClientRect();
+        const getTextPosition = (element, pageNum = 0) => {
             const hostRect = element.getRootNode().host.getBoundingClientRect();
 
-            let left = targetRect.left - hostRect.left;
-            let top = targetRect.top - hostRect.top;
+            // Build a range over the element's text
+            const range = document.createRange();
+            range.selectNodeContents(element);
+            let { left: L, top: T, right: R, bottom: B } = range.getBoundingClientRect();
+            range.detach?.();
 
-            if (!anchor) {
-                const style = getComputedStyle(element);
-                left = left + parseFloat(style.paddingLeft);
-                top += parseFloat(style.paddingTop);
-                if (pageNum === 0) {
-                    // margin top of container: 10mm = 37.795px
-                    const additionalTop = element.closest(".company").querySelector(".exp_projects") &&
-                        element.closest(".task-holder")
-                        ? parseFloat(style.height) / 2
-                        : 37.795 / 2;
-                    top += additionalTop;
-                } else {
-                    top += parseFloat(style.height);
-                }
+            let adj = (!element.closest(".project-tags") && !element.closest(".details")) ? containerMargin : containerMargin / 2;
+            if (pageNum > 0) {
+                adj = containerMargin / 2;
             }
+            T += adj;
+
+            const style = getComputedStyle(element);
 
             return {
-                left,
-                top,
-                width: targetRect.width,
-                height: targetRect.height,
-                ...posObj
+                left: L - hostRect.left,
+                top: T - hostRect.top,
+                width: R - L,
+                height: B - T,
+                fontSize: parseFloat(style.fontSize) * 1.075,
+                text: element.textContent,
+                url: element.href || ""
             };
         };
+
         const createPage = (elements, pageNum = 0) => {
             const newRoot = hiddenDiv.cloneNode(true);
             const shadowRoot = newRoot.attachShadow({ mode: "open" });
             shadowRoot.appendChild(hiddenDiv.shadowRoot.querySelector("style").cloneNode(true));
-            const newContainer = document.createElement("div");
-            newContainer.className = "container";
-            elements.forEach(element => newContainer.appendChild(element.cloneNode(true)));
-            newContainer.style.borderRadius = "0";
-            newContainer.style.margin = "0";
+            const newContainer = createElement("div", {
+                classes: ["container"],
+                children: elements.map((element) => element.cloneNode(true)),
+                attributes: {
+                    style: "border-radius: 0; margin: 0;"
+                }
+            });
             shadowRoot.appendChild(newContainer);
             document.body.appendChild(newRoot);
-            const linkPositions = [...shadowRoot.querySelectorAll("a")].map(
-                (elem) => getPostion(elem, true)
-            );
             const searchables = [
-                ...shadowRoot.querySelectorAll(".project-tag"),
-                ...shadowRoot.querySelectorAll(".skills li>span")
-            ].map((elem) => getPostion(elem, false, pageNum));
-            return { host: shadowRoot.host, linkPositions, searchables };
+                ...Array.from(shadowRoot.querySelectorAll("*"))
+                    .filter(
+                        (elem) =>
+                            ["style"].indexOf(elem.tagName.toLowerCase()) === -1 &&
+                            elem.innerText &&
+                            elem.innerText.trim().length > 0 &&
+                            elem.childElementCount === 0
+                    )
+            ].map((elem) => getTextPosition(elem, pageNum));
+            return { host: shadowRoot.host, searchables };
         };
+
         const splitPages = async () => {
             const containerNode = hiddenDiv.shadowRoot.querySelector(".container");
             const sections = [...containerNode.children];
@@ -385,7 +487,6 @@
                     url,
                     width: img.width,
                     height: img.height,
-                    linkPositions: page.linkPositions,
                     searchables: page.searchables
                 };
             }));
@@ -395,18 +496,31 @@
             document.body.style.cursor = "wait";
             isDownloading = true;
             const pageObjects = await splitPages();
-            const pdf = new Jspdf("p", "px", [pageObjects[0].width, pageObjects[0].height]);
+            const pdf = new Jspdf("p", "pt", [pageObjects[0].width, pageObjects[0].height]);
             pdf.setFontSize(16);
             pdf.setCharSpace(1);
             pageObjects.forEach((page, i) => {
                 pdf.addImage(page.url, "PNG", 0, 0, page.width, page.height);
-                page.linkPositions.forEach((link) => {
-                    pdf.link(link.left, link.top, link.width, link.height, { url: link.url });
-                });
                 page.searchables.forEach((searchable) => {
-                    pdf.text(searchable.text, searchable.left, searchable.top, {
-                        renderingMode: "invisible"
-                    });
+                    pdf.setFontSize(searchable.fontSize);
+                    try {
+                        pdf.text(searchable.text, searchable.left, searchable.top, {
+                            renderingMode: "invisible",
+                            maxWidth: 640
+                        });
+                        if (searchable.url) {
+                            pdf.link(
+                                searchable.left,
+                                searchable.top,
+                                searchable.width,
+                                searchable.height,
+                                { url: searchable.url }
+                            );
+                        }
+                    } catch (error) {
+                        console.error("Error adding text to PDF:", error);
+                    }
+                    pdf.setFontSize(16); // Reset font size for next text
                 });
                 if (i < pageObjects.length - 1) {
                     const nextHeight = pageObjects[i + 1].height;

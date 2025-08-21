@@ -18,6 +18,9 @@
          --company-bg: rgba(50, 50, 50, 0.8);
          --card-shadow: rgba(0, 0, 0, 0.8);
          --achv-subcolor: #aaa;
+         --page-margin: 35px;
+         --secondary-color: #00BCD4;
+         --project-meta-color: #888;
          font-family: Arial, sans-serif;
       }
 
@@ -37,6 +40,8 @@
             --company-bg: rgba(245, 245, 245, 0.8);
             --card-shadow: rgba(0, 0, 0, 0.1);
             --achv-subcolor: #888;
+            --secondary-color: #007b7b;
+            --project-meta-color: #676767;
          }
       }
 
@@ -51,30 +56,12 @@
          color: var(--body-color);
          background: var(--body-bg);
          width: 794px;
-         /* Width for A4 paper */
-         margin: 10mm auto;
-         padding: 0 10mm;
+         margin: var(--page-margin) auto;
+         padding: 0 var(--page-margin);
          background: var(--container-bg);
          border-radius: 15px;
          position: relative;
          overflow: hidden;
-      }
-
-      .icon {
-         display: inline-block;
-      }
-
-      .section:before,
-      .section:after {
-         content: '';
-         position: absolute;
-         width: 100%;
-         height: 100%;
-         background: var(--section-gradient);
-         top: 0;
-         left: 0;
-         z-index: 0;
-         pointer-events: none;
       }
 
       .header,
@@ -82,49 +69,12 @@
          text-align: center;
          padding: 20px 0;
          border-radius: 15px 15px 0 0;
-         transform: scaleX(1.2);
+         width: calc(100% + 2 * var(--page-margin));
+         margin-left: calc(var(--page-margin) * -1);
       }
 
       .header {
-         display: grid;
-         grid-template-columns: 1fr 2fr;
-         justify-items: center;
-         align-items: center;
          background: var(--header-bg);
-      }
-
-      .header>* {
-         transform: scale(calc(1 / 1.2));
-      }
-
-      .header h1,
-      .header h3 {
-         margin: 0;
-         letter-spacing: unset;
-      }
-
-      .header h1 {
-         font-size: 24px;
-         /* Adjusted font size for A4 */
-      }
-
-      .header h3 {
-         font-size: 16px;
-         /* Adjusted font size for A4 */
-         margin-bottom: 20px;
-         color: var(--header-h3-color);
-      }
-
-      .header .avatar img {
-         width: 100px;
-         /* Reduced size for A4 */
-         border-radius: 50%;
-         border: 5px solid var(--avatar-border);
-         filter: saturate(1.5);
-      }
-
-      .details {
-         margin-left: -50%;
       }
 
       .footer {
@@ -133,35 +83,36 @@
          filter: grayscale(1);
       }
 
-      .section-title {
+      .info {
+         margin-bottom: 20px;
+      }
+
+      .info span {
+         display: block;
+         font-weight: bold;
+      }
+
+      .info span:nth-child(1) {
+         font-size: 24px;
+      }
+
+      .info span:nth-child(2) {
+         font-size: 16px;
+         color: var(--header-h3-color);
+      }
+
+      .details {
          display: flex;
          align-items: center;
-         gap: 20px;
-         background: var(--section-title-bg);
-         padding: 10px 15px;
-         margin: 20px 0 10px 0;
-         font-size: 20px;
-         /* Adjusted for A4 */
-         font-weight: bold;
-         border-left: 5px solid #00BCD4;
-         position: relative;
-         transform: scaleX(1.1);
-      }
-
-      .content {
-         position: relative;
-         z-index: 1;
-      }
-
-      .content p {
-         line-height: 1.6;
+         flex-wrap: wrap;
+         justify-content: center;
       }
 
       .contact-info {
          display: grid;
          grid-template-columns: 1fr 1fr;
-         width: 100%;
-         margin-left: 20%;
+         margin-left: auto;
+         margin-right: auto;
       }
 
       .contact-info span {
@@ -178,6 +129,43 @@
          margin-right: 10px;
       }
 
+      .icon {
+         display: inline-block;
+         margin-right: 20px;
+      }
+
+      .section-title {
+         display: flex;
+         align-items: center;
+         background: var(--section-title-bg);
+         padding: 10px 15px;
+         margin: 20px 0 10px 0;
+         font-size: 20px;
+         font-weight: bold;
+         border-left: 5px solid var(--secondary-color);
+         position: relative;
+         width: calc(100% + 2 * var(--page-margin));
+         margin-left: calc(var(--page-margin) * -1);
+      }
+
+      .section:before,
+      .section:after {
+         content: '';
+         position: absolute;
+         width: 100%;
+         height: 100%;
+         background: var(--section-gradient);
+         top: 0;
+         left: 0;
+         z-index: 0;
+         pointer-events: none;
+      }
+
+      .content {
+         position: relative;
+         z-index: 1;
+      }
+
       ul {
          list-style-type: none;
          padding-left: 0;
@@ -190,9 +178,7 @@
       .company,
       .specialization {
          padding: 10px;
-         /* Adjusted padding for A4 */
          margin-bottom: 10px;
-         /* Adjusted margin for A4 */
          border-radius: 10px;
          background: var(--company-bg);
       }
@@ -201,7 +187,6 @@
       .education ul li strong {
          display: block;
          font-size: 18px;
-         /* Adjusted font size for A4 */
          font-weight: bold;
          margin-top: 10px;
          margin-bottom: 5px;
@@ -210,41 +195,37 @@
       .experience ul li .role,
       .education ul li .institution {
          font-size: 16px;
-         /* Adjusted font size for A4 */
          font-style: italic;
-         color: #00BCD4;
+         color: var(--secondary-color);
       }
 
       .experience ul li .period {
          display: block;
          font-size: 12px;
-         /* Adjusted font size for A4 */
          color: #888;
          margin-bottom: 10px;
       }
 
       .experience ul li .exp_projects {
          margin-left: 10px;
-         /* Adjusted margin for A4 */
       }
 
       .experience ul li .exp_projects .project {
          margin-bottom: 10px;
          padding: 5px;
          padding-top: 0;
-         border-left: 2px solid #00BCD4;
+         border-left: 2px solid var(--secondary-color);
       }
 
       .experience ul li .tasks {
          margin-left: 10px;
-         /* Adjusted margin for A4 */
       }
 
       .experience ul li div.task-holder {
          padding-left: 5px;
          margin-left: 10px;
          margin-bottom: 10px;
-         border-left: 2px solid #00BCD4;
+         border-left: 2px solid var(--secondary-color);
       }
 
       .experience ul li .tasks.project-tasks {
@@ -253,9 +234,12 @@
 
       .experience ul li .tasks li {
          font-size: 14px;
-         /* Adjusted font size for A4 */
          list-style-type: disc;
          margin-left: 10px;
+      }
+
+      .education ul {
+         width: fit-content;
       }
 
       .section.projects .content .projects {
@@ -281,19 +265,17 @@
 
       .project-title {
          font-size: 18px;
-         /* Adjusted font size for A4 */
          font-weight: bold;
          margin: 10px 0;
       }
 
       .project-title a {
-         color: #00BCD4;
+         color: var(--secondary-color);
          text-decoration: none;
       }
 
       .project-description {
          font-size: 14px;
-         /* Adjusted font size for A4 */
          margin: 10px 0;
       }
 
@@ -303,23 +285,21 @@
       }
 
       .project-tag {
-         background: #00BCD4;
-         color: #fff;
+         background: var(--secondary-color);
+         color: #1f1f1f;
          padding: 5px 10px;
          margin: 5px;
          border-radius: 5px;
          font-size: 12px;
-         /* Adjusted font size for A4 */
       }
 
       .project-meta {
          display: flex;
          justify-content: flex-start;
-         font-size: 10px;
-         /* Adjusted font size for A4 */
-         color: #888;
+         font-size: 12px;
+         color: var(--project-meta-color);
          margin-bottom: 10px;
-         gap: 10px;
+         gap: 20px;
       }
 
       .project-meta span {
@@ -328,11 +308,16 @@
          gap: 5px;
       }
 
+      .project-meta .icon {
+         display: flex;
+         align-items: center;
+         gap: 5px;
+         margin-right: 10px;
+      }
+
       .project-meta img {
          width: 14px;
-         /* Adjusted size for A4 */
          height: 14px;
-         /* Adjusted size for A4 */
          vertical-align: middle;
       }
 
@@ -356,12 +341,6 @@
          width: 20px;
          height: 20px;
          margin-right: 10px;
-      }
-
-      .education ul {
-         display: grid;
-         grid-template-columns: 1fr 1fr;
-         column-gap: 1em;
       }
 
       .achievements .content {
@@ -394,14 +373,16 @@
 
       .achievement-info strong {
          font-size: 14px;
-         /* Adjusted font size for A4 */
          font-weight: bold;
       }
 
       .achievement-info span {
          font-size: 12px;
-         /* Adjusted font size for A4 */
          color: var(--achv-subcolor);
+      }
+
+      span {
+         display: inline-block;
       }
    </style>
 </head>
@@ -409,13 +390,11 @@
 <body>
    <div class="container">
       <div class="header">
-         <div class="avatar">
-            <img
-               src="https://media.licdn.com/dms/image/D4D03AQGqn3_BFdOGJA/profile-displayphoto-shrink_200_200/0/1719310799351?e=2147483647&v=beta&t=YPJ6jAgy9YAzNt_NScO7Rd8uR6mn5PB_bPYrll_Sjr8">
-         </div>
          <div class="details">
-            <h1>Harshith Thota</h1>
-            <h3>Senior Software Engineer | Python Developer</h3>
+            <div class="info">
+               <span>Harshith Thota</span>
+               <span>Senior Software Engineer | Python Developer</span>
+            </div>
             <div class="contact-info">
                <span>
                   <div class="icon">
@@ -493,7 +472,8 @@
       </div>
       <div class="section education">
          <div class="section-title">
-            <div class="icon"><img src="https://img.icons8.com/ios-filled/20/transparent/graduation-cap.png" alt="Education Icon"></div> Education
+            <div class="icon"><img src="https://img.icons8.com/ios-filled/20/transparent/graduation-cap.png"
+                  alt="Education Icon"></div> <span>Education</span>
          </div>
          <div class="content">
             <ul></ul>
@@ -507,7 +487,7 @@
          <div class="content"></div>
       </div>
       <div class="footer">
-         <p>© 2024 Harshith Thota. All rights reserved.</p>
+         <span>© 2024 Harshith Thota. All rights reserved.</span>
       </div>
    </div>
 </body>
