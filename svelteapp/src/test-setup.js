@@ -5,17 +5,32 @@
 // Setup Jest DOM
 import '@testing-library/jest-dom';
 
-// Mock IntersectionObserver - Note: jest is not available here, so we use simple functions
-const mockIntersectionObserver = function(callback, options) {
+// Mock console methods to prevent output during tests (using simple function mocks)
+const originalConsole = global.console;
+global.console = {
+    ...originalConsole,
+    log: () => {},
+    error: () => {},
+    warn: () => {},
+    info: () => {},
+    debug: () => {},
+};
+
+// Restore console for debugging if needed
+global.restoreConsole = () => {
+    global.console = originalConsole;
+};
+
+// Mock IntersectionObserver
+global.IntersectionObserver = function(callback, options) {
     return {
         observe: function() {},
         unobserve: function() {},
         disconnect: function() {},
-        callback: callback,
-        options: options
+        callback,
+        options
     };
 };
-global.IntersectionObserver = mockIntersectionObserver;
 
 // Mock AudioContext
 const mockAudioContext = function() {
@@ -37,6 +52,7 @@ const mockAudioContext = function() {
         destination: {}
     };
 };
+
 global.AudioContext = mockAudioContext;
 global.webkitAudioContext = mockAudioContext;
 
@@ -77,4 +93,21 @@ if (typeof window !== 'undefined') {
     global.cancelAnimationFrame = function(id) {
         clearTimeout(id);
     };
+
+    // Mock matchMedia
+    Object.defineProperty(window, 'matchMedia', {
+        writable: true,
+        value: function(query) {
+            return {
+                matches: false,
+                media: query,
+                onchange: null,
+                addListener: function() {},
+                removeListener: function() {},
+                addEventListener: function() {},
+                removeEventListener: function() {},
+                dispatchEvent: function() {},
+            };
+        },
+    });
 }

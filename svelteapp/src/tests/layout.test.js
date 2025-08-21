@@ -1,4 +1,4 @@
-import { ssr } from './+layout.js';
+import { ssr } from '../routes/+layout.js';
 
 describe('Layout configuration', () => {
     it('should disable server-side rendering', () => {
