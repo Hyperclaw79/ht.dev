@@ -8,12 +8,8 @@ export default {
     transform: {
         "^.+\\.svelte$": ["svelte-jester", { 
             "preprocess": true,
-            "debug": false,
-            "compilerOptions": {
-                "dev": false
-            }
-        }],
-        "^.+\\.js$": "babel-jest"
+            "debug": false
+        }]
     },
     moduleNameMapper: {
         "^src/(.*)": "<rootDir>/src/$1",
@@ -21,20 +17,9 @@ export default {
         "^\\$app/stores$": "<rootDir>/src/test-mocks/app-stores.js",
         "^\\$app/(.*)": "<rootDir>/src/test-mocks/app-$1.js"
     },
-    setupFiles: ["<rootDir>/src/jest-globals.js"],
     setupFilesAfterEnv: ["<rootDir>/src/test-setup.js"],
     moduleFileExtensions: ["js", "svelte"],
     transformIgnorePatterns: [
         "node_modules/(?!(svelte|@testing-library)/)"
-    ],
-    collectCoverageFrom: [
-        "src/**/*.{js,svelte}",
-        "!src/**/*.test.{js,svelte}",
-        "!src/**/*.spec.{js,svelte}",
-        "!src/**/*.test.old.js",
-        "!src/test-setup.js",
-        "!src/jest-globals.js",
-        "!src/app.html"
-    ],
-    coverageReporters: ["text", "lcov", "html"]
+    ]
 };

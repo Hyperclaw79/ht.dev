@@ -2,6 +2,7 @@
  * @jest-environment jsdom
  */
 import { render, waitFor } from '@testing-library/svelte';
+import { jest } from '@jest/globals';
 import Skills from './Skills.svelte';
 import { writable } from 'svelte/store';
 
