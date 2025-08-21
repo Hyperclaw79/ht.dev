@@ -3,6 +3,7 @@
  */
 import { render } from '@testing-library/svelte';
 import TextSphere from './TextSphere.svelte';
+import { tick } from 'svelte';
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -29,9 +30,19 @@ Object.defineProperty(window, 'innerWidth', {
 describe('TextSphere component', () => {
     const mockTags = ['JavaScript', 'Python', 'React', 'Node.js', 'CSS'];
 
+    beforeEach(() => {
+        // Reset mock state
+        if (global.TagCloud) {
+            global.TagCloud.calls = [];
+        }
+        
+        // Clear any existing tagcloud items
+        document.querySelectorAll('.tagcloud--item').forEach(el => el.remove());
+    });
+
     it('renders the holder span element', () => {
         const { container } = render(TextSphere, { 
-            props: { tags: [] } // Use empty array to avoid TagCloud initialization
+            props: { tags: [] }
         });
         
         const holder = container.querySelector('.holder');
@@ -47,6 +58,7 @@ describe('TextSphere component', () => {
         
         const holder = container.querySelector('.holder');
         expect(holder).toBeInTheDocument();
+        expect(global.TagCloud.calls.length).toBe(0);
     });
 
     it('handles null tags gracefully', () => {
@@ -57,6 +69,7 @@ describe('TextSphere component', () => {
         
         const holder = container.querySelector('.holder');
         expect(holder).toBeInTheDocument();
+        expect(global.TagCloud.calls.length).toBe(0);
     });
 
     it('handles undefined tags gracefully', () => {
@@ -67,6 +80,7 @@ describe('TextSphere component', () => {
         
         const holder = container.querySelector('.holder');
         expect(holder).toBeInTheDocument();
+        expect(global.TagCloud.calls.length).toBe(0);
     });
 
     it('has correct CSS classes and structure', () => {
@@ -78,7 +92,7 @@ describe('TextSphere component', () => {
         expect(holder).toHaveClass('holder');
     });
 
-    it('handles TagCloud initialization with proper radius based on window width', () => {
+    it('initializes TagCloud with desktop radius when window width > 600', async () => {
         // Mock window.innerWidth for desktop
         Object.defineProperty(window, 'innerWidth', {
             writable: true,
@@ -90,10 +104,14 @@ describe('TextSphere component', () => {
             props: { tags: mockTags } 
         });
         
+        await tick();
+        
         expect(container).toBeTruthy();
+        expect(global.TagCloud.calls.length).toBe(1);
+        expect(global.TagCloud.calls[0].options.radius).toBe(300);
     });
 
-    it('handles TagCloud initialization with mobile radius', () => {
+    it('initializes TagCloud with mobile radius when window width <= 600', async () => {
         // Mock window.innerWidth for mobile
         Object.defineProperty(window, 'innerWidth', {
             writable: true,
@@ -105,7 +123,45 @@ describe('TextSphere component', () => {
             props: { tags: mockTags } 
         });
         
+        await tick();
+        
         expect(container).toBeTruthy();
+        expect(global.TagCloud.calls.length).toBe(1);
+        expect(global.TagCloud.calls[0].options.radius).toBe(100);
+    });
+
+    it('applies random colors to tagcloud items', async () => {
+        const { container } = render(TextSphere, { 
+            props: { tags: mockTags } 
+        });
+        
+        await tick();
+        
+        // Check that TagCloud items were created and colors were applied
+        const tagcloudItems = document.querySelectorAll('span.tagcloud--item');
+        expect(tagcloudItems.length).toBe(mockTags.length);
+        
+        // Check that each item has a color style applied
+        tagcloudItems.forEach(item => {
+            expect(item.style.color).toBeTruthy();
+        });
+    });
+
+    it('uses correct TagCloud configuration options', async () => {
+        const { container } = render(TextSphere, { 
+            props: { tags: mockTags } 
+        });
+        
+        await tick();
+        
+        expect(global.TagCloud.calls[0].selector).toBe('span[class~=holder]');
+        expect(global.TagCloud.calls[0].tags).toEqual(mockTags);
+        expect(global.TagCloud.calls[0].options).toMatchObject({
+            maxSpeed: 'fast',
+            initSpeed: 'fast',
+            direction: 135,
+            keep: true
+        });
     });
 
     it('handles tags with zero length', () => {
@@ -115,42 +171,277 @@ describe('TextSphere component', () => {
         
         const holder = container.querySelector('.holder');
         expect(holder).toBeInTheDocument();
+        expect(global.TagCloud.calls.length).toBe(0);
     });
 
-    it('updates when tags prop changes', () => {
+    it('updates when tags prop changes and reinitializes TagCloud', async () => {
         const { container, component } = render(TextSphere, { 
             props: { tags: [] } 
         });
         
-        // Update tags
+        expect(global.TagCloud.calls.length).toBe(0);
+        
+        // Update to tags with content
         component.$set({ tags: mockTags });
+        await tick();
         
-        expect(container).toBeTruthy();
+        expect(global.TagCloud.calls.length).toBe(1);
         
-        // Update to empty again
+        // Update to different tags
+        const newTags = ['Vue', 'Angular', 'Svelte'];
+        component.$set({ tags: newTags });
+        await tick();
+        
+        expect(global.TagCloud.calls.length).toBe(2);
+        expect(global.TagCloud.calls[1].tags).toEqual(newTags);
+        
+        // Update back to empty
         component.$set({ tags: [] });
+        await tick();
+        
+        // Should not call TagCloud for empty array
+        expect(global.TagCloud.calls.length).toBe(2);
         
         expect(container).toBeTruthy();
     });
 
-    it('handles very large tags array', () => {
+    it('handles very large tags array', async () => {
         const largeTags = Array.from({ length: 50 }, (_, i) => `Tag${i}`);
         
         const { container } = render(TextSphere, { 
             props: { tags: largeTags } 
         });
         
+        await tick();
+        
         const holder = container.querySelector('.holder');
         expect(holder).toBeInTheDocument();
+        expect(global.TagCloud.calls.length).toBe(1);
+        expect(global.TagCloud.calls[0].tags).toEqual(largeTags);
+        
+        // Verify color application for large dataset
+        const tagcloudItems = document.querySelectorAll('span.tagcloud--item');
+        expect(tagcloudItems.length).toBe(largeTags.length);
     });
 
-    it('maintains correct holder structure and binding', () => {
+    it('maintains correct holder structure and binding', async () => {
         const { container } = render(TextSphere, { 
             props: { tags: mockTags } 
         });
         
+        await tick();
+        
         const holder = container.querySelector('span.holder');
         expect(holder).toBeInTheDocument();
         expect(holder.tagName).toBe('SPAN');
+        expect(global.TagCloud.calls[0].selector).toBe('span[class~=holder]');
+    });
+
+    it('handles reactive statement with binder not yet bound', async () => {
+        // Test the condition where tags exist but binder is not ready
+        const { container, component } = render(TextSphere, { 
+            props: { tags: null } 
+        });
+        
+        // First set tags before binder is fully bound
+        component.$set({ tags: mockTags });
+        await tick();
+        
+        expect(container).toBeTruthy();
+    });
+
+    it('tests all window width boundary conditions', async () => {
+        const testCases = [
+            { width: 600, expectedRadius: 100 }, // Exactly 600
+            { width: 601, expectedRadius: 300 }, // Just above 600
+            { width: 599, expectedRadius: 100 }, // Just below 600
+            { width: 1200, expectedRadius: 300 }, // Large desktop
+            { width: 300, expectedRadius: 100 }, // Small mobile
+        ];
+
+        for (const testCase of testCases) {
+            Object.defineProperty(window, 'innerWidth', {
+                writable: true,
+                configurable: true,
+                value: testCase.width,
+            });
+
+            const { unmount } = render(TextSphere, { 
+                props: { tags: mockTags } 
+            });
+            
+            await tick();
+            
+            const lastCall = global.TagCloud.calls[global.TagCloud.calls.length - 1];
+            expect(lastCall.options.radius).toBe(testCase.expectedRadius);
+            
+            unmount();
+        }
+    });
+
+    it('tests color randomization covers all available colors', async () => {
+        // Mock Math.random to test different color selections
+        const originalRandom = Math.random;
+        let callCount = 0;
+        
+        Math.random = function() {
+            return (callCount++ % 18) / 18; // Cycle through all 18 colors
+        };
+        
+        const { container } = render(TextSphere, { 
+            props: { tags: Array.from({ length: 18 }, (_, i) => `Tag${i}`) } 
+        });
+        
+        await tick();
+        
+        const tagcloudItems = document.querySelectorAll('span.tagcloud--item');
+        expect(tagcloudItems.length).toBe(18);
+        
+        // Each item should have a color applied
+        tagcloudItems.forEach(item => {
+            expect(item.style.color).toBeTruthy();
+        });
+        
+        Math.random = originalRandom;
+    });
+
+    it('handles rapid prop changes without breaking', async () => {
+        const { component } = render(TextSphere, { 
+            props: { tags: [] } 
+        });
+        
+        // Rapid succession of changes
+        component.$set({ tags: ['A'] });
+        component.$set({ tags: ['A', 'B'] });
+        component.$set({ tags: ['A', 'B', 'C'] });
+        component.$set({ tags: [] });
+        component.$set({ tags: mockTags });
+        
+        await tick();
+        
+        expect(global.TagCloud.calls.length).toBe(4); // Should not count the empty array calls
+        expect(global.TagCloud.calls[global.TagCloud.calls.length - 1].tags).toEqual(mockTags);
+    });
+
+    it('tests edge case with single tag', async () => {
+        const singleTag = ['OnlyTag'];
+        
+        const { container } = render(TextSphere, { 
+            props: { tags: singleTag } 
+        });
+        
+        await tick();
+        
+        expect(global.TagCloud.calls.length).toBe(1);
+        expect(global.TagCloud.calls[0].tags).toEqual(singleTag);
+        
+        const tagcloudItems = document.querySelectorAll('span.tagcloud--item');
+        expect(tagcloudItems.length).toBe(1);
+        expect(tagcloudItems[0].style.color).toBeTruthy();
+    });
+
+    it('handles falsy tags values comprehensively', async () => {
+        const falsyValues = [null, undefined, false, 0, '', []];
+        
+        for (const falsyValue of falsyValues) {
+            const { unmount } = render(TextSphere, { 
+                props: { tags: falsyValue } 
+            });
+            
+            await tick();
+            
+            // Should not have called TagCloud for falsy values
+            expect(global.TagCloud.calls.length).toBe(0);
+            
+            unmount();
+        }
+    });
+
+    it('tests that reactive statement only runs when both conditions are met', async () => {
+        // Start with empty tags
+        const { component } = render(TextSphere, { 
+            props: { tags: [] } 
+        });
+        
+        await tick();
+        expect(global.TagCloud.calls.length).toBe(0);
+        
+        // Add tags - should trigger TagCloud
+        component.$set({ tags: mockTags });
+        await tick();
+        
+        expect(global.TagCloud.calls.length).toBe(1);
+        
+        // Remove tags - should not trigger TagCloud again
+        component.$set({ tags: [] });
+        await tick();
+        
+        expect(global.TagCloud.calls.length).toBe(1);
+    });
+
+    it('handles exact window width threshold of 600px', async () => {
+        // Test exactly 600px (should use mobile radius)
+        Object.defineProperty(window, 'innerWidth', {
+            writable: true,
+            configurable: true,
+            value: 600,
+        });
+        
+        const { container } = render(TextSphere, { 
+            props: { tags: mockTags } 
+        });
+        
+        await tick();
+        
+        expect(global.TagCloud.calls[0].options.radius).toBe(100);
+    });
+
+    it('verifies colors array contains expected values', async () => {
+        // This test ensures the colors array is being used
+        const { container } = render(TextSphere, { 
+            props: { tags: ['Test'] } 
+        });
+        
+        await tick();
+        
+        const tagcloudItem = document.querySelector('span.tagcloud--item');
+        expect(tagcloudItem).toBeTruthy();
+        expect(tagcloudItem.style.color).toBeTruthy();
+        
+        // The color should be one of the predefined colors or a valid CSS color
+        expect(tagcloudItem.style.color).toMatch(/^(#[0-9a-f]{3,6}|rgb\(|rgba\()/i);
+    });
+
+    it('tests TagCloud options are properly structured', async () => {
+        const { container } = render(TextSphere, { 
+            props: { tags: mockTags } 
+        });
+        
+        await tick();
+        
+        const options = global.TagCloud.calls[0].options;
+        expect(options).toHaveProperty('radius');
+        expect(options).toHaveProperty('maxSpeed', 'fast');
+        expect(options).toHaveProperty('initSpeed', 'fast');
+        expect(options).toHaveProperty('direction', 135);
+        expect(options).toHaveProperty('keep', true);
+    });
+
+    it('verifies selector matches the holder element', async () => {
+        const { container } = render(TextSphere, { 
+            props: { tags: mockTags } 
+        });
+        
+        await tick();
+        
+        const holder = container.querySelector('.holder');
+        expect(holder).toHaveClass('holder');
+        
+        // Verify the selector used in TagCloud matches our holder
+        expect(global.TagCloud.calls[0].selector).toBe('span[class~=holder]');
+        
+        // Verify the selector actually finds the holder element
+        const foundElement = document.querySelector(global.TagCloud.calls[0].selector);
+        expect(foundElement).toBeTruthy();
     });
 });
