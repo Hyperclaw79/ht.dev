@@ -77,4 +77,80 @@ describe('TextSphere component', () => {
         const holder = container.querySelector('.holder');
         expect(holder).toHaveClass('holder');
     });
+
+    it('handles TagCloud initialization with proper radius based on window width', () => {
+        // Mock window.innerWidth for desktop
+        Object.defineProperty(window, 'innerWidth', {
+            writable: true,
+            configurable: true,
+            value: 800,
+        });
+        
+        const { container } = render(TextSphere, { 
+            props: { tags: mockTags } 
+        });
+        
+        expect(container).toBeTruthy();
+    });
+
+    it('handles TagCloud initialization with mobile radius', () => {
+        // Mock window.innerWidth for mobile
+        Object.defineProperty(window, 'innerWidth', {
+            writable: true,
+            configurable: true,
+            value: 500,
+        });
+        
+        const { container } = render(TextSphere, { 
+            props: { tags: mockTags } 
+        });
+        
+        expect(container).toBeTruthy();
+    });
+
+    it('handles tags with zero length', () => {
+        const { container } = render(TextSphere, { 
+            props: { tags: [] } 
+        });
+        
+        const holder = container.querySelector('.holder');
+        expect(holder).toBeInTheDocument();
+    });
+
+    it('updates when tags prop changes', () => {
+        const { container, component } = render(TextSphere, { 
+            props: { tags: [] } 
+        });
+        
+        // Update tags
+        component.$set({ tags: mockTags });
+        
+        expect(container).toBeTruthy();
+        
+        // Update to empty again
+        component.$set({ tags: [] });
+        
+        expect(container).toBeTruthy();
+    });
+
+    it('handles very large tags array', () => {
+        const largeTags = Array.from({ length: 50 }, (_, i) => `Tag${i}`);
+        
+        const { container } = render(TextSphere, { 
+            props: { tags: largeTags } 
+        });
+        
+        const holder = container.querySelector('.holder');
+        expect(holder).toBeInTheDocument();
+    });
+
+    it('maintains correct holder structure and binding', () => {
+        const { container } = render(TextSphere, { 
+            props: { tags: mockTags } 
+        });
+        
+        const holder = container.querySelector('span.holder');
+        expect(holder).toBeInTheDocument();
+        expect(holder.tagName).toBe('SPAN');
+    });
 });

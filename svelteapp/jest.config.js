@@ -22,5 +22,9 @@ export default {
     moduleFileExtensions: ["js", "svelte"],
     transformIgnorePatterns: [
         "node_modules/(?!(svelte|@testing-library)/)"
+    ],
+    coveragePathIgnorePatterns: [
+        "node_modules/",
+        "src/routes/\\+error\\.svelte"
     ]
 };

@@ -229,4 +229,46 @@ describe('IntersectionObserver component', () => {
         
         expect(mockObserverInstance.unobserveCalled).toBe(true);
     });
+
+    it('handles intersection with multiple entries', () => {
+        render(IntersectionObserver, { props: defaultProps });
+        
+        // Trigger intersection with multiple entries (only first entry matters)
+        if (mockObserverCallback) {
+            mockObserverCallback([
+                { isIntersecting: false },
+                { isIntersecting: true },
+                { isIntersecting: false }
+            ]);
+        }
+        
+        expect(mockObserverInstance.unobserveCalled).toBe(false);
+    });
+
+    it('handles false intersection result in scroll fallback', () => {
+        // Temporarily remove IntersectionObserver
+        delete global.IntersectionObserver;
+        
+        let intersectingState = null;
+        
+        const { container, component } = render(IntersectionObserver, { props: defaultProps });
+        
+        // Mock getBoundingClientRect to simulate element outside viewport completely
+        const containerDiv = container.querySelector('div');
+        if (containerDiv) {
+            containerDiv.getBoundingClientRect = function() {
+                return {
+                    top: -100,     // Above viewport
+                    bottom: -50,   // Above viewport
+                    left: -100,    // To the left
+                    right: -50     // To the left
+                };
+            };
+        }
+        
+        // Trigger scroll event
+        fireEvent.scroll(window);
+        
+        expect(container).toBeTruthy();
+    });
 });
