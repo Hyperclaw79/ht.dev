@@ -1,15 +1,13 @@
 /**
  * @jest-environment jsdom
  */
-import { render } from '@testing-library/svelte';
+import { render, waitFor } from '@testing-library/svelte';
 import Action from './Action.svelte';
 
 describe('Action component', () => {
-    const mockAction = () => {
-        // Mock action function
-    };
-
     it('renders without crashing', () => {
+        const mockAction = () => {};
+        
         const { container } = render(Action, { 
             props: { 
                 action: mockAction,
@@ -20,21 +18,68 @@ describe('Action component', () => {
         expect(container).toBeTruthy();
     });
 
-    it('executes action immediately when timeout is 0', () => {
-        const mockActionSpy = () => {};
+    it('executes action immediately when timeout is 0', async () => {
+        let actionCalled = false;
+        const mockAction = () => {
+            actionCalled = true;
+        };
         
-        const { container } = render(Action, { 
+        render(Action, { 
             props: { 
-                action: mockActionSpy,
+                action: mockAction,
                 timeout: 0,
                 noProgress: false 
             } 
         });
         
-        expect(container).toBeTruthy();
+        // Action should be called immediately
+        expect(actionCalled).toBe(true);
+    });
+
+    it('executes action immediately when timeout is 0 regardless of noProgress', async () => {
+        let actionCalled = false;
+        const mockAction = () => {
+            actionCalled = true;
+        };
+        
+        render(Action, { 
+            props: { 
+                action: mockAction,
+                timeout: 0,
+                noProgress: true 
+            } 
+        });
+        
+        // Action should be called immediately even when noProgress is true
+        expect(actionCalled).toBe(true);
+    });
+
+    it('schedules action with setTimeout when timeout > 0 and noProgress is true', async () => {
+        let actionCalled = false;
+        const mockAction = () => {
+            actionCalled = true;
+        };
+        
+        render(Action, { 
+            props: { 
+                action: mockAction,
+                timeout: 100, // Short timeout for testing
+                noProgress: true 
+            } 
+        });
+        
+        // Action should not be called immediately
+        expect(actionCalled).toBe(false);
+        
+        // Wait for action to be called
+        await waitFor(() => {
+            expect(actionCalled).toBe(true);
+        }, { timeout: 500 });
     });
 
     it('renders AsciiProgress when timeout > 0 and noProgress is false', () => {
+        const mockAction = () => {};
+        
         const { container } = render(Action, { 
             props: { 
                 action: mockAction,
@@ -43,12 +88,13 @@ describe('Action component', () => {
             } 
         });
         
-        expect(container).toBeTruthy();
-        // AsciiProgress should be rendered, but we can't easily test its internal state
-        // without mocking the component or checking for specific elements
+        // Should render something (the AsciiProgress component)
+        expect(container.firstChild).toBeTruthy();
     });
 
     it('does not render AsciiProgress when noProgress is true', () => {
+        const mockAction = () => {};
+        
         const { container } = render(Action, { 
             props: { 
                 action: mockAction,
@@ -57,11 +103,13 @@ describe('Action component', () => {
             } 
         });
         
-        expect(container).toBeTruthy();
-        // With noProgress true, no AsciiProgress component should be rendered
+        // Should render an empty container since no AsciiProgress
+        expect(container.innerHTML.trim()).toBe('<!---->');
     });
 
     it('does not render AsciiProgress when timeout is 0', () => {
+        const mockAction = () => {};
+        
         const { container } = render(Action, { 
             props: { 
                 action: mockAction,
@@ -70,11 +118,13 @@ describe('Action component', () => {
             } 
         });
         
-        expect(container).toBeTruthy();
-        // With timeout 0, no AsciiProgress component should be rendered
+        // Should render an empty container since timeout is 0
+        expect(container.innerHTML.trim()).toBe('<!---->');
     });
 
-    it('handles default noProgress prop', () => {
+    it('handles default noProgress prop (false)', () => {
+        const mockAction = () => {};
+        
         const { container } = render(Action, { 
             props: { 
                 action: mockAction,
@@ -83,30 +133,193 @@ describe('Action component', () => {
         });
         
         expect(container).toBeTruthy();
+        // With default noProgress (false) and timeout > 0, should render AsciiProgress
+        expect(container.firstChild).toBeTruthy();
     });
 
-    it('handles default timeout prop', () => {
-        const { container } = render(Action, { 
+    it('handles default timeout prop (0)', () => {
+        let actionCalled = false;
+        const mockAction = () => {
+            actionCalled = true;
+        };
+        
+        render(Action, { 
             props: { 
                 action: mockAction
             } 
         });
         
-        expect(container).toBeTruthy();
+        // With default timeout (0), action should be called immediately
+        expect(actionCalled).toBe(true);
     });
 
-    it('accepts action function prop', () => {
-        const customAction = () => { 
-            console.log('Custom action executed'); 
+    it('handles different timeout values', async () => {
+        let actionCalled = false;
+        const mockAction = () => {
+            actionCalled = true;
         };
+        
+        render(Action, { 
+            props: { 
+                action: mockAction,
+                timeout: 150,
+                noProgress: true
+            } 
+        });
+        
+        expect(actionCalled).toBe(false);
+        
+        // Wait for action to be called
+        await waitFor(() => {
+            expect(actionCalled).toBe(true);
+        }, { timeout: 500 });
+    });
+
+    it('handles negative timeout as greater than 0', async () => {
+        const mockAction = () => {};
         
         const { container } = render(Action, { 
             props: { 
-                action: customAction,
+                action: mockAction,
+                timeout: -100,
+                noProgress: false
+            } 
+        });
+        
+        // Negative timeout should be treated as > 0, so AsciiProgress should render
+        expect(container.firstChild).toBeTruthy();
+    });
+
+    it('properly executes different action functions', () => {
+        let action1Called = false;
+        let action2Called = false;
+        
+        const mockAction1 = () => {
+            action1Called = true;
+        };
+        const mockAction2 = () => {
+            action2Called = true;
+        };
+        
+        // Test first action
+        const { unmount } = render(Action, { 
+            props: { 
+                action: mockAction1,
                 timeout: 0
             } 
         });
         
-        expect(container).toBeTruthy();
+        expect(action1Called).toBe(true);
+        expect(action2Called).toBe(false);
+        
+        unmount();
+        
+        // Test second action
+        render(Action, { 
+            props: { 
+                action: mockAction2,
+                timeout: 0
+            } 
+        });
+        
+        expect(action1Called).toBe(true);
+        expect(action2Called).toBe(true);
+    });
+
+    it('handles action that throws error', () => {
+        const mockAction = () => {
+            throw new Error('Test error');
+        };
+        
+        // Should not crash when action throws
+        expect(() => {
+            render(Action, { 
+                props: { 
+                    action: mockAction,
+                    timeout: 0
+                } 
+            });
+        }).not.toThrow();
+    });
+
+    it('handles zero timeout edge case', () => {
+        let actionCalled = false;
+        const mockAction = () => {
+            actionCalled = true;
+        };
+        
+        render(Action, { 
+            props: { 
+                action: mockAction,
+                timeout: 0,
+                noProgress: true
+            } 
+        });
+        
+        expect(actionCalled).toBe(true);
+    });
+
+    it('handles missing action prop gracefully', () => {
+        // Should not crash when action is undefined
+        expect(() => {
+            render(Action, { 
+                props: { 
+                    timeout: 0
+                } 
+            });
+        }).not.toThrow();
+    });
+
+    it('handles long timeout values', () => {
+        const mockAction = () => {};
+        
+        const { container } = render(Action, { 
+            props: { 
+                action: mockAction,
+                timeout: 10000,
+                noProgress: false
+            } 
+        });
+        
+        // Should render AsciiProgress for long timeouts
+        expect(container.firstChild).toBeTruthy();
+    });
+
+    it('handles timeout with progress bar callback integration', async () => {
+        let actionCalled = false;
+        const mockAction = () => {
+            actionCalled = true;
+        };
+        
+        const { container } = render(Action, { 
+            props: { 
+                action: mockAction,
+                timeout: 200, // Short timeout for testing
+                noProgress: false
+            } 
+        });
+        
+        // Should render AsciiProgress
+        expect(container.firstChild).toBeTruthy();
+        
+        // Wait for action to eventually be called through AsciiProgress
+        await waitFor(() => {
+            expect(actionCalled).toBe(true);
+        }, { timeout: 1000 });
+    });
+
+    it('handles component lifecycle correctly', () => {
+        const mockAction = () => {};
+        
+        const { unmount } = render(Action, { 
+            props: { 
+                action: mockAction,
+                timeout: 1000,
+                noProgress: false
+            } 
+        });
+        
+        // Should not throw when unmounting
+        expect(() => unmount()).not.toThrow();
     });
 });
