@@ -5,8 +5,10 @@
 // Setup Jest DOM
 import '@testing-library/jest-dom';
 
-// Mock console methods to prevent output during tests (using simple function mocks)
+// Store original console for potential restoration
 const originalConsole = global.console;
+
+// Mock console methods to prevent output during tests  
 global.console = {
     ...originalConsole,
     log: () => {},
@@ -21,16 +23,28 @@ global.restoreConsole = () => {
     global.console = originalConsole;
 };
 
-// Mock IntersectionObserver
-global.IntersectionObserver = function(callback, options) {
-    return {
-        observe: function() {},
-        unobserve: function() {},
-        disconnect: function() {},
+// Mock IntersectionObserver - Now checking if jest is available
+if (typeof jest !== 'undefined') {
+    // Use proper Jest mocking when available
+    global.IntersectionObserver = jest.fn().mockImplementation((callback, options) => ({
+        observe: jest.fn(),
+        unobserve: jest.fn(),
+        disconnect: jest.fn(),
         callback,
         options
+    }));
+} else {
+    // Fallback for when jest is not available in setup
+    global.IntersectionObserver = function(callback, options) {
+        return {
+            observe: function() {},
+            unobserve: function() {},
+            disconnect: function() {},
+            callback,
+            options
+        };
     };
-};
+}
 
 // Mock AudioContext
 const mockAudioContext = function() {
@@ -58,7 +72,7 @@ global.webkitAudioContext = mockAudioContext;
 
 // Only set up window/DOM mocks if we're in a browser environment
 if (typeof window !== 'undefined') {
-    // Mock window dimensions and other browser APIs
+    // Mock window dimensions
     Object.defineProperty(window, 'innerHeight', {
       writable: true,
       configurable: true,

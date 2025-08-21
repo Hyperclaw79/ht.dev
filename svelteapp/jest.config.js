@@ -4,6 +4,8 @@ export default {
         "**/?(*.)+(spec|test).svelte"
     ],
     testEnvironment: "jsdom",
+    preset: null,
+    extensionsToTreatAsEsm: [".svelte"],
     transform: {
         "^.+\\.svelte$": ["svelte-jester", { 
             "preprocess": true,
@@ -21,7 +23,6 @@ export default {
     },
     setupFilesAfterEnv: ["<rootDir>/src/test-setup.js"],
     moduleFileExtensions: ["js", "svelte"],
-    extensionsToTreatAsEsm: [".svelte"],
     transformIgnorePatterns: [
         "node_modules/(?!(svelte|@testing-library)/)"
     ],
@@ -33,10 +34,5 @@ export default {
         "!src/test-setup.js",
         "!src/app.html"
     ],
-    coverageReporters: ["text", "lcov", "html"],
-    globals: {
-        'js-jest': {
-            useESM: true
-        }
-    }
+    coverageReporters: ["text", "lcov", "html"]
 };
