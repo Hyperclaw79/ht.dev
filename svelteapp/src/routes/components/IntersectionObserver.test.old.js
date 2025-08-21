@@ -5,9 +5,8 @@ import { render, fireEvent } from '@testing-library/svelte';
 import IntersectionObserver from './IntersectionObserver.svelte';
 
 describe('IntersectionObserver component', () => {
+    let mockObserver;
     let mockObserverInstance;
-    let mockObserverCallback;
-    let mockObserverOptions;
     
     const defaultProps = {
         once: false,
@@ -18,32 +17,28 @@ describe('IntersectionObserver component', () => {
     };
 
     beforeEach(() => {
-        // Reset mock state
-        mockObserverCallback = null;
-        mockObserverOptions = null;
+        // Reset mocks
+        jest.clearAllMocks();
         
         // Create mock instance
         mockObserverInstance = {
-            observe: function() {
-                mockObserverInstance.observeCalled = true;
-            },
-            unobserve: function() {
-                mockObserverInstance.unobserveCalled = true;
-            },
-            disconnect: function() {
-                mockObserverInstance.disconnectCalled = true;
-            },
-            observeCalled: false,
-            unobserveCalled: false,
-            disconnectCalled: false
+            observe: jest.fn(),
+            unobserve: jest.fn(),
+            disconnect: jest.fn()
         };
         
         // Mock the IntersectionObserver constructor
-        global.IntersectionObserver = function(callback, options) {
-            mockObserverCallback = callback;
-            mockObserverOptions = options;
+        mockObserver = jest.fn().mockImplementation((callback, options) => {
+            mockObserverInstance.callback = callback;
+            mockObserverInstance.options = options;
             return mockObserverInstance;
-        };
+        });
+        
+        global.IntersectionObserver = mockObserver;
+    });
+
+    afterEach(() => {
+        jest.restoreAllMocks();
     });
 
     it('renders without crashing', () => {
@@ -69,23 +64,21 @@ describe('IntersectionObserver component', () => {
         
         render(IntersectionObserver, { props });
         
-        expect(mockObserverOptions).toBeTruthy();
-        expect(mockObserverOptions.rootMargin).toBe('20px 30px 10px 40px');
+        expect(mockObserver).toHaveBeenCalled();
+        expect(mockObserverInstance.options.rootMargin).toBe('20px 30px 10px 40px');
     });
 
     it('observes the container element', () => {
         render(IntersectionObserver, { props: defaultProps });
         
-        expect(mockObserverInstance.observeCalled).toBe(true);
+        expect(mockObserverInstance.observe).toHaveBeenCalledTimes(1);
     });
 
     it('handles intersection events', () => {
         const { container } = render(IntersectionObserver, { props: defaultProps });
         
         // Trigger intersection
-        if (mockObserverCallback) {
-            mockObserverCallback([{ isIntersecting: true }]);
-        }
+        mockObserverInstance.callback([{ isIntersecting: true }]);
         
         // The component should handle intersection
         expect(container).toBeTruthy();
@@ -95,105 +88,87 @@ describe('IntersectionObserver component', () => {
         render(IntersectionObserver, { props: { ...defaultProps, once: true } });
         
         // Trigger intersection
-        if (mockObserverCallback) {
-            mockObserverCallback([{ isIntersecting: true }]);
-        }
+        mockObserverInstance.callback([{ isIntersecting: true }]);
         
-        expect(mockObserverInstance.unobserveCalled).toBe(true);
+        expect(mockObserverInstance.unobserve).toHaveBeenCalledTimes(1);
     });
 
     it('does not unobserve when once=false', () => {
         render(IntersectionObserver, { props: { ...defaultProps, once: false } });
         
         // Trigger intersection
-        if (mockObserverCallback) {
-            mockObserverCallback([{ isIntersecting: true }]);
-        }
+        mockObserverInstance.callback([{ isIntersecting: true }]);
         
-        expect(mockObserverInstance.unobserveCalled).toBe(false);
+        expect(mockObserverInstance.unobserve).not.toHaveBeenCalled();
     });
 
     it('handles scroll fallback when IntersectionObserver is not available', () => {
         // Temporarily remove IntersectionObserver
         delete global.IntersectionObserver;
         
-        let addEventListenerCalled = false;
-        const originalAddEventListener = window.addEventListener;
-        window.addEventListener = function(event, handler) {
-            if (event === 'scroll') {
-                addEventListenerCalled = true;
-            }
-            return originalAddEventListener.call(window, event, handler);
-        };
+        const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
         
         render(IntersectionObserver, { props: defaultProps });
         
-        expect(addEventListenerCalled).toBe(true);
+        expect(addEventListenerSpy).toHaveBeenCalledWith('scroll', expect.any(Function));
         
-        // Restore
-        window.addEventListener = originalAddEventListener;
+        addEventListenerSpy.mockRestore();
+        // Restore IntersectionObserver
+        global.IntersectionObserver = mockObserver;
     });
 
     it('calculates intersection correctly in scroll fallback', () => {
         // Temporarily remove IntersectionObserver
+        const originalIntersectionObserver = global.IntersectionObserver;
         delete global.IntersectionObserver;
         
         const { container } = render(IntersectionObserver, { props: defaultProps });
         
         // Mock getBoundingClientRect
         const containerDiv = container.querySelector('div');
-        if (containerDiv) {
-            containerDiv.getBoundingClientRect = function() {
-                return {
-                    top: 100,
-                    bottom: 200,
-                    left: 100,
-                    right: 200
-                };
-            };
-        }
+        containerDiv.getBoundingClientRect = () => ({
+            top: 100,
+            bottom: 200,
+            left: 100,
+            right: 200
+        });
         
         // Trigger scroll event
         fireEvent.scroll(window);
         
         expect(container).toBeTruthy();
+        
+        // Restore IntersectionObserver
+        global.IntersectionObserver = originalIntersectionObserver;
     });
 
     it('removes scroll listener when once=true and intersection occurs in fallback', () => {
         // Temporarily remove IntersectionObserver
         delete global.IntersectionObserver;
         
-        let removeEventListenerCalled = false;
-        const originalRemoveEventListener = window.removeEventListener;
-        window.removeEventListener = function(event, handler) {
-            if (event === 'scroll') {
-                removeEventListenerCalled = true;
-            }
-            return originalRemoveEventListener.call(window, event, handler);
-        };
+        const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener');
         
-        const { container } = render(IntersectionObserver, { props: { ...defaultProps, once: true } });
+        render(IntersectionObserver, { props: { ...defaultProps, once: true } });
         
         // Mock getBoundingClientRect to simulate intersection
-        const containerDiv = container.querySelector('div');
-        if (containerDiv) {
-            containerDiv.getBoundingClientRect = function() {
-                return {
-                    top: 100,
-                    bottom: 200,
-                    left: 100,
-                    right: 200
-                };
-            };
+        const container = document.querySelector('div');
+        if (container) {
+            container.getBoundingClientRect = jest.fn(() => ({
+                top: 100,
+                bottom: 200,
+                left: 100,
+                right: 200
+            }));
         }
         
         // Trigger scroll event
         fireEvent.scroll(window);
         
-        expect(removeEventListenerCalled).toBe(true);
+        expect(removeEventListenerSpy).toHaveBeenCalledWith('scroll', expect.any(Function));
         
-        // Restore
-        window.removeEventListener = originalRemoveEventListener;
+        removeEventListenerSpy.mockRestore();
+        // Restore IntersectionObserver
+        global.IntersectionObserver = mockObserver;
     });
 
     it('handles edge case with negative margins', () => {
@@ -207,7 +182,7 @@ describe('IntersectionObserver component', () => {
         
         render(IntersectionObserver, { props });
         
-        expect(mockObserverOptions.rootMargin).toBe('-20px -30px -10px -40px');
+        expect(mockObserverInstance.options.rootMargin).toBe('-20px -30px -10px -40px');
     });
 
     it('has correct container styling', () => {
@@ -227,6 +202,6 @@ describe('IntersectionObserver component', () => {
         
         unmount();
         
-        expect(mockObserverInstance.unobserveCalled).toBe(true);
+        expect(mockObserverInstance.unobserve).toHaveBeenCalled();
     });
 });

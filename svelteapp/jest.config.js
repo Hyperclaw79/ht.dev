@@ -5,20 +5,22 @@ export default {
     ],
     testEnvironment: "jsdom",
     transform: {
-        "^.+\\.svelte$": ["svelte-jester", { "preprocess": true }]
+        "^.+\\.svelte$": ["svelte-jester", { 
+            "preprocess": true,
+            "debug": false,
+            "compilerOptions": {
+                "dev": false
+            }
+        }],
+        "^.+\\.js$": "babel-jest"
     },
     moduleNameMapper: {
         "^src/(.*)": "<rootDir>/src/$1"
     },
-    setupFilesAfterEnv: ["@testing-library/jest-dom"],
+    setupFilesAfterEnv: ["<rootDir>/src/test-setup.js"],
     moduleFileExtensions: ["js", "svelte"],
     extensionsToTreatAsEsm: [".svelte"],
-    globals: {
-        "ts-jest": {
-            useESM: true
-        }
-    },
-    testEnvironmentOptions: {
-        customExportConditions: ["node", "node-addons"]
-    }
+    transformIgnorePatterns: [
+        "node_modules/(?!(svelte|@testing-library)/)"
+    ]
 };
