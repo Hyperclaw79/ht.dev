@@ -16,7 +16,8 @@ export default {
     moduleNameMapper: {
         "^src/(.*)": "<rootDir>/src/$1",
         "^\\$lib/(.*)": "<rootDir>/src/lib/$1",
-        "^\\$app/(.*)": ["<rootDir>/src/app/$1", "<rootDir>/.svelte-kit/dev/runtime/app/$1"]
+        "^\\$app/stores$": "<rootDir>/src/test-mocks/app-stores.js",
+        "^\\$app/(.*)": "<rootDir>/src/test-mocks/app-$1.js"
     },
     setupFilesAfterEnv: ["<rootDir>/src/test-setup.js"],
     moduleFileExtensions: ["js", "svelte"],
