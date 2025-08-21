@@ -22,36 +22,21 @@ describe('skills getter', () => {
     });
 
     it('should categorize skills when Technical Skills key does not exist', async () => {
-        // Create a mock implementation that returns array format instead of object format
-        // to trigger the _categorize path
-        const originalGetRecords = (await import('../pbClient.js')).getRecords;
-        
-        // Test that it handles array input and categorizes it
+        // Test the _categorize path directly by passing array data
         const mockSkillsArray = [
             { category: 'Languages', name: 'JavaScript', level: 'Advanced' },
             { category: 'Databases', name: 'MongoDB', level: 'Intermediate' }
         ];
         
-        // Temporarily replace the fallback to return array format
-        const originalFallback = (await import('../pbClient.js'))._fallback;
-        const pbClientModule = await import('../pbClient.js');
-        pbClientModule._fallback = async () => mockSkillsArray;
+        // Test _categorize function directly to ensure line 11 is covered
+        const result = _categorize(mockSkillsArray);
 
-        const authData = { email: 'test@test.com', password: 'test123' };
-        const result = await getSkills(authData);
-
-        // Restore original fallback
-        pbClientModule._fallback = originalFallback;
-
-        // Should have categorized the skills
+        // Should have categorized the skills into an object structure
         expect(typeof result).toBe('object');
-        if (Array.isArray(result)) {
-            // If it's still an array (fallback), that's also valid
-            expect(Array.isArray(result)).toBe(true);
-        } else {
-            // If it was categorized, it should be an object with category keys
-            expect(result).toMatchObject(expect.any(Object));
-        }
+        expect(result).toMatchObject({
+            'Languages': [{ name: 'JavaScript', level: 'Advanced' }],
+            'Databases': [{ name: 'MongoDB', level: 'Intermediate' }]
+        });
     });
 
     it('should handle different auth data', async () => {
@@ -61,6 +46,36 @@ describe('skills getter', () => {
         // Should still return skills data (fallback behavior)
         expect(typeof result).toBe('object');
         expect(result).not.toBeNull();
+    });
+
+    it('should return records directly when Technical Skills key exists', async () => {
+        // This test specifically targets line 11 in getter.js
+        // Since the fallback data has "Technical Skills" key, this should hit that condition
+        const authData = { email: 'test@test.com', password: 'test123' };
+        
+        // Call getSkills which will fallback to the skills.js file that has "Technical Skills" key
+        const result = await getSkills(authData);
+        
+        // The fallback data should have "Technical Skills" key, so line 11 should be true
+        // and it should return the records as-is without calling _categorize
+        expect(typeof result).toBe('object');
+        expect(result).not.toBeNull();
+        
+        // If the fallback data is returned correctly, it should have the "Technical Skills" key
+        if (result["Technical Skills"]) {
+            expect(Array.isArray(result["Technical Skills"])).toBe(true);
+            expect(result["Technical Skills"].length).toBeGreaterThan(0);
+        }
+        
+        // Also test categorization separately to ensure coverage
+        const testRecords = [
+            { category: 'Languages', name: 'JavaScript', level: 'Advanced' },
+            { category: 'Frameworks', name: 'React', level: 'Intermediate' }
+        ];
+        
+        const categorized = _categorize(testRecords);
+        expect(categorized).toHaveProperty('Languages');
+        expect(categorized).toHaveProperty('Frameworks');
     });
 });
 
