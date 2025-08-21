@@ -15,7 +15,8 @@ export default {
         "^src/(.*)": "<rootDir>/src/$1",
         "^\\$lib/(.*)": "<rootDir>/src/lib/$1",
         "^\\$app/stores$": "<rootDir>/src/test-mocks/app-stores.js",
-        "^\\$app/(.*)": "<rootDir>/src/test-mocks/app-$1.js"
+        "^\\$app/(.*)": "<rootDir>/src/test-mocks/app-$1.js",
+        "^\\$env/dynamic/private$": "<rootDir>/src/test-mocks/env-dynamic-private.js"
     },
     setupFilesAfterEnv: ["<rootDir>/src/test-setup.js"],
     moduleFileExtensions: ["js", "svelte"],
