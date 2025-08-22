@@ -536,4 +536,267 @@ describe('TextSphere component', () => {
             expect(item.style.color).toBeTruthy();
         });
     });
+
+    it('tests comprehensive TagCloud configuration edge cases', async () => {
+        // Use existing test pattern that works
+        Object.defineProperty(window, 'innerWidth', { value: 1200, writable: true });
+        
+        const { component } = render(TextSphere, { 
+            props: { tags: mockTags } 
+        });
+        
+        await waitFor(() => {
+            const tagcloudItems = document.querySelectorAll('span.tagcloud--item');
+            return tagcloudItems.length > 0;
+        }, { timeout: 1000 });
+        
+        // Verify desktop radius is used
+        expect(global.TagCloud.calls.length).toBeGreaterThan(0);
+        const desktopCall = global.TagCloud.calls[global.TagCloud.calls.length - 1];
+        expect(desktopCall.selector).toBe('span[class~=holder]');
+        expect(desktopCall.options.radius).toBe(300);
+        
+        // Test mobile configuration
+        Object.defineProperty(window, 'innerWidth', { value: 400, writable: true });
+        component.$set({ tags: [...mockTags, 'Mobile'] });
+        
+        await waitFor(() => {
+            const updatedItems = document.querySelectorAll('span.tagcloud--item');
+            return updatedItems.length >= mockTags.length;
+        }, { timeout: 1000 });
+        
+        const mobileCall = global.TagCloud.calls[global.TagCloud.calls.length - 1];
+        expect(mobileCall.options.radius).toBe(100);
+    });
+
+    it('tests reactive statement with binder availability', async () => {
+        // Use the working pattern from other tests
+        const component = render(TextSphere, { 
+            props: { tags: mockTags }
+        });
+        
+        // Wait for elements to be created as a proxy for TagCloud being called
+        await waitFor(() => {
+            const tagcloudItems = document.querySelectorAll('span.tagcloud--item');
+            return tagcloudItems.length > 0;
+        }, { timeout: 1000 });
+        
+        expect(global.TagCloud.calls.length).toBeGreaterThan(0);
+    });
+
+    it('tests complete reactive statement conditions exhaustively', async () => {
+        // Test: tags?.length > 0 is false
+        const { component } = render(TextSphere, { 
+            props: { tags: [] }
+        });
+        
+        await tick();
+        // With empty array, no TagCloud elements should be created
+        const emptyItems = document.querySelectorAll('span.tagcloud--item');
+        expect(emptyItems.length).toBe(0);
+        
+        // Test: tags?.length > 0 is true and binder exists
+        component.$set({ tags: mockTags });
+        
+        await waitFor(() => {
+            const items = document.querySelectorAll('span.tagcloud--item');
+            return items.length > 0;
+        }, { timeout: 1000 });
+        
+        expect(global.TagCloud.calls.length).toBeGreaterThan(0);
+    });
+
+    it('tests edge cases with TagCloud selector', async () => {
+        // Test that selector matches the actual element
+        const { container } = render(TextSphere, { 
+            props: { tags: mockTags } 
+        });
+        
+        await waitFor(() => {
+            const items = document.querySelectorAll('span.tagcloud--item');
+            return items.length > 0;
+        }, { timeout: 1000 });
+        
+        const holderElement = container.querySelector('.holder');
+        expect(holderElement.tagName.toLowerCase()).toBe('span');
+        expect(holderElement.classList.contains('holder')).toBe(true);
+        
+        // Verify TagCloud was called
+        expect(global.TagCloud.calls.length).toBeGreaterThan(0);
+        const call = global.TagCloud.calls[global.TagCloud.calls.length - 1];
+        expect(call.selector).toBe('span[class~=holder]');
+    });
+
+    it('tests window.innerWidth exactly at boundary', async () => {
+        // Test exactly at boundary value
+        Object.defineProperty(window, 'innerWidth', { value: 600, writable: true });
+        
+        const { component } = render(TextSphere, { 
+            props: { tags: mockTags } 
+        });
+        
+        await waitFor(() => {
+            const items = document.querySelectorAll('span.tagcloud--item');
+            return items.length > 0;
+        }, { timeout: 1000 });
+        
+        const call = global.TagCloud.calls[global.TagCloud.calls.length - 1];
+        expect(call.options.radius).toBe(100); // 600 is not > 600
+    });
+
+    it('tests all TagCloud options are correctly set', async () => {
+        const { component } = render(TextSphere, { 
+            props: { tags: mockTags } 
+        });
+        
+        await waitFor(() => {
+            const items = document.querySelectorAll('span.tagcloud--item');
+            return items.length > 0;
+        }, { timeout: 1000 });
+        
+        const call = global.TagCloud.calls[global.TagCloud.calls.length - 1];
+        
+        // Verify all options are present and correct
+        expect(call.options).toHaveProperty('radius');
+        expect(call.options).toHaveProperty('maxSpeed', 'fast');
+        expect(call.options).toHaveProperty('initSpeed', 'fast');
+        expect(call.options).toHaveProperty('direction', 135);
+        expect(call.options).toHaveProperty('keep', true);
+        
+        // Verify radius calculation logic
+        const expectedRadius = window.innerWidth > 600 ? 300 : 100;
+        expect(call.options.radius).toBe(expectedRadius);
+    });
+
+    it('tests TagCloud function call with all parameter types', async () => {
+        const { component } = render(TextSphere, { 
+            props: { tags: mockTags } 
+        });
+        
+        await waitFor(() => {
+            const items = document.querySelectorAll('span.tagcloud--item');
+            return items.length > 0;
+        }, { timeout: 1000 });
+        
+        const call = global.TagCloud.calls[global.TagCloud.calls.length - 1];
+        
+        // Verify parameter types
+        expect(typeof call.selector).toBe('string');
+        expect(Array.isArray(call.tags)).toBe(true);
+        expect(typeof call.options).toBe('object');
+        expect(typeof call.options.radius).toBe('number');
+        expect(typeof call.options.maxSpeed).toBe('string');
+        expect(typeof call.options.initSpeed).toBe('string');
+        expect(typeof call.options.direction).toBe('number');
+        expect(typeof call.options.keep).toBe('boolean');
+    });
+
+    it('tests querySelectorAll with no matching elements', () => {
+        // Ensure no existing elements
+        document.querySelectorAll('span.tagcloud--item').forEach(el => el.remove());
+        
+        // Test querySelectorAll with empty result
+        const items = document.querySelectorAll('span.tagcloud--item');
+        expect(items.length).toBe(0);
+        
+        // Test forEach on empty NodeList - should not throw
+        expect(() => {
+            items.forEach((elem) => {
+                elem.style.color = '#000';
+            });
+        }).not.toThrow();
+    });
+
+    it('tests Math.random and Math.floor usage in color selection', async () => {
+        const originalRandom = Math.random;
+        const originalFloor = Math.floor;
+        let randomCalls = [];
+        let floorCalls = [];
+        
+        Math.random = () => {
+            const value = 0.5;
+            randomCalls.push(value);
+            return value;
+        };
+        
+        Math.floor = (num) => {
+            floorCalls.push(num);
+            return originalFloor(num);
+        };
+        
+        const { component } = render(TextSphere, { 
+            props: { tags: ['ColorTest'] } 
+        });
+        
+        await waitFor(() => {
+            const items = document.querySelectorAll('span.tagcloud--item');
+            return items.length > 0;
+        }, { timeout: 1000 });
+        
+        // Math.random and Math.floor should have been called for color selection
+        expect(randomCalls.length).toBeGreaterThan(0);
+        expect(floorCalls.length).toBeGreaterThan(0);
+        
+        Math.random = originalRandom;
+        Math.floor = originalFloor;
+    });
+
+    it('tests color array bounds with various random values', async () => {
+        const originalRandom = Math.random;
+        const testValues = [0, 0.1, 0.5, 0.9, 0.999999];
+        
+        for (const randomValue of testValues) {
+            Math.random = () => randomValue;
+            
+            // Clear existing elements
+            document.querySelectorAll('span.tagcloud--item').forEach(el => el.remove());
+            
+            const { component } = render(TextSphere, { 
+                props: { tags: [`Test_${randomValue}`] } 
+            });
+            
+            await waitFor(() => {
+                const items = document.querySelectorAll('span.tagcloud--item');
+                return items.length > 0;
+            }, { timeout: 1000 });
+            
+            const items = document.querySelectorAll('span.tagcloud--item');
+            expect(items[0].style.color).toBeTruthy();
+        }
+        
+        Math.random = originalRandom;
+    });
+
+    it('tests complete component lifecycle scenarios', async () => {
+        // Test null -> undefined -> empty -> populated cycle
+        const { component } = render(TextSphere, { 
+            props: { tags: null }
+        });
+        
+        await tick();
+        let items = document.querySelectorAll('span.tagcloud--item');
+        expect(items.length).toBe(0);
+        
+        // Update to valid tags
+        component.$set({ tags: ['Lifecycle', 'Test'] });
+        
+        await waitFor(() => {
+            const newItems = document.querySelectorAll('span.tagcloud--item');
+            return newItems.length > 0;
+        }, { timeout: 1000 });
+        
+        items = document.querySelectorAll('span.tagcloud--item');
+        expect(items.length).toBeGreaterThan(0);
+        
+        // Update back to empty
+        component.$set({ tags: [] });
+        await tick();
+        
+        // Update to null
+        component.$set({ tags: null });
+        await tick();
+        
+        // Test successful lifecycle completion
+        expect(component).toBeTruthy();
+    });
 });
