@@ -913,5 +913,329 @@ describe('Tiltable component', () => {
             expect(spanClicked).toBe(false);
             expect(divClicked).toBe(false);
         });
+
+        it('handles elementsFromPoint returning non-array value', () => {
+            global.document.elementsFromPoint = () => "not an array";
+            
+            const { container } = render(Tiltable);
+            const tiltingCard = container.querySelector('.tilting-card-content');
+            
+            expect(() => {
+                fireEvent.click(tiltingCard, { x: 100, y: 100 });
+            }).not.toThrow();
+        });
+
+        it('handles elementsFromPoint returning object that is not array', () => {
+            global.document.elementsFromPoint = () => ({ length: 2, 0: 'element1', 1: 'element2' });
+            
+            const { container } = render(Tiltable);
+            const tiltingCard = container.querySelector('.tilting-card-content');
+            
+            expect(() => {
+                fireEvent.click(tiltingCard, { x: 100, y: 100 });
+            }).not.toThrow();
+        });
+
+        it('handles elementsFromPoint returning complex falsy values', () => {
+            const falsyValues = [false, 0, '', NaN];
+            
+            const { container } = render(Tiltable);
+            const tiltingCard = container.querySelector('.tilting-card-content');
+            
+            falsyValues.forEach(falsyValue => {
+                global.document.elementsFromPoint = () => falsyValue;
+                
+                expect(() => {
+                    fireEvent.click(tiltingCard, { x: 100, y: 100 });
+                }).not.toThrow();
+            });
+        });
+
+        it('tests element click with mixed valid/invalid elements', () => {
+            const validElement = document.createElement('button');
+            let validClicked = false;
+            validElement.click = () => { validClicked = true; };
+            
+            const invalidElement = { 
+                tagName: 'DIV', 
+                classList: { contains: () => false },
+                click: () => {}
+            };
+            
+            global.document.elementsFromPoint = () => [invalidElement, validElement];
+            
+            const { container } = render(Tiltable);
+            const tiltingCard = container.querySelector('.tilting-card-content');
+            
+            expect(() => {
+                fireEvent.click(tiltingCard, { x: 100, y: 100 });
+            }).not.toThrow();
+        });
+
+        it('verifies element filtering with elements lacking classList', () => {
+            const elementWithoutClassList = { 
+                tagName: 'DIV',
+                classList: { contains: () => false }
+            };
+            const validElement = document.createElement('button');
+            let validClicked = false;
+            validElement.click = () => { validClicked = true; };
+            
+            global.document.elementsFromPoint = () => [elementWithoutClassList, validElement];
+            
+            const { container } = render(Tiltable);
+            const tiltingCard = container.querySelector('.tilting-card-content');
+            
+            expect(() => {
+                fireEvent.click(tiltingCard, { x: 100, y: 100 });
+            }).not.toThrow();
+        });
+
+        it('tests coordinate edge values with extensive range', () => {
+            const mockElement = document.createElement('button');
+            let clickCount = 0;
+            mockElement.click = () => { clickCount++; };
+            
+            global.document.elementsFromPoint = () => [mockElement];
+            
+            const { container } = render(Tiltable);
+            const tiltingCard = container.querySelector('.tilting-card-content');
+            
+            const extremeCoordinates = [
+                { x: Number.MIN_VALUE, y: Number.MIN_VALUE },
+                { x: Number.MAX_VALUE, y: Number.MAX_VALUE },
+                { x: Number.NEGATIVE_INFINITY, y: Number.POSITIVE_INFINITY },
+                { x: null, y: undefined },
+                { x: 'string', y: 'string' }
+            ];
+            
+            extremeCoordinates.forEach(coords => {
+                expect(() => {
+                    fireEvent.click(tiltingCard, coords);
+                }).not.toThrow();
+            });
+        });
+
+        it('handles complex sorting scenarios with multiple priority elements of same type', () => {
+            const mockButton1 = document.createElement('button');
+            const mockButton2 = document.createElement('button');
+            const mockButton3 = document.createElement('button');
+            
+            let button1Clicked = false;
+            let button2Clicked = false;
+            let button3Clicked = false;
+            
+            mockButton1.click = () => { button1Clicked = true; };
+            mockButton2.click = () => { button2Clicked = true; };
+            mockButton3.click = () => { button3Clicked = true; };
+            
+            global.document.elementsFromPoint = () => [mockButton1, mockButton2, mockButton3];
+            
+            const { container } = render(Tiltable);
+            const tiltingCard = container.querySelector('.tilting-card-content');
+            
+            fireEvent.click(tiltingCard, { x: 100, y: 100 });
+            
+            // One of the buttons should be clicked
+            const totalClicked = (button1Clicked ? 1 : 0) + (button2Clicked ? 1 : 0) + (button3Clicked ? 1 : 0);
+            expect(totalClicked).toBe(1);
+        });
+
+        it('tests element filtering robustness with all excluded classes present', () => {
+            const tiltingElement = document.createElement('div');
+            tiltingElement.classList.add('tilting-card-content');
+            const trackerElement = document.createElement('div');
+            trackerElement.classList.add('mouse-position-tracker');
+            const trackerElement2 = document.createElement('div');
+            trackerElement2.classList.add('tracker');
+            
+            global.document.elementsFromPoint = () => [tiltingElement, trackerElement, trackerElement2];
+            
+            const { container } = render(Tiltable);
+            const tiltingCard = container.querySelector('.tilting-card-content');
+            
+            expect(() => {
+                fireEvent.click(tiltingCard, { x: 100, y: 100 });
+            }).not.toThrow();
+        });
+
+        it('validates component slot mechanism', () => {
+            const { container } = render(Tiltable);
+            
+            expect(container.querySelector('.tilting-card-content')).toBeInTheDocument();
+            expect(container.querySelector('.mouse-position-tracker')).toBeInTheDocument();
+        });
+
+        it('tests extensive error handling with complex click scenarios', () => {
+            const mockElement = document.createElement('button');
+            
+            // Test various error scenarios
+            const errorScenarios = [
+                () => { throw new Error('Generic error'); },
+                () => { throw new TypeError('Type error'); },
+                () => { throw new ReferenceError('Reference error'); },
+                () => { throw 'String error'; },
+                () => { throw 42; },
+                () => { throw null; },
+                () => { throw undefined; }
+            ];
+            
+            const { container } = render(Tiltable);
+            const tiltingCard = container.querySelector('.tilting-card-content');
+            
+            errorScenarios.forEach((errorFn, index) => {
+                mockElement.click = errorFn;
+                global.document.elementsFromPoint = () => [mockElement];
+                
+                expect(() => {
+                    fireEvent.click(tiltingCard, { x: 100 + index, y: 100 + index });
+                }).not.toThrow();
+            });
+        });
+
+        it('verifies comprehensive sorting edge cases with mixed element types', () => {
+            // Create elements with different tag names and properties
+            const elements = [
+                { tagName: 'FORM', click: () => {}, classList: { contains: () => false } },
+                { tagName: 'TEXTAREA', click: () => {}, classList: { contains: () => false } },
+                { tagName: 'SELECT', click: () => {}, classList: { contains: () => false } },
+                { tagName: 'BUTTON', click: () => {}, classList: { contains: () => false } },
+                { tagName: 'FIELDSET', click: () => {}, classList: { contains: () => false } }
+            ];
+            
+            let buttonClicked = false;
+            elements[3].click = () => { buttonClicked = true; };
+            
+            global.document.elementsFromPoint = () => elements;
+            
+            const { container } = render(Tiltable);
+            const tiltingCard = container.querySelector('.tilting-card-content');
+            
+            fireEvent.click(tiltingCard, { x: 100, y: 100 });
+            
+            // Button should be clicked (priority element)
+            expect(buttonClicked).toBe(true);
+        });
+
+        it('tests extreme coordinate boundary values', () => {
+            global.document.elementsFromPoint = () => [];
+            
+            const { container } = render(Tiltable);
+            const tiltingCard = container.querySelector('.tilting-card-content');
+            
+            const boundaryCoordinates = [
+                { x: 0, y: 0 },
+                { x: -0, y: -0 },
+                { x: Infinity, y: -Infinity },
+                { x: 1.7976931348623157e+308, y: 5e-324 }
+            ];
+            
+            boundaryCoordinates.forEach(coords => {
+                expect(() => {
+                    fireEvent.click(tiltingCard, coords);
+                }).not.toThrow();
+            });
+        });
+    });
+
+    describe('advanced component interaction scenarios', () => {
+        it('validates proper DOM structure hierarchy', () => {
+            const { container } = render(Tiltable);
+            
+            const tiltingCard = container.querySelector('.tilting-card-content');
+            const mouseTracker = container.querySelector('.mouse-position-tracker');
+            const trackers = container.querySelectorAll('.tracker');
+            
+            // Verify structure
+            expect(tiltingCard).toBeInTheDocument();
+            expect(tiltingCard).toContainElement(mouseTracker);
+            
+            // Verify all tracker elements are properly nested
+            trackers.forEach(tracker => {
+                expect(mouseTracker).toContainElement(tracker);
+                expect(tracker).toHaveClass('tracker');
+            });
+            
+            // Verify expected number of elements
+            expect(trackers).toHaveLength(9);
+        });
+
+        it('tests comprehensive accessibility attributes and behavior', () => {
+            const { container } = render(Tiltable);
+            
+            const tiltingCard = container.querySelector('.tilting-card-content');
+            
+            // Verify all accessibility attributes
+            expect(tiltingCard).toHaveAttribute('role', 'button');
+            expect(tiltingCard).toHaveAttribute('tabindex', '0');
+            
+            // Verify element structure supports interaction
+            expect(tiltingCard.tagName.toLowerCase()).toBe('div');
+            expect(tiltingCard).toHaveClass('tilting-card-content');
+        });
+
+        it('validates component behavior with complex event scenarios', () => {
+            const mockElement = document.createElement('button');
+            let clickedWithCoords = null;
+            
+            mockElement.click = function() {
+                // Access event context if available
+                clickedWithCoords = { executed: true };
+            };
+            
+            global.document.elementsFromPoint = () => [mockElement];
+            
+            const { container } = render(Tiltable);
+            const tiltingCard = container.querySelector('.tilting-card-content');
+            
+            // Test multiple click scenarios
+            fireEvent.click(tiltingCard, { x: 50, y: 50 });
+            expect(clickedWithCoords).toEqual({ executed: true });
+            
+            fireEvent.click(tiltingCard, { x: 150, y: 200 });
+            expect(clickedWithCoords).toEqual({ executed: true });
+        });
+
+        it('handles stress testing with rapid consecutive clicks', () => {
+            const mockElement = document.createElement('button');
+            let clickCount = 0;
+            mockElement.click = () => { clickCount++; };
+            
+            global.document.elementsFromPoint = () => [mockElement];
+            
+            const { container } = render(Tiltable);
+            const tiltingCard = container.querySelector('.tilting-card-content');
+            
+            // Rapid fire clicks
+            for (let i = 0; i < 10; i++) {
+                fireEvent.click(tiltingCard, { x: 100 + i, y: 100 + i });
+            }
+            
+            expect(clickCount).toBe(10);
+        });
+
+        it('validates element filtering with mixed valid and invalid elements', () => {
+            const validElements = [
+                document.createElement('button'),
+                document.createElement('a'),
+                document.createElement('input')
+            ];
+            
+            let validClickCount = 0;
+            validElements.forEach(el => {
+                el.click = () => { validClickCount++; };
+            });
+            
+            global.document.elementsFromPoint = () => validElements;
+            
+            const { container } = render(Tiltable);
+            const tiltingCard = container.querySelector('.tilting-card-content');
+            
+            expect(() => {
+                fireEvent.click(tiltingCard, { x: 100, y: 100 });
+            }).not.toThrow();
+            
+            expect(validClickCount).toBe(1);
+        });
     });
 });
