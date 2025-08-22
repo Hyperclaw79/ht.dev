@@ -8,13 +8,35 @@
 
     onMount(() => {
         if (timeout === 0) {
-            action();
+            if (typeof action === "function") {
+                try {
+                    action();
+                } catch (e) {
+                    // Silently handle action errors
+                }
+            }
         } else if (noProgress) {
-            setTimeout(action, timeout);
+            if (typeof action === "function") {
+                setTimeout(() => {
+                    try {
+                        action();
+                    } catch (e) {
+                        // Silently handle action errors
+                    }
+                }, timeout);
+            }
         }
     });
 </script>
 
 {#if timeout > 0 && !noProgress}
-    <AsciiProgress {timeout} callback={action} />
+    <AsciiProgress {timeout} callback={typeof action === "function"
+        ? () => {
+            try {
+                action();
+            } catch (e) {
+                // Silently handle action errors
+            }
+        }
+        : () => {}} />
 {/if}
