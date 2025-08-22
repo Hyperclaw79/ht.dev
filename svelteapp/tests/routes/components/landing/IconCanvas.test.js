@@ -219,7 +219,7 @@ describe('IconCanvas', () => {
         expect(safeRotation(undefined)).toBe(0);
     });
 
-    test('component conditional rendering logic', () => {
+    test('component conditional rendering logic - all branches', () => {
         const shouldRenderIcons = (skills) => {
             return !!(skills && 
                    skills["Technical Skills"] && 
@@ -227,13 +227,57 @@ describe('IconCanvas', () => {
                    skills["Technical Skills"].length > 0);
         };
 
+        // Branch 1: Valid skills data (truthy path)
         expect(shouldRenderIcons(mockSkillsData)).toBe(true);
+        
+        // Branch 2: null skills (falsy path)
         expect(shouldRenderIcons(null)).toBe(false);
+        
+        // Branch 3: undefined skills (falsy path)
+        expect(shouldRenderIcons(undefined)).toBe(false);
+        
+        // Branch 4: empty object (falsy path) 
         expect(shouldRenderIcons({})).toBe(false);
+        
+        // Branch 5: missing Technical Skills (falsy path)
+        expect(shouldRenderIcons({
+            "Soft Skills": [{ name: 'Communication' }]
+        })).toBe(false);
+        
+        // Branch 6: missing Soft Skills (falsy path)
+        expect(shouldRenderIcons({
+            "Technical Skills": [{ icon: '/icons/js.svg', name: 'JavaScript' }]
+        })).toBe(false);
+        
+        // Branch 7: null Technical Skills (falsy path)
+        expect(shouldRenderIcons({
+            "Technical Skills": null,
+            "Soft Skills": [{ name: 'Communication' }]
+        })).toBe(false);
+        
+        // Branch 8: null Soft Skills (falsy path)
+        expect(shouldRenderIcons({
+            "Technical Skills": [{ icon: '/icons/js.svg', name: 'JavaScript' }],
+            "Soft Skills": null
+        })).toBe(false);
+        
+        // Branch 9: empty Technical Skills array (falsy path)
         expect(shouldRenderIcons({
             "Technical Skills": [],
             "Soft Skills": [{ name: 'Communication' }]
         })).toBe(false);
+        
+        // Branch 10: both arrays present but Technical Skills empty (falsy path)
+        expect(shouldRenderIcons({
+            "Technical Skills": [],
+            "Soft Skills": []
+        })).toBe(false);
+        
+        // Branch 11: Technical Skills present, empty Soft Skills but should still render (truthy path)
+        expect(shouldRenderIcons({
+            "Technical Skills": [{ icon: '/icons/js.svg', name: 'JavaScript' }],
+            "Soft Skills": []
+        })).toBe(true);
     });
 
     test('icon key generation', () => {

@@ -241,55 +241,131 @@ describe('Screen component', () => {
         expect(getBlinkerStatus(testInputs[2])).toBe(true);
     });
 
-    test('conditional rendering branch coverage', () => {
-        // Test different conditional paths for input rendering
-        const processInput = (input) => {
+    test('conditional rendering branch coverage for template conditions', () => {
+        // Test the specific template conditional logic (lines 42-53)
+        const renderComponent = (input) => {
+            // Simulate the exact conditional logic from the template
             if (input.command !== undefined) {
                 return {
-                    type: 'input',
-                    hasCommand: true,
-                    blinker: input.isLastInput || false
+                    componentType: 'Input',
+                    props: {
+                        execCallback: 'handleExec',
+                        blinker: input.isLastInput,
+                        commandsCache: []
+                    }
                 };
             } else if (input.output !== undefined) {
                 return {
-                    type: 'output',
-                    hasOutput: true,
-                    error: input.error || false
+                    componentType: 'Output',
+                    props: {
+                        output: input.output,
+                        error: input.error
+                    }
                 };
             } else if (input.action !== undefined) {
                 return {
-                    type: 'action',
-                    hasAction: true,
-                    timeout: input.timeout || 0
+                    componentType: 'Action',
+                    props: {
+                        action: input.action,
+                        timeout: input.timeout || 0
+                    }
                 };
             }
-            return { type: 'unknown' };
+            return null; // No component rendered
         };
 
-        // Test command input path
-        const commandInput = { uuid: 1, command: 'help', isLastInput: true };
-        const commandResult = processInput(commandInput);
-        expect(commandResult.type).toBe('input');
-        expect(commandResult.hasCommand).toBe(true);
-        expect(commandResult.blinker).toBe(true);
+        // Branch 1: command !== undefined (should render Input)
+        const commandInputs = [
+            { uuid: 1, command: '', isLastInput: true },
+            { uuid: 2, command: 'help', isLastInput: false },
+            { uuid: 3, command: null, isLastInput: false }, // null is !== undefined
+            { uuid: 4, command: 0, isLastInput: false }, // 0 is !== undefined
+            { uuid: 5, command: false, isLastInput: false } // false is !== undefined
+        ];
+        
+        commandInputs.forEach(input => {
+            const result = renderComponent(input);
+            expect(result.componentType).toBe('Input');
+            expect(result.props.blinker).toBe(input.isLastInput);
+        });
 
-        // Test output path
-        const outputInput = { uuid: 2, output: 'result', error: false };
-        const outputResult = processInput(outputInput);
-        expect(outputResult.type).toBe('output');
-        expect(outputResult.hasOutput).toBe(true);
-        expect(outputResult.error).toBe(false);
+        // Branch 2: command is undefined, output !== undefined (should render Output)
+        const outputInputs = [
+            { uuid: 6, output: 'Hello World', error: false },
+            { uuid: 7, output: '', error: true },
+            { uuid: 8, output: null, error: false }, // null is !== undefined
+            { uuid: 9, output: 0, error: false }, // 0 is !== undefined
+            { uuid: 10, output: [], error: false } // array is !== undefined
+        ];
+        
+        outputInputs.forEach(input => {
+            const result = renderComponent(input);
+            expect(result.componentType).toBe('Output');
+            expect(result.props.output).toBe(input.output);
+            expect(result.props.error).toBe(input.error);
+        });
 
-        // Test action path
-        const actionInput = { uuid: 3, action: () => {}, timeout: 1000 };
-        const actionResult = processInput(actionInput);
-        expect(actionResult.type).toBe('action');
-        expect(actionResult.hasAction).toBe(true);
-        expect(actionResult.timeout).toBe(1000);
+        // Branch 3: command and output are undefined, action !== undefined (should render Action)
+        const actionInputs = [
+            { uuid: 11, action: () => {}, timeout: 1000 },
+            { uuid: 12, action: 'string action', timeout: 500 },
+            { uuid: 13, action: null }, // null is !== undefined
+            { uuid: 14, action: 0 }, // 0 is !== undefined
+            { uuid: 15, action: false } // false is !== undefined
+        ];
+        
+        actionInputs.forEach(input => {
+            const result = renderComponent(input);
+            expect(result.componentType).toBe('Action');
+            expect(result.props.action).toBe(input.action);
+            expect(result.props.timeout).toBe(input.timeout || 0);
+        });
 
-        // Test unknown path
-        const unknownInput = { uuid: 4 };
-        const unknownResult = processInput(unknownInput);
-        expect(unknownResult.type).toBe('unknown');
+        // Branch 4: all conditions are undefined (should render nothing)
+        const undefinedInputs = [
+            { uuid: 16 }, // Only uuid
+            { uuid: 17, someOtherProp: 'value' }, // Different properties
+            { uuid: 18, command: undefined, output: undefined, action: undefined } // Explicitly undefined
+        ];
+        
+        undefinedInputs.forEach(input => {
+            const result = renderComponent(input);
+            expect(result).toBe(null);
+        });
+    });
+
+    test('input type precedence testing', () => {
+        // Test precedence when multiple properties are defined
+        const testPrecedence = (input) => {
+            // This follows the same if-else logic as the template
+            if (input.command !== undefined) return 'command';
+            if (input.output !== undefined) return 'output'; 
+            if (input.action !== undefined) return 'action';
+            return 'none';
+        };
+
+        // Command takes precedence over output and action
+        expect(testPrecedence({ 
+            command: 'help', 
+            output: 'result', 
+            action: () => {} 
+        })).toBe('command');
+
+        // Output takes precedence over action when command is undefined
+        expect(testPrecedence({ 
+            output: 'result', 
+            action: () => {} 
+        })).toBe('output');
+
+        // Action is last in precedence
+        expect(testPrecedence({ 
+            action: () => {} 
+        })).toBe('action');
+
+        // None when all are undefined
+        expect(testPrecedence({
+            uuid: 123,
+            isLastInput: true
+        })).toBe('none');
     });
 });

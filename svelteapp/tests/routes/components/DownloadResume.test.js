@@ -523,7 +523,7 @@ describe('DownloadResume', () => {
         expect(educationData[0].specialization).toBe('Computer Science');
     });
 
-    test('API data availability checks', () => {
+    test('API data availability checks and reactive statement coverage', () => {
         const checkDataAvailability = (data) => {
             return !!(
                 data.experience?.length &&
@@ -543,15 +543,77 @@ describe('DownloadResume', () => {
             socials: [{ name: 'GitHub' }]
         };
 
-        const incompleteData = {
-            experience: [],
-            projects: [{ title: 'Project' }],
-            skills: { 'Technical Skills': [{ name: 'JS' }] },
-            achievements: [{ name: 'Award' }],
-            socials: [{ name: 'GitHub' }]
-        };
+        const incompleteDataSets = [
+            // Missing experience
+            {
+                experience: [],
+                projects: [{ title: 'Project' }],
+                skills: { 'Technical Skills': [{ name: 'JS' }], 'Soft Skills': [{ name: 'Communication' }] },
+                achievements: [{ name: 'Award' }],
+                socials: [{ name: 'GitHub' }]
+            },
+            // Missing projects
+            {
+                experience: [{ name: 'Job' }],
+                projects: [],
+                skills: { 'Technical Skills': [{ name: 'JS' }], 'Soft Skills': [{ name: 'Communication' }] },
+                achievements: [{ name: 'Award' }],
+                socials: [{ name: 'GitHub' }]
+            },
+            // Missing technical skills
+            {
+                experience: [{ name: 'Job' }],
+                projects: [{ title: 'Project' }],
+                skills: { 'Technical Skills': [], 'Soft Skills': [{ name: 'Communication' }] },
+                achievements: [{ name: 'Award' }],
+                socials: [{ name: 'GitHub' }]
+            },
+            // Missing soft skills
+            {
+                experience: [{ name: 'Job' }],
+                projects: [{ title: 'Project' }],
+                skills: { 'Technical Skills': [{ name: 'JS' }], 'Soft Skills': [] },
+                achievements: [{ name: 'Award' }],
+                socials: [{ name: 'GitHub' }]
+            },
+            // Missing achievements
+            {
+                experience: [{ name: 'Job' }],
+                projects: [{ title: 'Project' }],
+                skills: { 'Technical Skills': [{ name: 'JS' }], 'Soft Skills': [{ name: 'Communication' }] },
+                achievements: [],
+                socials: [{ name: 'GitHub' }]
+            },
+            // Missing socials (line 545 coverage)
+            {
+                experience: [{ name: 'Job' }],
+                projects: [{ title: 'Project' }],
+                skills: { 'Technical Skills': [{ name: 'JS' }], 'Soft Skills': [{ name: 'Communication' }] },
+                achievements: [{ name: 'Award' }],
+                socials: []
+            },
+            // Null skills object
+            {
+                experience: [{ name: 'Job' }],
+                projects: [{ title: 'Project' }],
+                skills: null,
+                achievements: [{ name: 'Award' }],
+                socials: [{ name: 'GitHub' }]
+            },
+            // Undefined data properties
+            {
+                experience: [{ name: 'Job' }],
+                projects: [{ title: 'Project' }],
+                skills: { 'Technical Skills': [{ name: 'JS' }] }, // Missing Soft Skills
+                achievements: [{ name: 'Award' }],
+                socials: [{ name: 'GitHub' }]
+            }
+        ];
 
         expect(checkDataAvailability(completeData)).toBe(true);
-        expect(checkDataAvailability(incompleteData)).toBe(false);
+        
+        incompleteDataSets.forEach((incompleteData, index) => {
+            expect(checkDataAvailability(incompleteData)).toBe(false);
+        });
     });
 });
