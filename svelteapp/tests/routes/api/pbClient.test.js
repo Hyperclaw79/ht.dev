@@ -110,7 +110,7 @@ describe("_cleanRecord", () => {
 describe("getRecords integration", () => {
     it("should handle connection and fallback properly", async () => {
         // Import the actual getRecords function
-        const { getRecords } = await import("./pbClient.js");
+        const { getRecords } = await import("src/routes/api/pbClient.js");
         
         const authData = { email: "test@test.com", password: "test123" };
         const result = await getRecords({ 
@@ -134,7 +134,7 @@ describe("getRecords integration", () => {
     });
 
     it("should handle invalid collection gracefully", async () => {
-        const { getRecords } = await import("./pbClient.js");
+        const { getRecords } = await import("src/routes/api/pbClient.js");
         
         const authData = { email: "test@test.com", password: "test123" };
         const result = await getRecords({ 
@@ -148,7 +148,7 @@ describe("getRecords integration", () => {
     });
 
     it("should handle different parameters in getRecords", async () => {
-        const { getRecords } = await import("./pbClient.js");
+        const { getRecords } = await import("src/routes/api/pbClient.js");
         
         const authData = { email: "admin@test.com", password: "admin123" };
         const result = await getRecords({ 
@@ -165,7 +165,7 @@ describe("getRecords integration", () => {
     });
 
     it("should attempt PocketBase connection before falling back", async () => {
-        const { getRecords } = await import("./pbClient.js");
+        const { getRecords } = await import("src/routes/api/pbClient.js");
         
         // Test with valid credentials that will attempt real connection first
         const authData = { email: "real@test.com", password: "realpass" };

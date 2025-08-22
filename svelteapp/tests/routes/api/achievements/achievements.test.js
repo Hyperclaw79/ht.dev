@@ -81,14 +81,14 @@ describe("GET method", () => {
         const authData = { email: "custom@example.com", password: "custompass" };
         await GET({ authData });
         
-        const getterModule = await import("./getter.js");
+        const getterModule = await import("src/routes/api/achievements/getter.js");
         expect(getterModule.default).toHaveBeenCalledWith(authData);
     });
 
     it("should handle case when no authData is provided by using env vars", async () => {
         await GET({});
         
-        const getterModule = await import("./getter.js");
+        const getterModule = await import("src/routes/api/achievements/getter.js");
         expect(getterModule.default).toHaveBeenCalledWith({
             email: "test@example.com",
             password: "testpassword"

@@ -17,7 +17,7 @@ jest.unstable_mockModule('src/routes/api/pbClient.js', () => {
 describe('skills getter with array data (line 11 coverage)', () => {
     it('should categorize array data when Technical Skills key does not exist', async () => {
         // Import after the mock is set up
-        const getSkills = (await import('./getter.js')).default;
+        const getSkills = (await import('src/routes/api/skills/getter.js')).default;
         
         const authData = { email: 'test@test.com', password: 'test123' };
         const result = await getSkills(authData);
