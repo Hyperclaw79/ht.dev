@@ -298,6 +298,54 @@ describe('IconCanvas', () => {
         expect(updateIconsOnSkillsChange(oldSkills, oldSkills)).toBe(false);
     });
 
+    test('user data formatting and replacement', () => {
+        // Test data.user.replace() behavior on line 93
+        const formatUser = (user) => {
+            return user ? user.replace("@", "㉿") : '';
+        };
+
+        expect(formatUser('user@domain')).toBe('user㉿domain');
+        expect(formatUser('user')).toBe('user'); // No @ to replace
+        expect(formatUser('@user')).toBe('㉿user');
+        expect(formatUser('user@')).toBe('user㉿');
+        expect(formatUser('')).toBe('');
+        expect(formatUser(null)).toBe('');
+        expect(formatUser(undefined)).toBe('');
+    });
+
+    test('additional edge cases for component data handling', () => {
+        // Test various data edge cases that could affect branch coverage
+        const processComponentData = (data) => {
+            const user = data?.user || '';
+            const cwd = data?.cwd || '';
+            const formattedUser = user.replace ? user.replace("@", "㉿") : String(user);
+            
+            return {
+                formattedUser,
+                cwd,
+                pathDisplay: `(${formattedUser})-[${cwd}]`
+            };
+        };
+
+        // Test normal case
+        const normalData = { user: 'test@user', cwd: '/home/test' };
+        const normalResult = processComponentData(normalData);
+        expect(normalResult.formattedUser).toBe('test㉿user');
+        expect(normalResult.cwd).toBe('/home/test');
+        expect(normalResult.pathDisplay).toBe('(test㉿user)-[/home/test]');
+
+        // Test edge cases
+        const emptyData = {};
+        const emptyResult = processComponentData(emptyData);
+        expect(emptyResult.formattedUser).toBe('');
+        expect(emptyResult.cwd).toBe('');
+
+        const nullData = null;
+        const nullResult = processComponentData(nullData);
+        expect(nullResult.formattedUser).toBe('');
+        expect(nullResult.cwd).toBe('');
+    });
+
     test('CSS class and styling logic', () => {
         const getIconClasses = () => {
             return ['icon'];

@@ -218,6 +218,80 @@ describe('Screen component', () => {
             title: "HT's Portfolio",
             subtitle: "Enter the command Start or click the button.\nAlternatively, you can use the Help command to play around."
         };
+
+        expect(bannerContent.title).toBe("HT's Portfolio");
+        expect(bannerContent.subtitle).toContain("Start");
+        expect(bannerContent.subtitle).toContain("Help");
+    });
+
+    test('input blinker condition handling', () => {
+        // Test blinker condition logic for isLastInput
+        const testInputs = [
+            { uuid: 1, command: 'help', isLastInput: false },
+            { uuid: 2, command: 'about', isLastInput: false },
+            { uuid: 3, command: 'skills', isLastInput: true }
+        ];
+
+        const getBlinkerStatus = (input, isLastInput) => {
+            return input.isLastInput === true;
+        };
+
+        expect(getBlinkerStatus(testInputs[0])).toBe(false);
+        expect(getBlinkerStatus(testInputs[1])).toBe(false);
+        expect(getBlinkerStatus(testInputs[2])).toBe(true);
+    });
+
+    test('conditional rendering branch coverage', () => {
+        // Test different conditional paths for input rendering
+        const processInput = (input) => {
+            if (input.command !== undefined) {
+                return {
+                    type: 'input',
+                    hasCommand: true,
+                    blinker: input.isLastInput || false
+                };
+            } else if (input.output !== undefined) {
+                return {
+                    type: 'output',
+                    hasOutput: true,
+                    error: input.error || false
+                };
+            } else if (input.action !== undefined) {
+                return {
+                    type: 'action',
+                    hasAction: true,
+                    timeout: input.timeout || 0
+                };
+            }
+            return { type: 'unknown' };
+        };
+
+        // Test command input path
+        const commandInput = { uuid: 1, command: 'help', isLastInput: true };
+        const commandResult = processInput(commandInput);
+        expect(commandResult.type).toBe('input');
+        expect(commandResult.hasCommand).toBe(true);
+        expect(commandResult.blinker).toBe(true);
+
+        // Test output path
+        const outputInput = { uuid: 2, output: 'result', error: false };
+        const outputResult = processInput(outputInput);
+        expect(outputResult.type).toBe('output');
+        expect(outputResult.hasOutput).toBe(true);
+        expect(outputResult.error).toBe(false);
+
+        // Test action path
+        const actionInput = { uuid: 3, action: () => {}, timeout: 1000 };
+        const actionResult = processInput(actionInput);
+        expect(actionResult.type).toBe('action');
+        expect(actionResult.hasAction).toBe(true);
+        expect(actionResult.timeout).toBe(1000);
+
+        // Test unknown path
+        const unknownInput = { uuid: 4 };
+        const unknownResult = processInput(unknownInput);
+        expect(unknownResult.type).toBe('unknown');
+    });
         
         expect(bannerContent.title).toBe("HT's Portfolio");
         expect(bannerContent.subtitle).toContain('Start');

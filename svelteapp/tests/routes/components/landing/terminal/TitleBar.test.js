@@ -53,4 +53,28 @@ describe('TitleBar component', () => {
         expect(svgElements[1]).toHaveAttribute('height', '24');
         expect(svgElements[2]).toHaveAttribute('viewBox', '0 0 24 24');
     });
+
+    it('handles edge cases with empty or undefined data', () => {
+        // Test with empty strings
+        const emptyData = { user: '', cwd: '' };
+        const { getByText: getByTextEmpty } = render(TitleBar, { props: { data: emptyData } });
+        expect(getByTextEmpty(':')).toBeInTheDocument();
+
+        // Test with undefined properties (should not crash)
+        const undefinedData = { user: undefined, cwd: undefined };
+        const { container } = render(TitleBar, { props: { data: undefinedData } });
+        expect(container.querySelector('.titleBarText')).toBeInTheDocument();
+    });
+
+    it('handles various data types gracefully', () => {
+        // Test with numeric values
+        const numericData = { user: 123, cwd: 456 };
+        const { getByText: getByTextNumeric } = render(TitleBar, { props: { data: numericData } });
+        expect(getByTextNumeric('123:456')).toBeInTheDocument();
+
+        // Test with boolean values
+        const booleanData = { user: true, cwd: false };
+        const { getByText: getByTextBoolean } = render(TitleBar, { props: { data: booleanData } });
+        expect(getByTextBoolean('true:false')).toBeInTheDocument();
+    });
 });
