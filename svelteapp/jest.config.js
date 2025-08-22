@@ -16,9 +16,10 @@ export default {
         "^\\$lib/(.*)": "<rootDir>/src/lib/$1",
         "^\\$app/stores$": "<rootDir>/src/test-mocks/app-stores.js",
         "^\\$app/(.*)": "<rootDir>/src/test-mocks/app-$1.js",
-        "^\\$env/dynamic/private$": "<rootDir>/src/test-mocks/env-dynamic-private.js"
+        "^\\$env/dynamic/private$": "<rootDir>/src/test-mocks/env-dynamic-private.js",
+        "^TagCloud$": "<rootDir>/src/test-mocks/tagcloud.js"
     },
-    setupFilesAfterEnv: ["<rootDir>/src/test-setup.js"],
+    setupFilesAfterEnv: ["@testing-library/jest-dom/jest-globals", "<rootDir>/src/test-setup.js"],
     moduleFileExtensions: ["js", "svelte"],
     transformIgnorePatterns: [
         "node_modules/(?!(svelte|@testing-library)/)"
