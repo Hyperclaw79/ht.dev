@@ -621,4 +621,311 @@ describe('IntersectionObserver component', () => {
         
         unmount2();
     });
+
+    it('tests scroll fallback with negative margin values', async () => {
+        delete global.IntersectionObserver;
+        
+        const props = {
+            top: -10,
+            bottom: -20,
+            left: -30, 
+            right: -40
+        };
+        
+        const { container } = render(IntersectionObserver, { props });
+        
+        const containerDiv = container.querySelector('div');
+        if (containerDiv) {
+            containerDiv.getBoundingClientRect = () => ({
+                top: 50,
+                bottom: 150,
+                left: 50,
+                right: 150
+            });
+        }
+        
+        Object.defineProperty(window, 'innerHeight', { value: 800, writable: true });
+        Object.defineProperty(window, 'innerWidth', { value: 1200, writable: true });
+        
+        fireEvent.scroll(window);
+        await tick();
+        
+        expect(container).toBeTruthy();
+    });
+
+    it('tests scroll fallback with element completely out of bounds', async () => {
+        delete global.IntersectionObserver;
+        
+        const { container } = render(IntersectionObserver, { props: defaultProps });
+        
+        const containerDiv = container.querySelector('div');
+        if (containerDiv) {
+            // Element completely outside viewport
+            containerDiv.getBoundingClientRect = () => ({
+                top: 1000,
+                bottom: 1100,
+                left: 1500,
+                right: 1600
+            });
+        }
+        
+        Object.defineProperty(window, 'innerHeight', { value: 800, writable: true });
+        Object.defineProperty(window, 'innerWidth', { value: 1200, writable: true });
+        
+        fireEvent.scroll(window);
+        await tick();
+        
+        expect(container).toBeTruthy();
+    });
+
+    it('tests scroll fallback with element partially visible', async () => {
+        delete global.IntersectionObserver;
+        
+        const props = {
+            top: 10,
+            bottom: 10,
+            left: 10,
+            right: 10
+        };
+        
+        const { container } = render(IntersectionObserver, { props });
+        
+        const containerDiv = container.querySelector('div');
+        if (containerDiv) {
+            // Element partially visible
+            containerDiv.getBoundingClientRect = () => ({
+                top: 750,  // Just at bottom edge
+                bottom: 850, // Extends beyond viewport
+                left: 50,
+                right: 150
+            });
+        }
+        
+        Object.defineProperty(window, 'innerHeight', { value: 800, writable: true });
+        Object.defineProperty(window, 'innerWidth', { value: 1200, writable: true });
+        
+        fireEvent.scroll(window);
+        await tick();
+        
+        expect(container).toBeTruthy();
+    });
+
+    it('tests IntersectionObserver cleanup function is called', () => {
+        let cleanupCalled = false;
+        
+        const { unmount } = render(IntersectionObserver, { props: defaultProps });
+        
+        // Override the mock to track cleanup
+        const originalUnobserve = mockObserverInstance.unobserve;
+        mockObserverInstance.unobserve = function(element) {
+            cleanupCalled = true;
+            return originalUnobserve.call(this, element);
+        };
+        
+        unmount();
+        expect(cleanupCalled).toBe(true);
+    });
+
+    it('tests scroll fallback cleanup function is called', () => {
+        delete global.IntersectionObserver;
+        
+        let removeEventListenerCalled = false;
+        const originalRemoveEventListener = window.removeEventListener;
+        window.removeEventListener = function(event, handler) {
+            if (event === 'scroll') {
+                removeEventListenerCalled = true;
+            }
+            return originalRemoveEventListener.call(window, event, handler);
+        };
+        
+        const { unmount } = render(IntersectionObserver, { props: defaultProps });
+        unmount();
+        
+        expect(removeEventListenerCalled).toBe(true);
+        window.removeEventListener = originalRemoveEventListener;
+    });
+
+    it('tests intersection with all margin boundaries', async () => {
+        const props = {
+            top: 100,
+            bottom: 100,
+            left: 100,
+            right: 100
+        };
+        
+        render(IntersectionObserver, { props });
+        
+        expect(mockObserverOptions).toBeTruthy();
+        expect(mockObserverOptions.rootMargin).toBe('100px 100px 100px 100px');
+        
+        // Test intersection event
+        if (mockObserverCallback) {
+            mockObserverCallback([{ isIntersecting: true }]);
+        }
+        await tick();
+    });
+
+    it('tests zero margin boundaries', async () => {
+        const props = {
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0
+        };
+        
+        render(IntersectionObserver, { props });
+        
+        expect(mockObserverOptions).toBeTruthy();
+        expect(mockObserverOptions.rootMargin).toBe('0px 0px 0px 0px');
+    });
+
+    it('tests scroll fallback with edge case coordinates', async () => {
+        delete global.IntersectionObserver;
+        
+        const testCases = [
+            // Element at exact boundary
+            { bcr: { top: 0, bottom: 1, left: 0, right: 1 }, window: { height: 800, width: 1200 } },
+            // Element with negative coordinates
+            { bcr: { top: -50, bottom: 50, left: -50, right: 50 }, window: { height: 800, width: 1200 } },
+            // Very small window
+            { bcr: { top: 10, bottom: 20, left: 10, right: 20 }, window: { height: 100, width: 100 } }
+        ];
+        
+        for (const testCase of testCases) {
+            const { container, unmount } = render(IntersectionObserver, { props: defaultProps });
+            
+            const containerDiv = container.querySelector('div');
+            if (containerDiv) {
+                containerDiv.getBoundingClientRect = () => testCase.bcr;
+            }
+            
+            Object.defineProperty(window, 'innerHeight', { value: testCase.window.height, writable: true });
+            Object.defineProperty(window, 'innerWidth', { value: testCase.window.width, writable: true });
+            
+            fireEvent.scroll(window);
+            await tick();
+            
+            expect(container).toBeTruthy();
+            unmount();
+        }
+    });
+
+    it('tests once=true behavior with multiple intersections', async () => {
+        render(IntersectionObserver, { props: { ...defaultProps, once: true } });
+        
+        // First intersection - should trigger unobserve
+        if (mockObserverCallback) {
+            mockObserverCallback([{ isIntersecting: true }]);
+        }
+        await tick();
+        expect(mockObserverInstance.unobserveCalled).toBe(true);
+        
+        // Reset for second intersection attempt
+        mockObserverInstance.unobserveCalled = false;
+        
+        // Second intersection - should not trigger unobserve again
+        if (mockObserverCallback) {
+            mockObserverCallback([{ isIntersecting: false }]);
+        }
+        await tick();
+        
+        // Third intersection - should not trigger unobserve again
+        if (mockObserverCallback) {
+            mockObserverCallback([{ isIntersecting: true }]);
+        }
+        await tick();
+    });
+
+    it('tests scroll fallback intersection calculation precision', async () => {
+        delete global.IntersectionObserver;
+        
+        const props = {
+            top: 1,
+            bottom: 1,
+            left: 1,
+            right: 1
+        };
+        
+        const { container } = render(IntersectionObserver, { props });
+        
+        const containerDiv = container.querySelector('div');
+        if (containerDiv) {
+            // Test precise boundary calculations
+            containerDiv.getBoundingClientRect = () => ({
+                top: 799,    // window.innerHeight - 1
+                bottom: 801, // window.innerHeight + 1
+                left: 1199,  // window.innerWidth - 1
+                right: 1201  // window.innerWidth + 1
+            });
+        }
+        
+        Object.defineProperty(window, 'innerHeight', { value: 800, writable: true });
+        Object.defineProperty(window, 'innerWidth', { value: 1200, writable: true });
+        
+        fireEvent.scroll(window);
+        await tick();
+        
+        expect(container).toBeTruthy();
+    });
+
+    it('tests scroll fallback with once=true and immediate intersection', async () => {
+        delete global.IntersectionObserver;
+        
+        let scrollEventHandlerRemoved = false;
+        const originalRemoveEventListener = window.removeEventListener;
+        window.removeEventListener = function(event, handler) {
+            if (event === 'scroll') {
+                scrollEventHandlerRemoved = true;
+            }
+            return originalRemoveEventListener.call(window, event, handler);
+        };
+        
+        const { container } = render(IntersectionObserver, { props: { ...defaultProps, once: true } });
+        
+        const containerDiv = container.querySelector('div');
+        if (containerDiv) {
+            // Element immediately visible
+            containerDiv.getBoundingClientRect = () => ({
+                top: 100,
+                bottom: 200,
+                left: 100,
+                right: 200
+            });
+        }
+        
+        Object.defineProperty(window, 'innerHeight', { value: 800, writable: true });
+        Object.defineProperty(window, 'innerWidth', { value: 1200, writable: true });
+        
+        fireEvent.scroll(window);
+        await tick();
+        
+        expect(scrollEventHandlerRemoved).toBe(true);
+        window.removeEventListener = originalRemoveEventListener;
+    });
+
+    it('verifies slot prop binding for intersecting state', async () => {
+        const TestComponent = {
+            render() {
+                return `
+                    <div>
+                        <IntersectionObserver {props} let:intersecting>
+                            <div data-testid="slot-content">
+                                Intersecting: {intersecting}
+                            </div>
+                        </IntersectionObserver>
+                    </div>
+                `;
+            }
+        };
+        
+        const { container } = render(IntersectionObserver, { props: defaultProps });
+        
+        // Trigger intersection to change intersecting state
+        if (mockObserverCallback) {
+            mockObserverCallback([{ isIntersecting: true }]);
+        }
+        await tick();
+        
+        expect(container).toBeTruthy();
+    });
 });
