@@ -84,7 +84,7 @@ jobs:
 
     - name: Upload coverage reports and summary
       if: matrix.task == 'test'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: coverage-reports
         path: |
