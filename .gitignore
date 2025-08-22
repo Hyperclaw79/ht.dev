@@ -9,4 +9,6 @@ svelteapp/.vercel
 svelteapp/vite.config.js.timestamp-*
 svelteapp/vite.config.ts.timestamp-*
 svelteapp/coverage
+svelteapp/coverage-summary.txt
+svelteapp/coverage-summary.md
 database
