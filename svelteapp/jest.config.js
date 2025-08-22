@@ -13,6 +13,12 @@ export default {
     ],
     testEnvironment: "jsdom",
     extensionsToTreatAsEsm: [".svelte"],
+    coverageProvider: "v8",
+    collectCoverageFrom: [
+        "src/**/*.{js,svelte}",
+        "!src/**/*.d.ts",
+        "!src/test-setup.js"
+    ],
     transform: {
         "^.+\\.svelte$": ["svelte-jester", { 
             "preprocess": true,
@@ -34,6 +40,7 @@ export default {
     ],
     coveragePathIgnorePatterns: [
         "node_modules/",
-        "src/routes/\\+error\\.svelte"
+        "src/routes/\\+error\\.svelte",
+        "src/test-setup.js"
     ]
 };
