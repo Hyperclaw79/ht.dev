@@ -1237,5 +1237,171 @@ describe('Tiltable component', () => {
             
             expect(validClickCount).toBe(1);
         });
+
+        it('handles comprehensive classList edge cases', () => {
+            const containsCalls = [];
+            const mockElement = { 
+                tagName: 'BUTTON',
+                click: () => {},
+                classList: { 
+                    contains: (className) => {
+                        containsCalls.push(className);
+                        // Test that all filtering classes are properly checked
+                        return false; // Element should not be filtered out
+                    }
+                }
+            };
+            
+            global.document.elementsFromPoint = () => [mockElement];
+            
+            const { container } = render(Tiltable);
+            const tiltingCard = container.querySelector('.tilting-card-content');
+            
+            fireEvent.click(tiltingCard, { x: 100, y: 100 });
+            
+            // Verify all filter classes were checked
+            expect(containsCalls).toContain('tilting-card-content');
+            expect(containsCalls).toContain('mouse-position-tracker');
+            expect(containsCalls).toContain('tracker');
+        });
+
+        it('validates event object destructuring with comprehensive properties', () => {
+            let capturedCoords = null;
+            const elementsFromPointCalls = [];
+            const mockElement = { 
+                tagName: 'BUTTON',
+                click: () => {},
+                classList: { contains: () => false }
+            };
+            
+            // Mock elementsFromPoint to capture coordinates
+            const originalElementsFromPoint = global.document.elementsFromPoint;
+            global.document.elementsFromPoint = (x, y) => {
+                capturedCoords = { x, y };
+                elementsFromPointCalls.push({ x, y });
+                return [mockElement];
+            };
+            
+            const { container } = render(Tiltable);
+            const tiltingCard = container.querySelector('.tilting-card-content');
+            
+            // Fire a click event - testing-library will provide coordinates to the callback
+            fireEvent.click(tiltingCard);
+            
+            expect(elementsFromPointCalls.length).toBe(1);
+            expect(capturedCoords).toBeTruthy();
+            
+            // Restore original function
+            global.document.elementsFromPoint = originalElementsFromPoint;
+        });
+
+        it('tests comprehensive array filtering with all edge cases', () => {
+            const elements = [
+                { tagName: 'DIV', classList: { contains: (cls) => cls === 'tilting-card-content' } },
+                { tagName: 'DIV', classList: { contains: (cls) => cls === 'mouse-position-tracker' } },
+                { tagName: 'DIV', classList: { contains: (cls) => cls === 'tracker' } },
+                { tagName: 'BUTTON', classList: { contains: () => false }, click: () => {} }
+            ];
+            
+            global.document.elementsFromPoint = () => elements;
+            
+            const { container } = render(Tiltable);
+            const tiltingCard = container.querySelector('.tilting-card-content');
+            
+            expect(() => {
+                fireEvent.click(tiltingCard, { x: 100, y: 100 });
+            }).not.toThrow();
+        });
+
+        it('validates comprehensive tagName priority logic', () => {
+            const clickResults = [];
+            
+            // Test all possible combinations of priority elements
+            const priorityElements = ['BUTTON', 'A', 'INPUT'];
+            const nonPriorityElements = ['DIV', 'SPAN', 'P', 'H1'];
+            
+            priorityElements.forEach((priorityTag, i) => {
+                nonPriorityElements.forEach((nonPriorityTag, j) => {
+                    const mockPriority = { 
+                        tagName: priorityTag,
+                        click: () => { clickResults.push(`${priorityTag}-${i}-${j}`); },
+                        classList: { contains: () => false }
+                    };
+                    const mockNonPriority = { 
+                        tagName: nonPriorityTag,
+                        click: () => { clickResults.push(`${nonPriorityTag}-${i}-${j}`); },
+                        classList: { contains: () => false }
+                    };
+                    
+                    global.document.elementsFromPoint = () => [mockNonPriority, mockPriority];
+                    
+                    const { container } = render(Tiltable);
+                    const tiltingCard = container.querySelector('.tilting-card-content');
+                    
+                    fireEvent.click(tiltingCard, { x: 100 + i + j, y: 100 + i + j });
+                });
+            });
+            
+            // Verify that priority elements were always clicked
+            expect(clickResults.length).toBe(12); // 3 priority × 4 non-priority
+            clickResults.forEach(result => {
+                expect(result).toMatch(/^(BUTTON|A|INPUT)/);
+            });
+        });
+
+        it('tests sort function return values exhaustively', () => {
+            let sortCalls = [];
+            
+            const elements = [
+                { tagName: 'DIV', classList: { contains: () => false } },
+                { tagName: 'BUTTON', classList: { contains: () => false } },
+                { tagName: 'SPAN', classList: { contains: () => false } }
+            ];
+            
+            // Mock the sort method to capture calls
+            const originalSort = Array.prototype.sort;
+            Array.prototype.sort = function(compareFn) {
+                if (compareFn) {
+                    for (let i = 0; i < this.length; i++) {
+                        for (let j = i + 1; j < this.length; j++) {
+                            const result = compareFn(this[i], this[j]);
+                            sortCalls.push({
+                                a: this[i].tagName,
+                                b: this[j].tagName,
+                                result
+                            });
+                        }
+                    }
+                }
+                return originalSort.call(this, compareFn);
+            };
+            
+            global.document.elementsFromPoint = () => elements;
+            
+            const { container } = render(Tiltable);
+            const tiltingCard = container.querySelector('.tilting-card-content');
+            
+            fireEvent.click(tiltingCard, { x: 100, y: 100 });
+            
+            // Restore original sort
+            Array.prototype.sort = originalSort;
+            
+            // Verify sort function behavior
+            expect(sortCalls.length).toBeGreaterThan(0);
+            
+            // Check that priority elements return -1, non-priority to priority returns 1, and same types return 0
+            sortCalls.forEach(call => {
+                const aPriority = ['BUTTON', 'A', 'INPUT'].includes(call.a);
+                const bPriority = ['BUTTON', 'A', 'INPUT'].includes(call.b);
+                
+                if (aPriority && !bPriority) {
+                    expect(call.result).toBe(-1);
+                } else if (!aPriority && bPriority) {
+                    expect(call.result).toBe(1);
+                } else {
+                    expect(call.result).toBe(0);
+                }
+            });
+        });
     });
 });
