@@ -1,0 +1,152 @@
+
+> ht-portfolio@1.0.0 test
+> node --experimental-vm-modules node_modules/jest/bin/jest --coverage --coverageReporters=text
+
+(node:3824) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:3823) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:3825) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/routes/components/Footer.test.js
+PASS tests/routes/components/Typewriter.test.js
+PASS tests/routes/components/landing/terminal/Action.test.js
+PASS tests/routes/components/Progressbar.test.js
+PASS tests/routes/components/achievements/Listing.test.js
+PASS tests/routes/admin/LoginForm.test.js
+PASS tests/routes/components/landing/terminal/Terminal.test.js
+PASS tests/routes/components/projects/GhCard.test.js
+PASS tests/routes/page.test.js
+PASS tests/routes/components/about/About.test.js
+PASS tests/routes/components/landing/Landing.test.js
+PASS tests/routes/components/projects/GihtubCards.test.js
+PASS tests/routes/components/Shrinkable.test.js
+PASS tests/routes/admin/page.test.js
+PASS tests/routes/components/DownloadResume.test.js
+PASS tests/routes/components/skills/Skills.test.js
+PASS tests/routes/error.test.js
+PASS tests/routes/components/about/Header.test.js
+PASS tests/routes/components/landing/MobileFallback.test.js
+PASS tests/routes/components/TextSphere.test.js
+PASS tests/routes/components/landing/terminal/AsciiProgress.test.js
+PASS tests/routes/components/experience/Recursor.test.js
+PASS tests/routes/components/landing/terminal/TitleBar.test.js
+PASS tests/routes/api/experience/getter.test.js
+PASS tests/routes/components/landing/StartButton.test.js
+PASS tests/routes/api/skills/getter.test.js
+PASS tests/routes/api/socials/socials.test.js
+PASS tests/routes/components/landing/terminal/Output.test.js
+PASS tests/routes/components/IntersectionObserver.test.js
+PASS tests/routes/api/skills/getter-coverage.test.js
+PASS tests/routes/api/pbClient.test.js
+PASS tests/routes/api/achievements/getter.test.js
+PASS tests/routes/api/socials/getter.test.js
+PASS tests/routes/api/education/education.test.js
+PASS tests/routes/components/Tiltable.test.js
+PASS tests/routes/components/projects/Projects.test.js
+PASS tests/routes/api/admin/admin.test.js
+PASS tests/routes/api/projects/server-env-error.test.js
+PASS tests/routes/components/landing/terminal/Input.test.js
+PASS tests/routes/api/projects/getter.test.js
+PASS tests/routes/components/landing/utils.test.js
+PASS tests/routes/api/skills/skills.test.js
+PASS tests/utils.test.js
+PASS tests/routes/api/achievements/achievements.test.js
+PASS tests/routes/api/projects/projects.test.js
+PASS tests/routes/components/landing/terminal/commandHandler.test.js
+PASS tests/routes/api/education/getter.test.js
+PASS tests/routes/api/pbClient-coverage.test.js
+PASS tests/routes/components/landing/IconCanvas.test.js
+PASS tests/layout.test.js
+PASS tests/routes/api/experience/experience.test.js
+PASS tests/routes/components/landing/terminal/Screen.test.js
+----------------------------------------|---------|----------|---------|---------|-------------------
+File                                    | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+----------------------------------------|---------|----------|---------|---------|-------------------
+All files                               |   99.86 |    87.03 |    97.1 |   99.86 |                   
+ src                                    |     100 |      100 |     100 |     100 |                   
+  utils.js                              |     100 |      100 |     100 |     100 |                   
+ src/routes                             |     100 |      100 |     100 |     100 |                   
+  +layout.js                            |     100 |      100 |     100 |     100 |                   
+  +page.svelte                          |     100 |      100 |     100 |     100 |                   
+ src/routes/admin                       |     100 |      100 |     100 |     100 |                   
+  +page.svelte                          |     100 |      100 |     100 |     100 |                   
+  LoginForm.svelte                      |     100 |      100 |     100 |     100 |                   
+ src/routes/api                         |   97.14 |    90.47 |     100 |   97.14 |                   
+  pbClient.js                           |   97.14 |    90.47 |     100 |   97.14 | 19,25             
+ src/routes/api/achievements            |     100 |      100 |     100 |     100 |                   
+  +server.js                            |     100 |      100 |     100 |     100 |                   
+  getter.js                             |     100 |      100 |     100 |     100 |                   
+ src/routes/api/admin                   |     100 |      100 |     100 |     100 |                   
+  +server.js                            |     100 |      100 |     100 |     100 |                   
+ src/routes/api/education               |     100 |      100 |     100 |     100 |                   
+  +server.js                            |     100 |      100 |     100 |     100 |                   
+  getter.js                             |     100 |      100 |     100 |     100 |                   
+ src/routes/api/experience              |     100 |      100 |     100 |     100 |                   
+  +server.js                            |     100 |      100 |     100 |     100 |                   
+  getter.js                             |     100 |      100 |     100 |     100 |                   
+ src/routes/api/fallbacks               |     100 |      100 |     100 |     100 |                   
+  achievements.js                       |     100 |      100 |     100 |     100 |                   
+  education.js                          |     100 |      100 |     100 |     100 |                   
+  jobs.js                               |     100 |      100 |     100 |     100 |                   
+  projects.js                           |     100 |      100 |     100 |     100 |                   
+  skills.js                             |     100 |      100 |     100 |     100 |                   
+  socials.js                            |     100 |      100 |     100 |     100 |                   
+ src/routes/api/projects                |     100 |      100 |     100 |     100 |                   
+  +server.js                            |     100 |      100 |     100 |     100 |                   
+  getter.js                             |     100 |      100 |     100 |     100 |                   
+ src/routes/api/skills                  |     100 |      100 |     100 |     100 |                   
+  +server.js                            |     100 |      100 |     100 |     100 |                   
+  getter.js                             |     100 |      100 |     100 |     100 |                   
+ src/routes/api/socials                 |     100 |      100 |     100 |     100 |                   
+  +server.js                            |     100 |      100 |     100 |     100 |                   
+  getter.js                             |     100 |      100 |     100 |     100 |                   
+ src/routes/components                  |   99.92 |     77.5 |     100 |   99.92 |                   
+  DownloadResume.svelte                 |   99.86 |    36.36 |     100 |   99.86 | 545               
+  Footer.svelte                         |     100 |       80 |     100 |     100 | 25                
+  IntersectionObserver.svelte           |     100 |      100 |     100 |     100 |                   
+  Progressbar.svelte                    |     100 |      100 |     100 |     100 |                   
+  Shrinkable.svelte                     |     100 |      100 |     100 |     100 |                   
+  TextSphere.svelte                     |     100 |      100 |     100 |     100 |                   
+  Tiltable.svelte                       |     100 |      100 |     100 |     100 |                   
+  Typewriter.svelte                     |     100 |    66.66 |     100 |     100 | 57                
+ src/routes/components/about            |   99.82 |       80 |     100 |   99.82 |                   
+  About.svelte                          |     100 |       75 |     100 |     100 | 64,67             
+  Header.svelte                         |     100 |      100 |     100 |     100 |                   
+  SkillTable.svelte                     |   99.25 |    66.66 |     100 |   99.25 | 16                
+ src/routes/components/achievements     |     100 |    42.85 |     100 |     100 |                   
+  Achievements.svelte                   |     100 |      100 |     100 |     100 |                   
+  Listing.svelte                        |     100 |       40 |     100 |     100 | 11-33,47-77       
+ src/routes/components/experience       |     100 |    88.88 |     100 |     100 |                   
+  Experience.svelte                     |     100 |      100 |     100 |     100 |                   
+  Recursor.svelte                       |     100 |    88.88 |     100 |     100 | 52                
+ src/routes/components/landing          |     100 |    88.23 |     100 |     100 |                   
+  IconCanvas.svelte                     |     100 |    33.33 |     100 |     100 | 15                
+  Landing.svelte                        |     100 |      100 |     100 |     100 |                   
+  Mobile.svelte                         |     100 |      100 |     100 |     100 |                   
+  MobileFallback.svelte                 |     100 |      100 |     100 |     100 |                   
+  Monitor.svelte                        |     100 |      100 |     100 |     100 |                   
+  StartButton.svelte                    |     100 |      100 |     100 |     100 |                   
+  utils.js                              |     100 |      100 |     100 |     100 |                   
+ src/routes/components/landing/terminal |   99.47 |    82.85 |   84.61 |   99.47 |                   
+  Action.svelte                         |     100 |      100 |     100 |     100 |                   
+  AsciiProgress.svelte                  |     100 |      100 |     100 |     100 |                   
+  Input.svelte                          |     100 |       40 |     100 |     100 | 93-102            
+  Output.svelte                         |     100 |      100 |     100 |     100 |                   
+  Screen.svelte                         |     100 |       50 |     100 |     100 | 45                
+  Terminal.svelte                       |     100 |      100 |     100 |     100 |                   
+  TitleBar.svelte                       |     100 |        0 |     100 |     100 | 6                 
+  commandHandler.js                     |   97.14 |      100 |   83.33 |   97.14 | 16-17,30,119      
+ src/routes/components/projects         |     100 |       70 |     100 |     100 |                   
+  GhCard.svelte                         |     100 |    83.33 |     100 |     100 | 85                
+  GihtubCards.svelte                    |     100 |       50 |     100 |     100 | 12                
+  Projects.svelte                       |     100 |      100 |     100 |     100 |                   
+ src/routes/components/skills           |     100 |      100 |     100 |     100 |                   
+  Skills.svelte                         |     100 |      100 |     100 |     100 |                   
+----------------------------------------|---------|----------|---------|---------|-------------------
+
+Test Suites: 52 passed, 52 total
+Tests:       1 skipped, 758 passed, 759 total
+Snapshots:   0 total
+Time:        15.582 s
+Ran all test suites.

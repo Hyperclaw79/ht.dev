@@ -1,4 +1,4 @@
-name: Build and Lint
+name: Build, Lint, and Test
 
 on:
   push:
@@ -9,14 +9,14 @@ on:
     branches: [ main ]
 
 jobs:
-  Build_and_Lint:
+  build_lint_test:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./svelteapp
     strategy:
         matrix:
-            task: [build, lint]
+            task: [build, lint, test]
 
     steps:
     - name: Checkout code
@@ -30,35 +30,20 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Validate Unit Tests
+    - name: Run build task
       if: matrix.task == 'build'
-      run: npm test
+      run: npm run build
 
-    - name: Run ${{ matrix.task }} task
-      run: npm run ${{ matrix.task }}
-
-  Test_and_Coverage:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./svelteapp
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Install Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 'latest'
-
-    - name: Install dependencies
-      run: npm install
+    - name: Run lint task
+      if: matrix.task == 'lint'
+      run: npm run lint
 
     - name: Run tests with coverage
+      if: matrix.task == 'test'
       run: npm test -- --coverage --coverageReporters=text --coverageReporters=lcov --coverageReporters=html
 
     - name: Extract coverage summary
+      if: matrix.task == 'test'
       run: |
         # Extract coverage summary from text output
         npm test -- --coverage --coverageReporters=text > coverage-summary.txt 2>&1 || true
@@ -66,14 +51,15 @@ jobs:
         cat coverage-summary.txt | grep -A 20 "Coverage summary"
         
         # Extract overall coverage percentage
-        COVERAGE=$(cat coverage-summary.txt | grep "All files" | awk '{print $2}' | head -1 || echo "N/A")
-        BRANCH_COVERAGE=$(cat coverage-summary.txt | grep "All files" | awk '{print $3}' | head -1 || echo "N/A")
+        COVERAGE=$(cat coverage-summary.txt | grep "All files" | awk '{print $4}' | head -1 || echo "N/A")
+        BRANCH_COVERAGE=$(cat coverage-summary.txt | grep "All files" | awk '{print $6}' | head -1 || echo "N/A")
         echo "Statement Coverage: $COVERAGE"
         echo "Branch Coverage: $BRANCH_COVERAGE"
         echo "COVERAGE_PERCENTAGE=$COVERAGE" >> $GITHUB_ENV
         echo "BRANCH_COVERAGE_PERCENTAGE=$BRANCH_COVERAGE" >> $GITHUB_ENV
 
     - name: Generate coverage summary file
+      if: matrix.task == 'test'
       run: |
         echo "# Test Coverage Report" > coverage-summary.md
         echo "" >> coverage-summary.md
@@ -97,6 +83,7 @@ jobs:
         echo "- Optimized V8 coverage provider for accuracy" >> coverage-summary.md
 
     - name: Upload coverage reports and summary
+      if: matrix.task == 'test'
       uses: actions/upload-artifact@v3
       with:
         name: coverage-reports
@@ -107,7 +94,7 @@ jobs:
         retention-days: 30
 
     - name: Comment coverage on PR
-      if: github.event_name == 'pull_request'
+      if: matrix.task == 'test' && github.event_name == 'pull_request'
       uses: actions/github-script@v6
       with:
         script: |
