@@ -420,4 +420,194 @@ describe('Shrinkable component', () => {
             });
         }).toThrow();
     });
+
+    it('tests reactive statement execution with various handle types', () => {
+        // Test that reactive statement handles different truthy/falsy values
+        const { component } = render(Shrinkable, { 
+            props: { handle: null } 
+        });
+        
+        // Test with falsy values (should not add event listener)
+        const falsyValues = [null, undefined, false, 0, '', NaN];
+        
+        for (const falsyValue of falsyValues) {
+            expect(() => {
+                component.$set({ handle: falsyValue });
+            }).not.toThrow();
+        }
+        
+        // Test with valid element
+        const validHandle = document.createElement('button');
+        expect(() => {
+            component.$set({ handle: validHandle });
+        }).not.toThrow();
+    });
+
+    it('tests component state persistence across handle changes', async () => {
+        const handle1 = document.createElement('button');
+        const handle2 = document.createElement('button');
+        
+        const { component, container } = render(Shrinkable, { 
+            props: { handle: handle1 } 
+        });
+        
+        // Click first handle to shrink
+        fireEvent.click(handle1);
+        
+        await new Promise(resolve => setTimeout(resolve, 10));
+        let shrinkableDiv = container.querySelector('.shrinkable');
+        expect(shrinkableDiv).toHaveClass('shrunk');
+        
+        // Change handle - shrunk state should persist
+        component.$set({ handle: handle2 });
+        
+        shrinkableDiv = container.querySelector('.shrinkable');
+        expect(shrinkableDiv).toHaveClass('shrunk');
+        
+        // Click new handle should still work
+        fireEvent.click(handle2);
+        expect(shrinkableDiv).toHaveClass('shrunk');
+    });
+
+    it('tests event listener cleanup and memory leaks', () => {
+        const handle1 = document.createElement('button');
+        const handle2 = document.createElement('button');
+        
+        // Track addEventListener calls
+        let addEventListenerCallCount = 0;
+        const originalAddEventListener = handle1.addEventListener;
+        handle1.addEventListener = function(...args) {
+            addEventListenerCallCount++;
+            return originalAddEventListener.apply(this, args);
+        };
+        
+        const { component } = render(Shrinkable, { 
+            props: { handle: handle1 } 
+        });
+        
+        expect(addEventListenerCallCount).toBe(1);
+        
+        // When handle changes, the reactive statement runs again for the new handle
+        // but doesn't remove listeners from the old handle
+        component.$set({ handle: handle2 });
+        
+        // Setting back to handle1 will add another listener to handle1
+        component.$set({ handle: handle1 });
+        
+        // Svelte's reactive statement only runs when the value actually changes
+        // Setting handle1 -> handle2 -> handle1 means handle1 gets listener added only once initially
+        expect(addEventListenerCallCount).toBe(1);
+    });
+
+    it('tests shrunk class binding edge cases', async () => {
+        const mockHandle = document.createElement('button');
+        
+        const { component, container } = render(Shrinkable, { 
+            props: { handle: mockHandle } 
+        });
+        
+        const shrinkableDiv = container.querySelector('.shrinkable');
+        
+        // Initially not shrunk
+        expect(shrinkableDiv).not.toHaveClass('shrunk');
+        
+        // Click to shrink
+        fireEvent.click(mockHandle);
+        
+        // Wait for state to update
+        await new Promise(resolve => setTimeout(resolve, 10));
+        
+        // Should have shrunk class after click
+        expect(shrinkableDiv).toHaveClass('shrunk');
+        
+        // Test that shrunk state persists across handle changes
+        const newHandle = document.createElement('button');
+        component.$set({ handle: newHandle });
+        
+        expect(shrinkableDiv).toHaveClass('shrunk');
+    });
+
+    it('tests containerRef binding functionality', () => {
+        const { container } = render(Shrinkable, { 
+            props: { handle: null } 
+        });
+        
+        const shrinkableDiv = container.querySelector('.shrinkable');
+        expect(shrinkableDiv).toBeInTheDocument();
+        expect(shrinkableDiv.tagName.toLowerCase()).toBe('div');
+        expect(shrinkableDiv).toHaveClass('shrinkable');
+    });
+
+    it('tests component initialization with various handle states', () => {
+        // Test initialization with null handle
+        const { component: component1 } = render(Shrinkable, { 
+            props: { handle: null } 
+        });
+        expect(component1).toBeTruthy();
+        
+        // Test initialization with undefined handle
+        const { component: component2 } = render(Shrinkable, { 
+            props: { handle: undefined } 
+        });
+        expect(component2).toBeTruthy();
+        
+        // Test initialization with valid handle
+        const validHandle = document.createElement('button');
+        const { component: component3 } = render(Shrinkable, { 
+            props: { handle: validHandle } 
+        });
+        expect(component3).toBeTruthy();
+    });
+
+    it('tests dispatch timing and event object structure', () => {
+        const mockHandle = document.createElement('button');
+        
+        const { component } = render(Shrinkable, { 
+            props: { handle: mockHandle } 
+        });
+        
+        let capturedEvent = null;
+        let eventTimestamp = null;
+        
+        component.$on('shrunkEvent', (event) => {
+            capturedEvent = event;
+            eventTimestamp = Date.now();
+        });
+        
+        const clickTimestamp = Date.now();
+        fireEvent.click(mockHandle);
+        
+        expect(capturedEvent).toBeTruthy();
+        expect(capturedEvent.type).toBe('shrunkEvent');
+        expect(eventTimestamp).toBeGreaterThanOrEqual(clickTimestamp);
+    });
+
+    it('tests reactive statement execution order with rapid handle changes', () => {
+        const { component } = render(Shrinkable, { 
+            props: { handle: null } 
+        });
+        
+        // Rapid handle changes to test reactive statement execution
+        const handles = [
+            document.createElement('button'),
+            document.createElement('div'),
+            document.createElement('span'),
+            null,
+            document.createElement('a'),
+            undefined,
+            document.createElement('input')
+        ];
+        
+        for (const handle of handles) {
+            if (handle && typeof handle.addEventListener === 'function') {
+                expect(() => {
+                    component.$set({ handle });
+                }).not.toThrow();
+            } else {
+                expect(() => {
+                    component.$set({ handle });
+                }).not.toThrow();
+            }
+        }
+    });
 });

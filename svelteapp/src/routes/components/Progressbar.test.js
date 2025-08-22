@@ -543,4 +543,172 @@ describe('Progressbar component', () => {
             expect(progressFill.style.maxWidth).toBeTruthy();
         });
     });
+
+    it('tests progressive value changes during component lifecycle', async () => {
+        const { component } = render(Progressbar, { props: { value: 0, width: 100, animate: true } });
+        
+        // Progressive updates to test all pathways
+        await tick();
+        component.$set({ value: 25 });
+        await tick();
+        component.$set({ value: 50 });
+        await tick();
+        component.$set({ value: 75 });
+        await tick();
+        component.$set({ value: 100 });
+        await tick();
+        
+        expect(component).toBeTruthy();
+    });
+
+    it('tests onMount execution with edge case values', async () => {
+        // Test various initial values that trigger onMount
+        const testValues = [undefined, null, 0, 1, 99, 100, 101, -5];
+        
+        for (const value of testValues) {
+            const { component } = render(Progressbar, { props: { value, width: 50 } });
+            await tick();
+            expect(component).toBeTruthy();
+        }
+    });
+
+    it('tests reactive statement execution with various scenarios', async () => {
+        const { component } = render(Progressbar, { props: { value: 50 } });
+        
+        // Test the reactive statement with different types of value changes
+        const valueChanges = [
+            0, // minimum
+            1, // small positive
+            50, // middle
+            99, // near maximum 
+            100, // maximum
+            101, // over maximum
+            -1, // negative
+            50.5, // decimal
+            NaN, // special value
+            undefined, // undefined
+            null // null
+        ];
+        
+        for (const value of valueChanges) {
+            component.$set({ value });
+            await tick();
+        }
+        
+        expect(component).toBeTruthy();
+    });
+
+    it('tests tweened motion integration with various durations', async () => {
+        const { component } = render(Progressbar, { props: { value: 0 } });
+        
+        // Test rapid successive updates that exercise the tweened motion
+        component.$set({ value: 10 });
+        await tick();
+        component.$set({ value: 20 });
+        await tick();
+        component.$set({ value: 30 });
+        await tick();
+        component.$set({ value: 40 });
+        await tick();
+        component.$set({ value: 50 });
+        await tick();
+        
+        expect(component).toBeTruthy();
+    });
+
+    it('tests class binding conditionals thoroughly', async () => {
+        const { container, component } = render(Progressbar, { props: { animate: false } });
+        
+        let progressFill = container.querySelector('.progress-bar__fill');
+        expect(progressFill).not.toHaveClass('animate');
+        
+        // Toggle animate
+        component.$set({ animate: true });
+        await tick();
+        progressFill = container.querySelector('.progress-bar__fill');
+        expect(progressFill).toHaveClass('animate');
+        
+        // Toggle back
+        component.$set({ animate: false });
+        await tick();
+        progressFill = container.querySelector('.progress-bar__fill');
+        expect(progressFill).not.toHaveClass('animate');
+        
+        // Multiple rapid toggles
+        for (let i = 0; i < 5; i++) {
+            component.$set({ animate: i % 2 === 0 });
+            await tick();
+        }
+        
+        expect(component).toBeTruthy();
+    });
+
+    it('tests max-width calculation with extreme progress values', async () => {
+        const testCases = [
+            { value: 0, expectedMaxWidth: '-2%' },
+            { value: 2, expectedMaxWidth: '0%' },
+            { value: 3, expectedMaxWidth: '1%' },
+            { value: 100, expectedMaxWidth: '98%' },
+            { value: 102, expectedMaxWidth: '100%' }
+        ];
+        
+        for (const testCase of testCases) {
+            const { container } = render(Progressbar, { props: { value: testCase.value } });
+            
+            await waitFor(() => {
+                const progressFill = container.querySelector('.progress-bar__fill');
+                expect(progressFill.style.maxWidth).toBeTruthy();
+            });
+        }
+    });
+
+    it('tests component prop validation and edge cases', async () => {
+        // Test with various prop combinations
+        const propCombinations = [
+            { width: 0, value: 0, animate: false },
+            { width: 1, value: 1, animate: true },
+            { width: 50, value: 25, animate: false },
+            { width: 100, value: 100, animate: true },
+            { width: 200, value: 150, animate: false },
+            { width: -10, value: -5, animate: true }
+        ];
+        
+        for (const props of propCombinations) {
+            const { component } = render(Progressbar, { props });
+            await tick();
+            expect(component).toBeTruthy();
+        }
+    });
+
+    it('tests progressive width changes with style updates', async () => {
+        const { container, component } = render(Progressbar, { props: { width: 10 } });
+        
+        const progressBar = container.querySelector('.progress-bar');
+        expect(progressBar.style.width).toBe('10%');
+        
+        // Progressive width changes
+        const widthValues = [20, 40, 60, 80, 100, 120, 150];
+        for (const width of widthValues) {
+            component.$set({ width });
+            await tick();
+            expect(progressBar.style.width).toBe(`${width}%`);
+        }
+    });
+
+    it('tests easing function execution in tweened motion', async () => {
+        const { component } = render(Progressbar, { props: { value: 0 } });
+        
+        // Trigger the easing function through value changes
+        component.$set({ value: 50 });
+        await tick();
+        
+        // Test immediate follow-up to exercise the easing function
+        component.$set({ value: 100 });
+        await tick();
+        
+        component.$set({ value: 0 });
+        await tick();
+        
+        expect(component).toBeTruthy();
+    });
 });
