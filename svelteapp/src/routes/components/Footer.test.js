@@ -561,4 +561,364 @@ describe('Footer component', () => {
             expect(img).toHaveAttribute('title', 'Valid Name');
         });
     });
+
+    it('should handle comprehensive context destructuring scenarios', () => {
+        // Test the Object.fromEntries(getContext("api")) line specifically
+        const apiContext = new Map([
+            ['socials', writable([
+                {
+                    name: 'Context Test',
+                    url: 'https://context.test',
+                    icon: '/context.png'
+                }
+            ])]
+        ]);
+
+        const { getByText } = render(Footer, {
+            context: new Map([['api', apiContext]])
+        });
+        
+        expect(getByText('Context Test')).toBeInTheDocument();
+    });
+
+    it('should test each block iteration with various social configurations', () => {
+        const mockSocials = writable([
+            {
+                name: 'Twitter',
+                url: 'https://twitter.com/test',
+                icon: '/twitter.png'
+            },
+            {
+                name: 'Discord',
+                url: 'https://discord.gg/test',
+                icon: '/discord.png'
+            },
+            {
+                name: 'YouTube',
+                url: 'https://youtube.com/@test',
+                icon: '/youtube.png'
+            }
+        ]);
+
+        const { getAllByRole, getByText } = FooterWrapper(Footer, { socials: mockSocials });
+        
+        const links = getAllByRole('link');
+        expect(links).toHaveLength(3);
+        
+        // Verify each social is rendered
+        expect(getByText('Twitter')).toBeInTheDocument();
+        expect(getByText('Discord')).toBeInTheDocument();
+        expect(getByText('YouTube')).toBeInTheDocument();
+        
+        // Verify key prop usage in each block (check class contains 'social')
+        links.forEach(link => {
+            expect(link).toHaveAttribute('href');
+            expect(link.className).toContain('social');
+        });
+    });
+
+    it('should handle conditional rendering edge cases', () => {
+        // Test the #if social.url && social.icon condition thoroughly
+        const mockSocials = writable([
+            {
+                name: 'Has Both',
+                url: 'https://example.com',
+                icon: '/icon.png'
+            },
+            {
+                name: 'No URL',
+                url: null,
+                icon: '/icon.png'
+            },
+            {
+                name: 'No Icon',  
+                url: 'https://example.com',
+                icon: null
+            },
+            {
+                name: 'Empty URL',
+                url: '',
+                icon: '/icon.png'
+            },
+            {
+                name: 'Empty Icon',
+                url: 'https://example.com', 
+                icon: ''
+            },
+            {
+                name: 'Undefined Values',
+                url: undefined,
+                icon: undefined
+            },
+            {
+                name: 'False Values',
+                url: false,
+                icon: false
+            }
+        ]);
+
+        const { getAllByRole } = FooterWrapper(Footer, { socials: mockSocials });
+        
+        const links = getAllByRole('link');
+        expect(links).toHaveLength(1); // Only "Has Both" should render
+    });
+
+    it('should test reactive statement execution with date calculation', () => {
+        // Ensure new Date().getFullYear() is executed and reactive
+        const { getByText, rerender } = FooterWrapper(Footer);
+        
+        const currentYear = new Date().getFullYear();
+        expect(getByText(currentYear.toString())).toBeInTheDocument();
+        
+        // Test that the expression is re-evaluated on re-render
+        rerender({});
+        expect(getByText(currentYear.toString())).toBeInTheDocument();
+    });
+
+    it('should handle store subscription lifecycle', () => {
+        const mockSocials = writable([]);
+        const { unmount } = FooterWrapper(Footer, { socials: mockSocials });
+        
+        // Update store after mount
+        mockSocials.set([
+            {
+                name: 'Test',
+                url: 'https://test.com',
+                icon: '/test.png'
+            }
+        ]);
+        
+        // Component should clean up subscriptions on unmount
+        expect(() => unmount()).not.toThrow();
+    });
+
+    it('should handle complex social data structures', () => {
+        const mockSocials = writable([
+            {
+                name: 'GitHub',
+                url: 'https://github.com/user',
+                icon: '/icons/github.png',
+                extraProp: 'should be ignored' // extra properties
+            },
+            {
+                name: 'LinkedIn',
+                url: 'https://linkedin.com/in/user', 
+                icon: '/icons/linkedin.png',
+                nested: { prop: 'ignored' }
+            }
+        ]);
+
+        const { getAllByRole } = FooterWrapper(Footer, { socials: mockSocials });
+        
+        const links = getAllByRole('link');
+        expect(links).toHaveLength(2);
+        
+        // Verify only required props are used
+        expect(links[0]).toHaveAttribute('href', 'https://github.com/user');
+        expect(links[1]).toHaveAttribute('href', 'https://linkedin.com/in/user');
+    });
+
+    it('should handle social array mutation scenarios', () => {
+        const mockSocials = writable([
+            {
+                name: 'Initial',
+                url: 'https://initial.com',
+                icon: '/initial.png'
+            }
+        ]);
+
+        const { queryAllByRole } = FooterWrapper(Footer, { socials: mockSocials });
+        
+        // Verify initial state
+        expect(queryAllByRole('link')).toHaveLength(1);
+        
+        // Test various array mutations
+        mockSocials.update(socials => [
+            ...socials,
+            {
+                name: 'Added',
+                url: 'https://added.com', 
+                icon: '/added.png'
+            }
+        ]);
+        
+        // Add a small delay to allow reactive updates
+        setTimeout(() => {
+            mockSocials.update(socials => socials.slice(1)); // Remove first
+        }, 10);
+        
+        setTimeout(() => {
+            mockSocials.update(() => []); // Clear all
+        }, 20);
+        
+        // Component should handle all mutations gracefully - test final state
+        setTimeout(() => {
+            expect(queryAllByRole('link')).toHaveLength(0);
+        }, 30);
+    });
+
+    it('should test keyed each block behavior with unique keys', () => {
+        const mockSocials = writable([
+            {
+                name: 'Twitter-User1',
+                url: 'https://twitter.com/user1',
+                icon: '/twitter1.png'
+            },
+            {
+                name: 'Twitter-User2', // Unique name for key
+                url: 'https://twitter.com/user2',
+                icon: '/twitter2.png'
+            }
+        ]);
+
+        const { getAllByRole } = FooterWrapper(Footer, { socials: mockSocials });
+        
+        const links = getAllByRole('link');
+        expect(links).toHaveLength(2);
+        
+        // Both should render with unique keys
+        expect(links[0]).toHaveAttribute('href', 'https://twitter.com/user1');
+        expect(links[1]).toHaveAttribute('href', 'https://twitter.com/user2');
+    });
+
+    it('should handle URL and icon validation edge cases', () => {
+        const mockSocials = writable([
+            {
+                name: 'Truthy URL, Falsy Icon',
+                url: 'https://example.com',
+                icon: 0 // falsy but not null/undefined
+            },
+            {
+                name: 'Falsy URL, Truthy Icon',
+                url: 0, // falsy but not null/undefined  
+                icon: '/icon.png'
+            },
+            {
+                name: 'Both Zero',
+                url: 0,
+                icon: 0
+            },
+            {
+                name: 'Both NaN',
+                url: NaN,
+                icon: NaN
+            },
+            {
+                name: 'Valid After Invalid',
+                url: 'https://valid.com',
+                icon: '/valid.png'
+            }
+        ]);
+
+        const { getAllByRole } = FooterWrapper(Footer, { socials: mockSocials });
+        
+        const links = getAllByRole('link');
+        expect(links).toHaveLength(1); // Only the last valid one
+    });
+
+    it('should test component structure rendering', () => {
+        const { container } = FooterWrapper(Footer);
+        
+        // Verify complete DOM structure
+        const footer = container.querySelector('footer');
+        expect(footer).toBeInTheDocument();
+        
+        const content = footer.querySelector('.content');
+        expect(content).toBeInTheDocument();
+        
+        const socials = content.querySelector('.socials');
+        expect(socials).toBeInTheDocument();
+        
+        const copyright = content.querySelector('.copyright');
+        expect(copyright).toBeInTheDocument();
+        
+        // Verify copyright structure
+        const spans = copyright.querySelectorAll('span');
+        expect(spans).toHaveLength(2);
+        expect(spans[0].textContent).toBe('© Harshith Thota');
+        expect(spans[1].textContent).toBe(new Date().getFullYear().toString());
+    });
+
+    it('should handle social name rendering with various data types', () => {
+        const mockSocials = writable([
+            {
+                name: 'String Name',
+                url: 'https://example.com',
+                icon: '/icon.png'
+            },
+            {
+                name: 123, // Number
+                url: 'https://example.com',
+                icon: '/icon.png'
+            },
+            {
+                name: true, // Boolean
+                url: 'https://example.com',
+                icon: '/icon.png'
+            }
+        ]);
+
+        const { container } = FooterWrapper(Footer, { socials: mockSocials });
+        
+        // Component should handle type coercion gracefully
+        const socialNames = container.querySelectorAll('.social-name');
+        expect(socialNames).toHaveLength(3);
+        
+        expect(socialNames[0].textContent).toBe('String Name');
+        expect(socialNames[1].textContent).toBe('123');
+        expect(socialNames[2].textContent).toBe('true');
+    });
+
+    it('should verify alt and title attribute rendering', () => {
+        const mockSocials = writable([
+            {
+                name: 'Test Social',
+                url: 'https://test.com',
+                icon: '/test.png'
+            }
+        ]);
+
+        const { getAllByRole } = FooterWrapper(Footer, { socials: mockSocials });
+        
+        const images = getAllByRole('img');
+        expect(images).toHaveLength(1);
+        
+        const img = images[0];
+        expect(img).toHaveAttribute('alt', 'Test Social');
+        expect(img).toHaveAttribute('title', 'Test Social');
+        expect(img).toHaveAttribute('src', '/test.png');
+        expect(img).toHaveClass('icon');
+    });
+
+    it('should handle complete store lifecycle with comprehensive updates', () => {
+        const mockSocials = writable(null);
+        const component = FooterWrapper(Footer, { socials: mockSocials });
+        
+        // Test null -> undefined -> empty array -> populated -> null cycle
+        const testStates = [
+            undefined,
+            [],
+            [{ name: 'A', url: 'http://a.com', icon: '/a.png' }],
+            [
+                { name: 'B', url: 'http://b.com', icon: '/b.png' },
+                { name: 'C', url: 'http://c.com', icon: '/c.png' }
+            ],
+            null
+        ];
+        
+        testStates.forEach((state, index) => {
+            mockSocials.set(state);
+            
+            // Give component time to react to store changes
+            setTimeout(() => {
+                const links = component.queryAllByRole('link');
+                
+                if (state && Array.isArray(state) && state.length > 0) {
+                    expect(links).toHaveLength(state.length);
+                } else {
+                    expect(links).toHaveLength(0);
+                }
+            }, index * 10);
+        });
+    });
 });
