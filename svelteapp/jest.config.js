@@ -1,7 +1,7 @@
 export default {
     testMatch: [
-        "**/?(*.)+(spec|test).[jt]s?(x)",
-        "**/?(*.)+(spec|test).svelte"
+        "<rootDir>/tests/**/?(*.)+(spec|test).[jt]s?(x)",
+        "<rootDir>/tests/**/?(*.)+(spec|test).svelte"
     ],
     testEnvironment: "jsdom",
     extensionsToTreatAsEsm: [".svelte"],
@@ -14,10 +14,10 @@ export default {
     moduleNameMapper: {
         "^src/(.*)": "<rootDir>/src/$1",
         "^\\$lib/(.*)": "<rootDir>/src/lib/$1",
-        "^\\$app/stores$": "<rootDir>/src/test-mocks/app-stores.js",
-        "^\\$app/(.*)": "<rootDir>/src/test-mocks/app-$1.js",
-        "^\\$env/dynamic/private$": "<rootDir>/src/test-mocks/env-dynamic-private.js",
-        "^TagCloud$": "<rootDir>/src/test-mocks/tagcloud.js"
+        "^\\$app/stores$": "<rootDir>/tests/test-mocks/app-stores.js",
+        "^\\$app/(.*)": "<rootDir>/tests/test-mocks/app-$1.js",
+        "^\\$env/dynamic/private$": "<rootDir>/tests/test-mocks/env-dynamic-private.js",
+        "^TagCloud$": "<rootDir>/tests/test-mocks/tagcloud.js"
     },
     setupFilesAfterEnv: ["@testing-library/jest-dom/jest-globals", "<rootDir>/src/test-setup.js"],
     moduleFileExtensions: ["js", "svelte"],
