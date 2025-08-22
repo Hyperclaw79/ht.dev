@@ -1,31 +1,40 @@
 /**
  * @jest-environment node
  */
+
 import { jest } from "@jest/globals";
 
+// Mock the getter function
 jest.unstable_mockModule("./getter.js", () => {
     return {
-        default: () => Promise.resolve([
+        default: jest.fn().mockResolvedValue([
             {
-                name: "Github",
-                url: "https://github.com/hyperclaw79",
-                icon: "/icons/github.png"
+                id: "1",
+                platform: "linkedin",
+                username: "testuser",
+                url: "https://linkedin.com/in/testuser"
             },
             {
-                name: "Linkedin",
-                url: "https://linkedin.com/in/harshith-thota-749851154",
-                icon: "/icons/linkedin.png"
-            },
-            {
-                name: "Gmail",
-                url: "mailto:harshith.thota7@gmail.com",
-                icon: "/icons/gmail.webp"
+                id: "2", 
+                platform: "github",
+                username: "testuser",
+                url: "https://github.com/testuser"
             }
         ])
     };
 });
 
-import { GET, POST, PUT, DELETE } from "./+server.js";
+// Mock environment variables
+jest.unstable_mockModule("$env/dynamic/private", () => {
+    return {
+        env: {
+            DB_EMAIL: "test@example.com",
+            DB_PASSWORD: "testpassword"
+        }
+    };
+});
+
+const { GET, POST, PUT, DELETE } = await import("./+server.js");
 
 describe("Unallowed Methods", () => {
     it("should throw error with status code 405 for POST, PUT and DELETE", () => {
@@ -35,18 +44,59 @@ describe("Unallowed Methods", () => {
     });
 });
 
-describe("GET", () => {
-    it("should return socialMetadata", async () => {
-        const result = await GET({ authData: { email: "mock", password: "mock" } });
-        expect(result).toBeDefined();
-        expect(result.status).toEqual(200);
-        expect(result.headers.get("Content-Type")).toEqual("application/json");
-        const body = await result.json();
-        expect(body).toBeDefined();
-        expect(body[0]).toMatchObject({
-            name: expect.any(String),
-            url: expect.any(String),
-            icon: expect.any(String)
+describe("GET method", () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it("should export GET function", () => {
+        expect(typeof GET).toBe('function');
+    });
+
+    it("should return socials data when authData is provided", async () => {
+        const authData = { email: "test@example.com", password: "testpass" };
+        const response = await GET({ authData });
+        
+        expect(response).toBeInstanceOf(Response);
+        expect(response.headers.get("Content-Type")).toBe("application/json");
+        
+        const data = await response.json();
+        expect(Array.isArray(data)).toBe(true);
+        expect(data).toHaveLength(2);
+        expect(data[0]).toMatchObject({
+            id: "1",
+            platform: "linkedin",
+            username: "testuser",
+            url: "https://linkedin.com/in/testuser"
+        });
+    });
+
+    it("should use environment variables when authData is not provided", async () => {
+        const response = await GET({});
+        
+        expect(response).toBeInstanceOf(Response);
+        expect(response.headers.get("Content-Type")).toBe("application/json");
+        
+        const data = await response.json();
+        expect(Array.isArray(data)).toBe(true);
+        expect(data).toHaveLength(2);
+    });
+
+    it("should handle getter function being called with correct parameters", async () => {
+        const authData = { email: "custom@example.com", password: "custompass" };
+        await GET({ authData });
+        
+        const getterModule = await import("./getter.js");
+        expect(getterModule.default).toHaveBeenCalledWith(authData);
+    });
+
+    it("should handle case when no authData is provided by using env vars", async () => {
+        await GET({});
+        
+        const getterModule = await import("./getter.js");
+        expect(getterModule.default).toHaveBeenCalledWith({
+            email: "test@example.com",
+            password: "testpassword"
         });
     });
 });
