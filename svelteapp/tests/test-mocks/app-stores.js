@@ -1,13 +1,13 @@
-import { writable } from 'svelte/store';
+import { writable } from "svelte/store";
 
 export const page = writable({
     error: {
-        message: 'Test error message'
+        message: "Test error message"
     },
     url: {
-        pathname: '/',
-        search: '',
-        hash: ''
+        pathname: "/",
+        search: "",
+        hash: ""
     },
     params: {},
     route: {

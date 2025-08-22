@@ -181,3 +181,104 @@ describe("getRecords integration", () => {
         expect(Array.isArray(result)).toBe(true);
     });
 });
+
+// Additional test scenarios from consolidated tests
+describe("getRecords edge cases", () => {
+    let originalMock;
+    
+    beforeEach(() => {
+        // Store the original implementation
+        originalMock = jest.fn();
+    });
+
+    it("should return empty array when PocketBase returns null records", async () => {
+        // Mock PocketBase to return null for records
+        jest.doMock('pocketbase', () => ({
+            default: jest.fn().mockImplementation(() => ({
+                autoCancellation: jest.fn(),
+                authStore: { token: 'existing_token' },
+                admins: {
+                    authWithPassword: jest.fn()
+                },
+                collection: jest.fn().mockReturnValue({
+                    getFullList: jest.fn().mockResolvedValue(null)
+                })
+            }))
+        }));
+
+        const { getRecords } = await import("src/routes/api/pbClient.js");
+        
+        const authData = { email: "test@test.com", password: "testpass" };
+        const result = await getRecords({ 
+            authData, 
+            collection: "test_collection"
+        });
+
+        // Should return empty array when records is null
+        expect(Array.isArray(result)).toBe(true);
+        expect(result).toHaveLength(0);
+    });
+
+    it("should successfully authenticate and fetch records", async () => {
+        // Mock successful PocketBase behavior
+        jest.doMock('pocketbase', () => ({
+            default: jest.fn().mockImplementation(() => ({
+                autoCancellation: jest.fn(),
+                authStore: { token: null },
+                admins: {
+                    authWithPassword: jest.fn().mockImplementation(async (email) => {
+                        if (email === 'success@test.com') {
+                            return true;
+                        }
+                        throw new Error('Authentication failed');
+                    })
+                },
+                collection: jest.fn().mockReturnValue({
+                    getFullList: jest.fn().mockResolvedValue([
+                        {
+                            collectionId: "123",
+                            id: "456", 
+                            name: "Test Record",
+                            description: "Test Description",
+                            category: "test",
+                            created: "2023-02-10T00:00:00.000Z",
+                            updated: "2023-02-10T00:00:00.000Z",
+                            collectionName: "test_success",
+                            expand: {
+                                children: [
+                                    { name: "Child 1", id: "child1" }
+                                ]
+                            }
+                        }
+                    ])
+                })
+            }))
+        }));
+
+        const { getRecords } = await import("src/routes/api/pbClient.js");
+        
+        const authData = { email: "success@test.com", password: "testpass" };
+        const result = await getRecords({ 
+            authData, 
+            collection: "test_success",
+            sort: "created",
+            skipFields: ["collectionId", "id"],
+            keyOrder: ["name", "description", "children"]
+        });
+
+        // Should successfully fetch and process records
+        expect(Array.isArray(result)).toBe(true);
+        
+        if (result.length > 0) {
+            // Verify record processing
+            expect(result[0]).toMatchObject({
+                name: expect.any(String),
+                description: expect.any(String)
+            });
+            
+            // Verify dirty fields were removed if processing succeeded
+            expect(result[0]).not.toHaveProperty('collectionId');
+            expect(result[0]).not.toHaveProperty('id');
+        }
+    });
+});

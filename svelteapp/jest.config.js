@@ -20,9 +20,9 @@ export default {
         "!src/test-setup.js"
     ],
     transform: {
-        "^.+\\.svelte$": ["svelte-jester", { 
-            "preprocess": true,
-            "debug": false
+        "^.+\\.svelte$": ["svelte-jester", {
+            preprocess: true,
+            debug: false
         }]
     },
     moduleNameMapper: {

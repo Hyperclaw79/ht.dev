@@ -8,7 +8,7 @@
 
     onMount(() => {
         if (timeout === 0) {
-            if (typeof action === 'function') {
+            if (typeof action === "function") {
                 try {
                     action();
                 } catch (e) {
@@ -16,7 +16,7 @@
                 }
             }
         } else if (noProgress) {
-            if (typeof action === 'function') {
+            if (typeof action === "function") {
                 setTimeout(() => {
                     try {
                         action();
@@ -30,11 +30,13 @@
 </script>
 
 {#if timeout > 0 && !noProgress}
-    <AsciiProgress {timeout} callback={typeof action === 'function' ? (() => {
-        try {
-            action();
-        } catch (e) {
-            // Silently handle action errors
+    <AsciiProgress {timeout} callback={typeof action === "function"
+        ? () => {
+            try {
+                action();
+            } catch (e) {
+                // Silently handle action errors
+            }
         }
-    }) : () => {}} />
+        : () => {}} />
 {/if}
