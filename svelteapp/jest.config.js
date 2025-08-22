@@ -1,7 +1,15 @@
 export default {
     testMatch: [
-        "<rootDir>/tests/**/?(*.)+(spec|test).[jt]s?(x)",
-        "<rootDir>/tests/**/?(*.)+(spec|test).svelte"
+        "<rootDir>/tests/**/*.test.js",
+        "<rootDir>/tests/**/*.test.ts",
+        "<rootDir>/tests/**/*.test.jsx",
+        "<rootDir>/tests/**/*.test.tsx",
+        "<rootDir>/tests/**/*.spec.js",
+        "<rootDir>/tests/**/*.spec.ts",
+        "<rootDir>/tests/**/*.spec.jsx",
+        "<rootDir>/tests/**/*.spec.tsx",
+        "<rootDir>/tests/**/*.test.svelte",
+        "<rootDir>/tests/**/*.spec.svelte"
     ],
     testEnvironment: "jsdom",
     extensionsToTreatAsEsm: [".svelte"],
