@@ -1,17 +1,10 @@
 # 🚀 HT Developer Portfolio 🚀
-![Svelte](https://img.shields.io/badge/svelte-%23f1413d.svg?style=for-the-badge&logo=svelte&logoColor=white)
-![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white)
-![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white)
-![PocketBase](https://img.shields.io/badge/pocketbase-%23b8dbe4.svg?style=for-the-badge&logo=Pocketbase&logoColor=black)
-![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)
-![NPM](https://img.shields.io/badge/NPM-%23CB3837.svg?style=for-the-badge&logo=npm&logoColor=white)
-![Jest](https://img.shields.io/badge/-jest-%23C21325?style=for-the-badge&logo=jest&logoColor=white)
-![ESLint](https://img.shields.io/badge/ESLint-4B3263?style=for-the-badge&logo=eslint&logoColor=white)
-
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Hyperclaw79/ht.dev/build.yml?style=for-the-badge&logo=Github)
-![Codacy](https://img.shields.io/codacy/grade/485f58538f324d4d8154b55e991455d5?label=Code%20Quality&logo=Codacy&style=for-the-badge)
-![Vercel](https://img.shields.io/github/deployments/hyperclaw79/ht.dev/production?label=Vercel&logo=Vercel&style=for-the-badge)
-![Checkly](https://api.checklyhq.com/v1/badges/checks/ec3abe6a-d733-43eb-964a-99d06a61efb7?style=for-the-badge&theme=default)
+| **Stack** | **Tools** | **Status** |
+|:---:|:---:|:---:|
+| ![SvelteKit](https://img.shields.io/badge/SvelteKit-FF3E00?style=for-the-badge&logo=svelte&logoColor=white) | ![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white) | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Hyperclaw79/ht.dev/build.yml?style=for-the-badge&logo=Github) |
+| ![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white) | ![ESLint](https://img.shields.io/badge/ESLint-4B3263?style=for-the-badge&logo=eslint&logoColor=white) | ![Codacy](https://img.shields.io/codacy/grade/485f58538f324d4d8154b55e991455d5?label=Code%20Quality&logo=Codacy&style=for-the-badge) |
+| ![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white) | ![Jest](https://img.shields.io/badge/-jest-%23C21325?style=for-the-badge&logo=jest&logoColor=white) | ![Vercel](https://img.shields.io/github/deployments/hyperclaw79/ht.dev/production?label=Vercel&logo=Vercel&style=for-the-badge) |
+| ![PocketBase](https://img.shields.io/badge/pocketbase-%23b8dbe4.svg?style=for-the-badge&logo=Pocketbase&logoColor=black) | ![Playwright](https://img.shields.io/badge/Playwright-%23C21325?style=for-the-badge&logo=jest&logoColor=white) | ![Checkly](https://api.checklyhq.com/v1/badges/checks/ec3abe6a-d733-43eb-964a-99d06a61efb7?style=for-the-badge&theme=default) |
 
 Welcome to my developer portfolio website, built using SvelteKit and PocketBase. The website showcases my skills, projects, and experiences as a developer.
 
