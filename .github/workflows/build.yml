@@ -25,14 +25,10 @@ jobs:
     - name: Install Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '20.19.4'
+        node-version: '22'
 
     - name: Install dependencies
       run: npm install
-
-    - name: Clear Jest cache (CI stability)
-      if: matrix.task == 'test'
-      run: npm test -- --clearCache
 
     - name: Run build task
       if: matrix.task == 'build'
@@ -45,16 +41,16 @@ jobs:
     - name: Run tests with coverage
       if: matrix.task == 'test'
       env:
-        NODE_OPTIONS: "--experimental-vm-modules --max-old-space-size=4096"
-      run: npm test -- --coverage --coverageReporters=text --coverageReporters=lcov --coverageReporters=html --runInBand --forceExit --detectOpenHandles --no-cache
+        NODE_OPTIONS: "--experimental-vm-modules"
+      run: npm test -- --coverage --coverageReporters=text --coverageReporters=lcov --coverageReporters=html
 
     - name: Extract coverage summary
       if: matrix.task == 'test'
       env:
-        NODE_OPTIONS: "--experimental-vm-modules --max-old-space-size=4096"
+        NODE_OPTIONS: "--experimental-vm-modules"
       run: |
         # Extract coverage summary from text output
-        npm test -- --coverage --coverageReporters=text --runInBand --forceExit --detectOpenHandles --no-cache > coverage-summary.txt 2>&1 || true
+        npm test -- --coverage --coverageReporters=text > coverage-summary.txt 2>&1 || true
         echo "=== Coverage Summary ===" 
         cat coverage-summary.txt | grep -A 20 "Coverage summary"
         
