@@ -22,7 +22,7 @@ jobs:
         working-directory: ./svelteapp
     strategy:
         matrix:
-            task: [build, lint, test]
+            task: [build, lint, unit-test, e2e-test]
 
     steps:
     - name: Checkout code
@@ -44,14 +44,18 @@ jobs:
       if: matrix.task == 'lint'
       run: npm run lint
 
-    - name: Run tests with coverage
-      if: matrix.task == 'test'
+    - name: Run unit tests with coverage
+      if: matrix.task == 'unit-test'
       env:
         NODE_OPTIONS: "--experimental-vm-modules"
       run: npm test -- --coverage --coverageReporters=text --coverageReporters=lcov --coverageReporters=html --coverageReporters=json-summary
 
+    - name: Run e2e tests
+      if: matrix.task == 'e2e-test'
+      run: npm run test:e2e
+
     - name: Extract coverage summary
-      if: matrix.task == 'test'
+      if: matrix.task == 'unit-test'
       run: |
         # Create a Node.js script to generate coverage report in the exact format requested
         cat > generate-coverage-report.cjs << 'EOF'
@@ -237,10 +241,8 @@ jobs:
         # Run the script with commit hash and capture output
         node generate-coverage-report.cjs ${{ github.sha }} >> $GITHUB_ENV
 
-
-
     - name: Upload coverage reports
-      if: matrix.task == 'test'
+      if: matrix.task == 'unit-test'
       uses: actions/upload-artifact@v4
       with:
         name: coverage-reports
@@ -249,7 +251,7 @@ jobs:
         retention-days: 30
 
     - name: Comment coverage on PR
-      if: matrix.task == 'test' && github.event_name == 'pull_request'
+      if: matrix.task == 'unit-test' && github.event_name == 'pull_request'
       uses: actions/github-script@v6
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
