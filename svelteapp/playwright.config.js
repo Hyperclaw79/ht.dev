@@ -31,7 +31,10 @@ export default defineConfig({
       name: 'chromium',
       use: { 
         ...devices['Desktop Chrome'],
-        channel: 'chrome', // Use system Chrome if available
+        launchOptions: {
+          executablePath: '/usr/bin/google-chrome',
+          args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+        }
       },
     },
 
@@ -40,7 +43,10 @@ export default defineConfig({
       name: 'Mobile Chrome',
       use: { 
         ...devices['Pixel 5'],
-        channel: 'chrome', // Use system Chrome if available
+        launchOptions: {
+          executablePath: '/usr/bin/google-chrome',
+          args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+        }
       },
     },
   ],
@@ -49,7 +55,7 @@ export default defineConfig({
   webServer: {
     command: 'npm run build && npm run preview',
     port: 8000,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
     timeout: 120 * 1000,
   },
 });

@@ -11,6 +11,7 @@ This directory contains end-to-end tests for the portfolio application using [Pl
 - **`terminal.spec.js`** - Terminal interface interactions on the landing page
 - **`admin.spec.js`** - Admin login functionality and form handling
 - **`responsive.spec.js`** - Mobile responsiveness and fallback behavior
+- **`download-resume.spec.js`** - Resume download functionality and PDF generation
 
 ### Coverage
 
@@ -24,6 +25,10 @@ The E2E tests cover:
 - ✅ API call interception and mocking
 - ✅ Responsive design across viewports
 - ✅ Form validation and user interactions
+- ✅ Resume download component display and functionality
+- ✅ PDF generation and thumbnail creation
+- ✅ Resume download with content validation
+- ✅ Button state management during processing
 
 ## Running Tests
 
@@ -104,4 +109,76 @@ If the web server fails to start:
 
 If browser automation fails:
 - Try installing system dependencies: `npx playwright install-deps`
-- Use system Chrome: Already configured via `channel: 'chrome'`
+- Use system Chrome: Already configured via `launchOptions.executablePath`
+
+## Download Resume Tests
+
+The `download-resume.spec.js` file contains comprehensive tests for the resume download functionality:
+
+### Test Coverage
+
+**Component Display Tests:**
+- Verifies download component visibility and structure
+- Checks for proper heading, description, and button elements
+- Validates preview container and accessibility attributes
+
+**Thumbnail Generation Tests:**
+- Tests resume thumbnail creation from HTML content
+- Validates data URL format for generated images
+- Handles timeout scenarios gracefully in CI environments
+- Verifies button state changes based on thumbnail availability
+
+**PDF Download Tests:**
+- Tests actual PDF file download and saves it temporarily
+- Validates PDF file structure and content
+- Checks for minimum file size requirements
+- Verifies filename matches expected pattern
+- Includes basic PDF content validation (header, name, resume text)
+- Properly cleans up downloaded test files
+
+**Button State Management:**
+- Tests button disabled/enabled states
+- Verifies loading indicators during processing
+- Handles click interactions and accessibility
+
+**API Integration Tests:**
+- Monitors required API calls for resume data
+- Validates that all necessary endpoints are called
+- Ensures data loading before thumbnail generation
+
+### Test Characteristics
+
+**Robust Error Handling:**
+- Tests gracefully skip when thumbnail generation times out
+- Mobile fallback detection automatically adjusts test expectations
+- PDF parsing failures don't fail the overall download validation
+
+**CI-Friendly:**
+- Reduced timeouts for CI environments
+- Graceful handling of resource-intensive operations
+- Smart skipping when conditions aren't met
+
+**Content Validation:**
+- PDF header validation (`%PDF`)
+- Basic content checks for name and resume keywords
+- File size validation to ensure meaningful content
+
+### Running Download Resume Tests
+
+```bash
+# Run all download resume tests
+npx playwright test e2e/download-resume.spec.js
+
+# Run specific test
+npx playwright test e2e/download-resume.spec.js --grep "should download resume PDF"
+
+# Run with debug mode
+npx playwright test e2e/download-resume.spec.js --debug
+```
+
+### Notes
+
+- PDF generation is resource-intensive and may timeout in constrained environments
+- Thumbnail generation depends on API data being fully loaded
+- Tests automatically detect mobile fallback and adjust expectations
+- Downloaded test files are automatically cleaned up after validation
