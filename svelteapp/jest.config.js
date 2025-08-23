@@ -16,8 +16,7 @@ export default {
     coverageProvider: "v8",
     collectCoverageFrom: [
         "src/**/*.{js,svelte}",
-        "!src/**/*.d.ts",
-        "!src/test-setup.js"
+        "!src/**/*.d.ts"
     ],
     transform: {
         "^.+\\.svelte$": ["svelte-jester", {
@@ -33,14 +32,9 @@ export default {
         "^\\$env/dynamic/private$": "<rootDir>/tests/test-mocks/env-dynamic-private.js",
         "^TagCloud$": "<rootDir>/tests/test-mocks/tagcloud.js"
     },
-    setupFilesAfterEnv: ["@testing-library/jest-dom/jest-globals", "<rootDir>/src/test-setup.js"],
+    setupFilesAfterEnv: ["@testing-library/jest-dom/jest-globals", "<rootDir>/tests/test-setup.js"],
     moduleFileExtensions: ["js", "svelte"],
     transformIgnorePatterns: [
         "node_modules/(?!(svelte|@testing-library)/)"
-    ],
-    coveragePathIgnorePatterns: [
-        "node_modules/",
-        "src/routes/\\+error\\.svelte",
-        "src/test-setup.js"
     ]
 };
