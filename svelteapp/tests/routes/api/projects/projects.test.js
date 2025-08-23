@@ -3,7 +3,7 @@
  */
 import { jest } from "@jest/globals";
 
-jest.unstable_mockModule("./getter.js", () => {
+jest.unstable_mockModule("src/routes/api/projects/getter.js", () => {
     return {
         default: () => Promise.resolve([
             {
@@ -25,8 +25,19 @@ jest.unstable_mockModule("./getter.js", () => {
     };
 });
 
+// Mock environment variables
+jest.unstable_mockModule("$env/dynamic/private", () => {
+    return {
+        env: {
+            DB_EMAIL: "test@example.com",
+            DB_PASSWORD: "testpassword",
+            GITHUB_TOKEN: "env_github_token"
+        }
+    };
+});
+
 // eslint-disable-next-line import/first
-import { GET, POST, PUT, DELETE, _updateWithGHStats, _generateGQL } from "./+server.js";
+const { GET, POST, PUT, DELETE, _updateWithGHStats, _generateGQL } = await import("src/routes/api/projects/+server.js");
 
 describe("Unallowed Methods", () => {
     it("should throw error with status code 405 for POST, PUT and DELETE", () => {
@@ -79,6 +90,28 @@ describe("GET method", () => {
             }
         ]);
     });
+
+    it("should use environment variables when authData is not provided", async () => {
+        const response = await GET({ token: "mocked_github_pat" });
+        const responseBody = await response.json();
+        expect(responseBody).toMatchObject([
+            {
+                name: "repoName",
+                title: "Project Title",
+                description: "Project Description",
+                htmlUrl: "https://github.com/hyperclaw79/repoName",
+                imageUrl: "/images/projects/repoName.png",
+                watcherCount: 1,
+                forkCount: 2,
+                stargazerCount: 3
+            },
+            {
+                name: "repoName2",
+                title: "Project Title 2",
+                description: "Project Description 2"
+            }
+        ]);
+    });
 });
 
 describe("_updateWithGHStats", () => {
@@ -111,6 +144,21 @@ describe("_updateWithGHStats", () => {
         await _updateWithGHStats({ projects, token: "mocked_github_pat" });
 
         expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    it("uses environment token when no token is provided", async () => {
+        const projects = [{ isOnGithub: true, alias: "repo", title: "Project Title", description: "Project Description" }];
+
+        await _updateWithGHStats({ projects });
+
+        expect(global.fetch).toHaveBeenCalledWith(
+            "https://api.github.com/graphql",
+            expect.objectContaining({
+                headers: expect.objectContaining({
+                    Authorization: "Bearer env_github_token"
+                })
+            })
+        );
     });
 
     it("handles fetch errors", async () => {

@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import constructUrl, { extractEndYear, getRoles, isIntern, firstExpJob } from "./utils";
+import constructUrl, { extractEndYear, getRoles, isIntern, firstExpJob } from "src/utils";
 
 describe("constructUrl", () => {
     const testCases = [

@@ -2,6 +2,9 @@
     const clickCallback = (e) => {
         const { x, y } = e;
         let elems = document.elementsFromPoint(x, y);
+        if (!elems || !Array.isArray(elems)) {
+            return;
+        }
         elems = elems.filter(
             elem => !elem.classList.contains("tilting-card-content") &&
                     !elem.classList.contains("mouse-position-tracker") &&

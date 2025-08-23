@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { transpose, mutate, generateGrid, getRandomRotation, getIconData } from "./utils.js";
+import { transpose, mutate, generateGrid, getRandomRotation, getIconData } from "src/routes/components/landing/utils.js";
 
 describe("transpose", () => {
     it("should correctly transpose a matrix", () => {

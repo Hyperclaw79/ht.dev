@@ -3,7 +3,7 @@
  */
 
 import { jest } from "@jest/globals";
-import { execute, commandsMap } from "./commandHandler.js";
+import { execute, commandsMap } from "src/routes/components/landing/terminal/commandHandler.js";
 
 describe("Execute", () => {
     let inputs;

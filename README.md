@@ -74,6 +74,16 @@ To run the website locally:
 3. Update the `.env` file with your relevant credentials
 4. Start the development server using `npm run dev`
 
+### 🧪 Running Tests
+
+To run the test suite:
+
+1. Ensure dependencies are installed: `npm install`
+2. Run all tests: `npm test`
+3. Run tests in watch mode: `npm test -- --watch`
+
+All tests are located in the `svelteapp/tests/` directory, organized to mirror the source code structure in `svelteapp/src/`.
+
 ## 🤝 Contributing
 
 Contributions, issues, and feature requests are welcome. Feel free to check out the [issues page](https://github.com/hyperclaw79/ht.dev/issues) if you want to contribute.
