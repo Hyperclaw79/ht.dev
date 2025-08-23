@@ -2,9 +2,6 @@ import { test, expect } from "@playwright/test";
 
 test.describe("Terminal Landing Page", () => {
     test("should display terminal interface on desktop", async ({ page }) => {
-    // Set desktop viewport to ensure we see the main content
-        await page.setViewportSize({ width: 1200, height: 800 });
-
         await page.goto("/");
         await page.waitForLoadState("networkidle");
 
@@ -13,8 +10,11 @@ test.describe("Terminal Landing Page", () => {
         const isShowingMobileFallback = await mobileHeader.isVisible();
 
         if (isShowingMobileFallback) {
-            // Skip terminal tests if mobile fallback is shown
-            test.skip();
+            // If mobile fallback is shown, verify that terminal is not visible
+            const terminal = page.locator(".terminal").first();
+            await expect(terminal).not.toBeVisible();
+            // Optionally, check that the mobile header is visible
+            await expect(mobileHeader).toBeVisible();
             return;
         }
 

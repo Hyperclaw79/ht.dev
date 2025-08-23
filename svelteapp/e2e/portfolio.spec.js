@@ -30,27 +30,16 @@ test.describe("Portfolio Main Page", () => {
         }
     });
 
-    test("should navigate between sections on desktop", async ({ page }) => {
-    // Set desktop viewport to ensure we see the main content
-        await page.setViewportSize({ width: 1200, height: 800 });
-
+    test("should navigate between sections", async ({ page }) => {
         await page.goto("/");
         await page.waitForLoadState("networkidle");
 
-        // Check if we have main content (not mobile fallback)
-        const landingSection = page.locator("#landing");
+        // Test navigation to different sections
+        const sections = ["#about", "#experience", "#projects", "#skills", "#achievements"];
 
-        if (await landingSection.isVisible()) {
-            // Test navigation to different sections
-            const sections = ["#about", "#experience", "#projects", "#skills", "#achievements"];
-
-            for (const section of sections) {
-                await page.goto(`/${section}`);
-                await expect(page.locator(section)).toBeVisible();
-            }
-        } else {
-            // If mobile fallback is shown, skip this test
-            test.skip();
+        for (const section of sections) {
+            await page.goto(`/${section}`);
+            await expect(page.locator(section)).toBeVisible();
         }
     });
 
@@ -61,6 +50,14 @@ test.describe("Portfolio Main Page", () => {
         // Scroll to footer
         await page.locator("footer").scrollIntoViewIfNeeded();
         await expect(page.locator("footer")).toBeVisible();
+        // Test if the Footer buttons actually have valid URLs
+        const footerLinks = page.locator("footer a");
+        const count = await footerLinks.count();
+        for (let i = 0; i < count; i++) {
+            const link = footerLinks.nth(i);
+            const href = await link.getAttribute("href");
+            expect(href).toBeTruthy();
+        }
     });
 
     test("should handle API data loading", async ({ page }) => {
