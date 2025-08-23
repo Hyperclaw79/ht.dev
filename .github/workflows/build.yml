@@ -60,23 +60,67 @@ jobs:
         function generateProgressBar(percentage) {
           const pct = parseFloat(percentage);
           const blocks = Math.round(pct / 5); // 20 blocks total for 100%
-          const filled = '█'.repeat(blocks);
-          const empty = '░'.repeat(20 - blocks);
           
-          let color;
-          if (pct >= 90) color = '🟢';
-          else if (pct >= 75) color = '🟡';
-          else color = '🔴';
+          // Generate colored squares based on percentage
+          let coloredBlocks = '';
+          let emptyBlocks = '⬛'.repeat(20 - blocks);
           
-          return `${color} ${filled}${empty} ${pct}%`;
+          for (let i = 0; i < blocks; i++) {
+            const blockPct = ((i + 1) * 5);
+            if (blockPct <= pct) {
+              if (blockPct >= 90) coloredBlocks += '🟩'; // Green squares for high coverage
+              else if (blockPct >= 75) coloredBlocks += '🟨'; // Yellow squares for medium coverage  
+              else coloredBlocks += '🟥'; // Red squares for low coverage
+            }
+          }
+          
+          return `${coloredBlocks}${emptyBlocks} ${pct}%`;
         }
         
         function formatCoverageData(coverageData) {
           const total = coverageData.total;
           
+          // Create per-file breakdown
+          const fileEntries = Object.entries(coverageData).filter(([key]) => key !== 'total');
+          
+          // Group files by directory
+          const directories = {};
+          fileEntries.forEach(([filePath, data]) => {
+            const relativePath = filePath.replace('/home/runner/work/ht.dev/ht.dev/svelteapp/', '');
+            const dirPath = relativePath.substring(0, relativePath.lastIndexOf('/')) || 'root';
+            if (!directories[dirPath]) {
+              directories[dirPath] = [];
+            }
+            directories[dirPath].push({ path: relativePath, data });
+          });
+          
+          // Generate directory breakdown
+          let directoryBreakdown = '';
+          Object.entries(directories).forEach(([dirName, files]) => {
+            directoryBreakdown += `\\n#### 📁 ${dirName}\\n\\n`;
+            directoryBreakdown += '| File | Statements | Lines | Functions | Branches |\\n';
+            directoryBreakdown += '|------|------------|-------|-----------|----------|\\n';
+            
+            files.forEach(({ path, data }) => {
+              const fileName = path.substring(path.lastIndexOf('/') + 1);
+              const stmtPct = data.statements.pct.toFixed(1);
+              const linesPct = data.lines.pct.toFixed(1);
+              const funcsPct = data.functions.pct.toFixed(1);
+              const branchPct = data.branches.pct.toFixed(1);
+              
+              const stmtIcon = stmtPct >= 90 ? '🟢' : stmtPct >= 75 ? '🟡' : '🔴';
+              const linesIcon = linesPct >= 90 ? '🟢' : linesPct >= 75 ? '🟡' : '🔴';
+              const funcsIcon = funcsPct >= 90 ? '🟢' : funcsPct >= 75 ? '🟡' : '🔴';
+              const branchIcon = branchPct >= 90 ? '🟢' : branchPct >= 75 ? '🟡' : '🔴';
+              
+              directoryBreakdown += `| ${fileName} | ${stmtIcon} ${stmtPct}% | ${linesIcon} ${linesPct}% | ${funcsIcon} ${funcsPct}% | ${branchIcon} ${branchPct}% |\\n`;
+            });
+          });
+          
           const table = `
         ## 📊 Test Coverage Report
         
+        ### 📈 Overall Summary
         | Coverage Type | Progress | Covered/Total |
         |---------------|----------|---------------|
         | **Statements** | ${generateProgressBar(total.statements.pct)} | ${total.statements.covered}/${total.statements.total} |
@@ -84,9 +128,11 @@ jobs:
         | **Functions** | ${generateProgressBar(total.functions.pct)} | ${total.functions.covered}/${total.functions.total} |
         | **Branches** | ${generateProgressBar(total.branches.pct)} | ${total.branches.covered}/${total.branches.total} |
         
-        ### 📈 Overall Summary
         - **Total Files Covered**: ${Object.keys(coverageData).length - 1} files
         - **Average Coverage**: ${((total.statements.pct + total.lines.pct + total.functions.pct + total.branches.pct) / 4).toFixed(2)}%
+        
+        ### 📂 Detailed Coverage by Directory
+        ${directoryBreakdown}
         `;
           
           return table;
@@ -153,7 +199,7 @@ jobs:
         
         const summary = `# Test Coverage Report
 
-**Generated on:** ${timestamp}
+\\*\\*Generated on:\\*\\* ${timestamp}
 
 ## Coverage Summary
 
