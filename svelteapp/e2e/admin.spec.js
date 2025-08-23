@@ -54,13 +54,6 @@ test.describe('Admin Login Page', () => {
       });
     });
 
-    // Mock window.location.assign to prevent actual navigation
-    await page.addInitScript(() => {
-      window.location.assign = (url) => {
-        window._redirectUrl = url;
-      };
-    });
-
     await page.goto('/admin');
     await page.waitForLoadState('networkidle');
     
@@ -68,14 +61,25 @@ test.describe('Admin Login Page', () => {
     await page.locator('input[placeholder="Username"]').fill('admin');
     await page.locator('input[placeholder="Password"]').fill('password');
     
+    // Mock window.location.assign and track redirects
+    let redirectUrl = null;
+    await page.evaluate(() => {
+      window.originalAssign = window.location.assign;
+      window.location.assign = (url) => {
+        window._redirectUrl = url;
+      };
+    });
+    
     // Submit form
     await page.locator('button:has-text("LOGIN")').click();
     
     // Wait for redirect handling
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
     
     // Check that redirect was called
-    const redirectUrl = await page.evaluate(() => window._redirectUrl);
+    redirectUrl = await page.evaluate(() => window._redirectUrl);
+    
+    // Verify redirect URL is set correctly
     expect(redirectUrl).toBe('https://example.com/dashboard');
   });
 
