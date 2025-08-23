@@ -5,15 +5,16 @@ import constructUrl from "../../utils";
 let pocket;
 
 export const getRecords = async ({ authData, collection, sort = "created", skipFields, keyOrder }) => {
-    if (!pocket) {
-        const module = await import("$env/dynamic/private");
-        const { env } = module;
-        const dbUrl = constructUrl(env.DB_HOST, env.DB_PORT);
-        console.log(`Connecting to PocketBase at ${dbUrl}...`);
-        pocket = new PocketBase(dbUrl.toString());
-        pocket?.autoCancellation(false);
-    }
     try {
+        if (!pocket) {
+            const module = await import("$env/dynamic/private");
+            const { env } = module;
+            console.log(`Environment variables - DB_HOST: ${env.DB_HOST}, DB_PORT: ${env.DB_PORT}`);
+            const dbUrl = constructUrl(env.DB_HOST, env.DB_PORT);
+            console.log(`Connecting to PocketBase at ${dbUrl}...`);
+            pocket = new PocketBase(dbUrl.toString());
+            pocket?.autoCancellation(false);
+        }
         if (!pocket.authStore.token) {
             await pocket.admins.authWithPassword(authData.email, authData.password);
         }
@@ -26,7 +27,8 @@ export const getRecords = async ({ authData, collection, sort = "created", skipF
     } catch (err) {
         console.warn(
             `Error fetching remote records for collection: ${collection.toUpperCase()}.` +
-            "\nSwitching to Fallback mode."
+            "\nSwitching to Fallback mode.",
+            err.message
         );
         return await _fallback(collection);
     }

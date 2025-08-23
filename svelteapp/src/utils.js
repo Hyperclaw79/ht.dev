@@ -1,4 +1,7 @@
 const constructUrl = (host, port, path) => {
+    if (!host) {
+        throw new Error("Host parameter is required for URL construction");
+    }
     const rawUrl = host.startsWith("http") ? host : `http://${host}`;
     const redirectUrl = path ? new URL(path, rawUrl) : new URL(rawUrl);
     if (port) {

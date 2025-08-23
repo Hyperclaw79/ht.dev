@@ -53,9 +53,9 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm run build && npm run preview',
+    command: 'npm run build && npx vite preview --port 8000',
     port: 8000,
-    reuseExistingServer: true,
+    reuseExistingServer: false,
     timeout: 120 * 1000,
   },
 });
