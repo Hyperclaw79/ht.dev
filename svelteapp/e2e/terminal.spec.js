@@ -28,8 +28,8 @@ test.describe('Terminal Landing Page', () => {
       // If terminal is visible, test its functionality
       await expect(terminal).toBeVisible();
       
-      // Check for terminal title bar
-      await expect(page.locator('.title-bar')).toBeVisible();
+      // Check for terminal title bar (correct class name)
+      await expect(page.locator('.titleBar')).toBeVisible();
       
       // Check for screen/terminal content
       await expect(page.locator('.screen')).toBeVisible();
