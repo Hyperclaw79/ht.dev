@@ -42,5 +42,13 @@ export default {
         "node_modules/",
         "src/routes/\\+error\\.svelte",
         "src/test-setup.js"
-    ]
+    ],
+    // Improve module isolation for CI stability
+    clearMocks: true,
+    resetMocks: true,
+    restoreMocks: true,
+    // Timeout settings for CI stability
+    testTimeout: 10000,
+    // Cache settings
+    cacheDirectory: "<rootDir>/node_modules/.cache/jest"
 };
