@@ -55,7 +55,18 @@ export default defineConfig({
   webServer: {
     command: 'npm run build && npx vite preview --port 8000',
     port: 8000,
-    reuseExistingServer: false,
+    reuseExistingServer: true,
     timeout: 120 * 1000,
+    env: {
+      // Set test environment variables to trigger PocketBase fallback mechanism
+      // PocketBase will try to connect to localhost:9999 which doesn't exist,
+      // causing connection to fail naturally and activate fallbacks
+      DB_HOST: 'localhost',
+      DB_PORT: '9999',
+      DB_EMAIL: 'test@example.com',
+      DB_PASSWORD: 'test',
+      ADMIN_USERNAME: 'admin',
+      ADMIN_PASSWORD: 'admin',
+    },
   },
 });
