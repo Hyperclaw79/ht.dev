@@ -1,0 +1,105 @@
+# Page snapshot
+
+```yaml
+- main [ref=e3]:
+  - generic [ref=e4]:
+    - paragraph [ref=e5]: PLEASE SWITCH TO A DESKTOP FOR AN ENHANCED USER EXPERIENCE.
+    - generic:
+      - img [ref=e6]
+      - img [ref=e35]
+    - generic [ref=e52] [cursor=pointer]: Scroll Down
+  - generic [ref=e55]:
+    - heading "A B O U T" [level=1] [ref=e56]:
+      - generic [ref=e57]: A
+      - generic [ref=e58]: B
+      - generic [ref=e59]: O
+      - generic [ref=e60]: U
+      - generic [ref=e61]: T
+    - generic [ref=e62]:
+      - generic [ref=e63]:
+        - generic [ref=e64]:
+          - generic [ref=e65]:
+            - generic [ref=e66]:
+              - generic [ref=e67]: H
+              - generic [ref=e68]: ARSHITH
+            - generic [ref=e69]:
+              - generic [ref=e70]: T
+              - generic [ref=e71]: HOTA
+          - code [ref=e72]:
+            - generic [ref=e73]: PYTHON 🐍
+            - generic [ref=e74]: DEVELOPER 👨‍💻
+        - img "Avatar" [ref=e76]
+      - generic [ref=e78]:
+        - paragraph
+        - generic [ref=e79]:
+          - generic [ref=e82]: Skills
+          - generic [ref=e84]:
+            - generic [ref=e86]: Interests
+            - generic [ref=e87]:
+              - generic [ref=e89]: Cybersecurity
+              - generic [ref=e91]: Artificial Intelligence
+              - generic [ref=e93]: Data Science
+              - generic [ref=e95]: Automation Systems
+        - paragraph
+  - heading "E X P E R I E N C E" [level=1] [ref=e98]:
+    - generic [ref=e99]: E
+    - generic [ref=e100]: X
+    - generic [ref=e101]: P
+    - generic [ref=e102]: E
+    - generic [ref=e103]: R
+    - generic [ref=e104]: I
+    - generic [ref=e105]: E
+    - generic [ref=e106]: "N"
+    - generic [ref=e107]: C
+    - generic [ref=e108]: E
+  - generic [ref=e112]:
+    - heading "M Y P R O J E C T S" [level=1] [ref=e113]:
+      - generic [ref=e114]: M
+      - generic [ref=e115]: "Y"
+      - generic [ref=e116]: P
+      - generic [ref=e117]: R
+      - generic [ref=e118]: O
+      - generic [ref=e119]: J
+      - generic [ref=e120]: E
+      - generic [ref=e121]: C
+      - generic [ref=e122]: T
+      - generic [ref=e123]: S
+    - paragraph [ref=e125]: No projects found...
+  - heading "A C H I E V E M E N T S & C E R T I F I C A T E S" [level=1] [ref=e129]:
+    - generic [ref=e130]: A
+    - generic [ref=e131]: C
+    - generic [ref=e132]: H
+    - generic [ref=e133]: I
+    - generic [ref=e134]: E
+    - generic [ref=e135]: V
+    - generic [ref=e136]: E
+    - generic [ref=e137]: M
+    - generic [ref=e138]: E
+    - generic [ref=e139]: "N"
+    - generic [ref=e140]: T
+    - generic [ref=e141]: S
+    - generic [ref=e142]: "&"
+    - generic [ref=e143]: C
+    - generic [ref=e144]: E
+    - generic [ref=e145]: R
+    - generic [ref=e146]: T
+    - generic [ref=e147]: I
+    - generic [ref=e148]: F
+    - generic [ref=e149]: I
+    - generic [ref=e150]: C
+    - generic [ref=e151]: A
+    - generic [ref=e152]: T
+    - generic [ref=e153]: E
+    - generic [ref=e154]: S
+  - generic [ref=e156]:
+    - heading "Download My Resume" [level=2] [ref=e157]
+    - paragraph [ref=e158]: Get a copy of my dynamically generated resume.
+    - generic [ref=e159]:
+      - button "Download resume as PDF" [ref=e160] [cursor=pointer]
+      - button "Download" [disabled] [ref=e162]:
+        - img [ref=e163]
+        - generic [ref=e166]: Download
+  - generic [ref=e169]:
+    - generic [ref=e170]: © Harshith Thota
+    - generic [ref=e171]: "2025"
+```

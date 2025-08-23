@@ -7,9 +7,13 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"lint": "eslint . --ext .js,.svelte",
-		"test": "node --experimental-vm-modules node_modules/jest/bin/jest"
+		"test": "node --experimental-vm-modules node_modules/jest/bin/jest",
+		"test:e2e": "playwright test",
+		"test:e2e:ui": "playwright test --ui",
+		"test:e2e:report": "playwright show-report"
 	},
 	"devDependencies": {
+		"@playwright/test": "^1.55.0",
 		"@sveltejs/adapter-auto": "^2.0.0",
 		"@sveltejs/adapter-vercel": "^3.1.0",
 		"@sveltejs/kit": "^1.30.4",
