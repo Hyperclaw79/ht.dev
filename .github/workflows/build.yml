@@ -11,6 +11,7 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  issues: write
 
 jobs:
   build_lint_test:
@@ -190,6 +191,7 @@ The detailed HTML coverage report is available in the coverage/ directory.
       if: matrix.task == 'test' && github.event_name == 'pull_request'
       uses: actions/github-script@v6
       with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
           // Use the dynamically generated coverage report
           const coverageReport = process.env.COVERAGE_REPORT || 'Coverage data not available';
@@ -209,9 +211,17 @@ The detailed HTML coverage report is available in the coverage/ directory.
           
           const comment = coverageReport + testSummary;
           
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: comment
-          });
+          try {
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+            console.log('Successfully posted coverage comment to PR');
+          } catch (error) {
+            console.log('Failed to post coverage comment:', error.message);
+            console.log('Coverage data was:', comment);
+            // Don't fail the workflow if commenting fails
+            return;
+          }
