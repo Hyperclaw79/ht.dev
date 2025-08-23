@@ -14,7 +14,6 @@ export default {
     testEnvironment: "jsdom",
     extensionsToTreatAsEsm: [".svelte"],
     coverageProvider: "v8",
-    maxWorkers: 1,
     collectCoverageFrom: [
         "src/**/*.{js,svelte}",
         "!src/**/*.d.ts",

@@ -2,11 +2,11 @@ name: Build, Lint, and Test
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, testing ]
     paths:
       - 'svelteapp/**'
   pull_request:
-    branches: [ main ]
+    branches: [ main, testing ]
 
 jobs:
   build_lint_test:
@@ -40,13 +40,13 @@ jobs:
 
     - name: Run tests with coverage
       if: matrix.task == 'test'
-      run: npm test -- --coverage --coverageReporters=text --coverageReporters=lcov --coverageReporters=html
+      run: npm test -- --coverage --coverageReporters=text --coverageReporters=lcov --coverageReporters=html --maxWorkers=1
 
     - name: Extract coverage summary
       if: matrix.task == 'test'
       run: |
         # Extract coverage summary from text output
-        npm test -- --coverage --coverageReporters=text > coverage-summary.txt 2>&1 || true
+        npm test -- --coverage --coverageReporters=text --maxWorkers=1 > coverage-summary.txt 2>&1 || true
         echo "=== Coverage Summary ===" 
         cat coverage-summary.txt | grep -A 20 "Coverage summary"
         
