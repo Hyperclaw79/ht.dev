@@ -5,9 +5,15 @@ test.describe('Admin Login Page', () => {
     await page.goto('/admin');
     await page.waitForLoadState('networkidle');
     
+    // Wait for the main heading to be visible before proceeding
+    await page.waitForSelector('h1', { timeout: 10000 });
+    
     // Check page title and heading
     await expect(page).toHaveTitle("Harshith Thota's Developer Portfolio");
     await expect(page.locator('h1:has-text("Admin Console")')).toBeVisible();
+    
+    // Wait for form to be visible
+    await page.waitForSelector('form.login-form', { timeout: 10000 });
     
     // Check for login form elements
     await expect(page.locator('input[placeholder="Username"]')).toBeVisible();
@@ -28,6 +34,9 @@ test.describe('Admin Login Page', () => {
     await page.goto('/admin');
     await page.waitForLoadState('networkidle');
     
+    // Wait for form to be ready
+    await page.waitForSelector('form.login-form', { timeout: 10000 });
+    
     // Fill invalid credentials
     await page.locator('input[placeholder="Username"]').fill('invalid');
     await page.locator('input[placeholder="Password"]').fill('wrong');
@@ -35,8 +44,8 @@ test.describe('Admin Login Page', () => {
     // Submit form
     await page.locator('button:has-text("LOGIN")').click();
     
-    // Wait for error message
-    await page.waitForTimeout(1000);
+    // Wait for error message with explicit selector wait
+    await page.waitForSelector('p.error.show', { timeout: 10000 });
     
     // Check for error message
     const errorMessage = page.locator('p.error.show');
@@ -57,35 +66,54 @@ test.describe('Admin Login Page', () => {
     await page.goto('/admin');
     await page.waitForLoadState('networkidle');
     
+    // Wait for form to be ready
+    await page.waitForSelector('form.login-form', { timeout: 10000 });
+    
     // Fill valid credentials
     await page.locator('input[placeholder="Username"]').fill('admin');
     await page.locator('input[placeholder="Password"]').fill('password');
     
-    // Mock window.location.assign and track redirects
-    let redirectUrl = null;
+    // Check that no error is displayed before submission
+    const errorMessage = page.locator('p.error.show');
+    await expect(errorMessage).not.toBeVisible();
+    
+    // Mock location.assign and track redirects - setup BEFORE clicking
     await page.evaluate(() => {
-      window.originalAssign = window.location.assign;
-      window.location.assign = (url) => {
+      window._redirectCalled = false;
+      window._redirectUrl = null;
+      window.originalAssign = location.assign;
+      location.assign = (url) => {
+        window._redirectCalled = true;
         window._redirectUrl = url;
+        // Prevent actual redirect in test
+        return Promise.resolve();
       };
     });
     
     // Submit form
     await page.locator('button:has-text("LOGIN")').click();
     
-    // Wait for redirect handling
-    await page.waitForTimeout(2000);
+    // Wait for the API call to complete and redirect to be called
+    await page.waitForTimeout(3000);
+    
+    // Verify error message is still not visible (successful login)
+    await expect(errorMessage).not.toBeVisible();
     
     // Check that redirect was called
-    redirectUrl = await page.evaluate(() => window._redirectUrl);
+    const redirectCalled = await page.evaluate(() => window._redirectCalled);
+    const redirectUrl = await page.evaluate(() => window._redirectUrl);
     
-    // Verify redirect URL is set correctly
+    // Verify redirect was attempted
+    expect(redirectCalled).toBe(true);
     expect(redirectUrl).toBe('https://example.com/dashboard');
   });
 
   test('should validate form inputs', async ({ page }) => {
     await page.goto('/admin');
     await page.waitForLoadState('networkidle');
+    
+    // Wait for form to be ready
+    await page.waitForSelector('form.login-form', { timeout: 10000 });
     
     // Try to submit empty form
     await page.locator('button:has-text("LOGIN")').click();

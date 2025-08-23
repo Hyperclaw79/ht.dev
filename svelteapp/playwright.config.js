@@ -67,6 +67,7 @@ export default defineConfig({
       DB_PASSWORD: 'test',
       ADMIN_USERNAME: 'admin',
       ADMIN_PASSWORD: 'admin',
+      TEST_MODE: 'true',
     },
   },
 });

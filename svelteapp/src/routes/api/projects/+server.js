@@ -77,7 +77,10 @@ export const _updateWithGHStats = async ({ projects, token }) => {
             }
         });
     } catch (err) {
-        console.warn("Failed to fetch GitHub data.");
+        // Only log GitHub fetch errors if not in test mode
+        if (process.env.TEST_MODE !== 'true') {
+            console.warn("Failed to fetch GitHub data.");
+        }
     }
 };
 
