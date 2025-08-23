@@ -42,25 +42,32 @@ jobs:
       if: matrix.task == 'test'
       env:
         NODE_OPTIONS: "--experimental-vm-modules"
-      run: npm test -- --coverage --coverageReporters=text --coverageReporters=lcov --coverageReporters=html
+      run: npm test -- --coverage --coverageReporters=text --coverageReporters=lcov --coverageReporters=html --coverageReporters=json-summary
 
     - name: Extract coverage summary
       if: matrix.task == 'test'
-      env:
-        NODE_OPTIONS: "--experimental-vm-modules"
       run: |
-        # Extract coverage summary from text output
-        npm test -- --coverage --coverageReporters=text > coverage-summary.txt 2>&1 || true
-        echo "=== Coverage Summary ===" 
-        cat coverage-summary.txt | grep -A 20 "Coverage summary"
-        
-        # Extract overall coverage percentage
-        COVERAGE=$(cat coverage-summary.txt | grep "All files" | awk '{print $4}' | head -1 || echo "N/A")
-        BRANCH_COVERAGE=$(cat coverage-summary.txt | grep "All files" | awk '{print $6}' | head -1 || echo "N/A")
-        echo "Statement Coverage: $COVERAGE"
-        echo "Branch Coverage: $BRANCH_COVERAGE"
-        echo "COVERAGE_PERCENTAGE=$COVERAGE" >> $GITHUB_ENV
-        echo "BRANCH_COVERAGE_PERCENTAGE=$BRANCH_COVERAGE" >> $GITHUB_ENV
+        # Extract coverage metrics from existing coverage-summary.json file
+        if [ -f "coverage/coverage-summary.json" ]; then
+          COVERAGE=$(node -e "
+            const fs = require('fs');
+            const coverage = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'));
+            console.log(coverage.total.statements.pct + '%');
+          ")
+          BRANCH_COVERAGE=$(node -e "
+            const fs = require('fs');
+            const coverage = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'));
+            console.log(coverage.total.branches.pct + '%');
+          ")
+          echo "Statement Coverage: $COVERAGE"
+          echo "Branch Coverage: $BRANCH_COVERAGE"
+          echo "COVERAGE_PERCENTAGE=$COVERAGE" >> $GITHUB_ENV
+          echo "BRANCH_COVERAGE_PERCENTAGE=$BRANCH_COVERAGE" >> $GITHUB_ENV
+        else
+          echo "Coverage summary file not found"
+          echo "COVERAGE_PERCENTAGE=N/A" >> $GITHUB_ENV
+          echo "BRANCH_COVERAGE_PERCENTAGE=N/A" >> $GITHUB_ENV
+        fi
 
     - name: Generate coverage summary file
       if: matrix.task == 'test'
@@ -94,7 +101,6 @@ jobs:
         path: |
           svelteapp/coverage/
           svelteapp/coverage-summary.md
-          svelteapp/coverage-summary.txt
         retention-days: 30
 
     - name: Comment coverage on PR
