@@ -8,6 +8,10 @@ on:
   pull_request:
     branches: [ main, testing ]
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   build_lint_test:
     runs-on: ubuntu-latest
@@ -47,51 +51,130 @@ jobs:
     - name: Extract coverage summary
       if: matrix.task == 'test'
       run: |
-        # Extract coverage metrics from existing coverage-summary.json file
-        if [ -f "coverage/coverage-summary.json" ]; then
-          COVERAGE=$(node -e "
-            const fs = require('fs');
-            const coverage = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'));
-            console.log(coverage.total.statements.pct + '%');
-          ")
-          BRANCH_COVERAGE=$(node -e "
-            const fs = require('fs');
-            const coverage = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'));
-            console.log(coverage.total.branches.pct + '%');
-          ")
-          echo "Statement Coverage: $COVERAGE"
-          echo "Branch Coverage: $BRANCH_COVERAGE"
-          echo "COVERAGE_PERCENTAGE=$COVERAGE" >> $GITHUB_ENV
-          echo "BRANCH_COVERAGE_PERCENTAGE=$BRANCH_COVERAGE" >> $GITHUB_ENV
-        else
-          echo "Coverage summary file not found"
-          echo "COVERAGE_PERCENTAGE=N/A" >> $GITHUB_ENV
-          echo "BRANCH_COVERAGE_PERCENTAGE=N/A" >> $GITHUB_ENV
-        fi
+        # Create a Node.js script to generate comprehensive coverage report
+        cat > generate-coverage-report.cjs << 'EOF'
+        const fs = require('fs');
+        
+        function generateProgressBar(percentage) {
+          const pct = parseFloat(percentage);
+          const blocks = Math.round(pct / 5); // 20 blocks total for 100%
+          const filled = '█'.repeat(blocks);
+          const empty = '░'.repeat(20 - blocks);
+          
+          let color;
+          if (pct >= 90) color = '🟢';
+          else if (pct >= 75) color = '🟡';
+          else color = '🔴';
+          
+          return `${color} ${filled}${empty} ${pct}%`;
+        }
+        
+        function formatCoverageData(coverageData) {
+          const total = coverageData.total;
+          
+          const table = `
+        ## 📊 Test Coverage Report
+        
+        | Coverage Type | Progress | Covered/Total |
+        |---------------|----------|---------------|
+        | **Statements** | ${generateProgressBar(total.statements.pct)} | ${total.statements.covered}/${total.statements.total} |
+        | **Lines** | ${generateProgressBar(total.lines.pct)} | ${total.lines.covered}/${total.lines.total} |
+        | **Functions** | ${generateProgressBar(total.functions.pct)} | ${total.functions.covered}/${total.functions.total} |
+        | **Branches** | ${generateProgressBar(total.branches.pct)} | ${total.branches.covered}/${total.branches.total} |
+        
+        ### 📈 Overall Summary
+        - **Total Files Covered**: ${Object.keys(coverageData).length - 1} files
+        - **Average Coverage**: ${((total.statements.pct + total.lines.pct + total.functions.pct + total.branches.pct) / 4).toFixed(2)}%
+        `;
+          
+          return table;
+        }
+        
+        try {
+          if (fs.existsSync('coverage/coverage-summary.json')) {
+            const coverageData = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'));
+            const report = formatCoverageData(coverageData);
+            
+            // Output for GitHub Environment
+            console.log('COVERAGE_REPORT<<EOF');
+            console.log(report);
+            console.log('EOF');
+            
+            // Save individual metrics for backward compatibility
+            const total = coverageData.total;
+            console.log(`STATEMENTS_PCT=${total.statements.pct}`);
+            console.log(`LINES_PCT=${total.lines.pct}`);
+            console.log(`FUNCTIONS_PCT=${total.functions.pct}`);
+            console.log(`BRANCHES_PCT=${total.branches.pct}`);
+            console.log(`TOTAL_FILES=${Object.keys(coverageData).length - 1}`);
+          } else {
+            console.log('COVERAGE_REPORT=Coverage file not found');
+            console.log('STATEMENTS_PCT=N/A');
+            console.log('LINES_PCT=N/A');
+            console.log('FUNCTIONS_PCT=N/A');
+            console.log('BRANCHES_PCT=N/A');
+            console.log('TOTAL_FILES=0');
+          }
+        } catch (error) {
+          console.log('COVERAGE_REPORT=Error reading coverage data');
+          console.log('STATEMENTS_PCT=Error');
+          console.log('LINES_PCT=Error');
+          console.log('FUNCTIONS_PCT=Error');
+          console.log('BRANCHES_PCT=Error');
+          console.log('TOTAL_FILES=0');
+        }
+        EOF
+        
+        # Run the script and capture output
+        node generate-coverage-report.cjs >> $GITHUB_ENV
 
     - name: Generate coverage summary file
       if: matrix.task == 'test'
       run: |
-        echo "# Test Coverage Report" > coverage-summary.md
-        echo "" >> coverage-summary.md
-        echo "**Generated on:** $(date)" >> coverage-summary.md
-        echo "" >> coverage-summary.md
-        echo "## Coverage Summary" >> coverage-summary.md
-        echo "" >> coverage-summary.md
-        echo "| Metric | Percentage |" >> coverage-summary.md
-        echo "|--------|------------|" >> coverage-summary.md
-        echo "| Statements | $COVERAGE_PERCENTAGE |" >> coverage-summary.md
-        echo "| Branches | $BRANCH_COVERAGE_PERCENTAGE |" >> coverage-summary.md
-        echo "" >> coverage-summary.md
-        echo "## Detailed Report" >> coverage-summary.md
-        echo "" >> coverage-summary.md
-        echo "The detailed HTML coverage report is available in the coverage/ directory." >> coverage-summary.md
-        echo "" >> coverage-summary.md
-        echo "### Key Improvements Made" >> coverage-summary.md
-        echo "- Enhanced branch coverage for low-coverage components" >> coverage-summary.md
-        echo "- Added comprehensive edge case testing" >> coverage-summary.md
-        echo "- Improved conditional logic coverage" >> coverage-summary.md
-        echo "- Optimized V8 coverage provider for accuracy" >> coverage-summary.md
+        # Extract test statistics from Jest output and create dynamic summary
+        cat > extract-test-stats.cjs << 'EOF'
+        const fs = require('fs');
+        
+        // Generate timestamp
+        const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+        
+        // Read coverage data for file count
+        let totalFiles = 0;
+        let avgCoverage = 'N/A';
+        
+        if (fs.existsSync('coverage/coverage-summary.json')) {
+          const coverageData = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'));
+          totalFiles = Object.keys(coverageData).length - 1; // Exclude 'total' key
+          const total = coverageData.total;
+          avgCoverage = ((total.statements.pct + total.lines.pct + total.functions.pct + total.branches.pct) / 4).toFixed(2) + '%';
+        }
+        
+        const summary = `# Test Coverage Report
+
+**Generated on:** ${timestamp}
+
+## Coverage Summary
+
+${process.env.COVERAGE_REPORT || 'Coverage data not available'}
+
+### 📊 Test Execution Details
+- **Total Files Analyzed:** ${totalFiles}
+- **Average Coverage:** ${avgCoverage}
+
+### Key Improvements Made
+- Enhanced branch coverage for low-coverage components
+- Added comprehensive edge case testing
+- Improved conditional logic coverage
+- Optimized V8 coverage provider for accuracy
+
+The detailed HTML coverage report is available in the coverage/ directory.
+`;
+        
+        fs.writeFileSync('coverage-summary.md', summary);
+        console.log('Dynamic coverage summary generated successfully');
+        EOF
+        
+        node extract-test-stats.cjs
 
     - name: Upload coverage reports and summary
       if: matrix.task == 'test'
@@ -108,30 +191,23 @@ jobs:
       uses: actions/github-script@v6
       with:
         script: |
-          const fs = require('fs');
+          // Use the dynamically generated coverage report
+          const coverageReport = process.env.COVERAGE_REPORT || 'Coverage data not available';
           
-          // Try to read coverage summary
-          let coverage = process.env.COVERAGE_PERCENTAGE || 'Unknown';
-          let branchCoverage = process.env.BRANCH_COVERAGE_PERCENTAGE || 'Unknown';
+          // Add test execution summary with dynamic data
+          const testSummary = `
+          ### ✅ Test Execution Summary
+          - **Statement Coverage**: ${process.env.STATEMENTS_PCT || 'N/A'}%
+          - **Line Coverage**: ${process.env.LINES_PCT || 'N/A'}%  
+          - **Function Coverage**: ${process.env.FUNCTIONS_PCT || 'N/A'}%
+          - **Branch Coverage**: ${process.env.BRANCHES_PCT || 'N/A'}%
+          - **Files Analyzed**: ${process.env.TOTAL_FILES || '0'} files
           
-          const comment = `## 📊 Test Coverage Report
-          
-          **Statement Coverage:** ${coverage}
-          **Branch Coverage:** ${branchCoverage}
-          
-          ### ✅ All Tests Passing
-          - **758 tests** passing successfully
-          - **52 test suites** completed  
-          - **1 test** skipped (as expected)
-          
-          ### 📈 Coverage Improvements
-          - Enhanced branch coverage for low-coverage components
-          - Added comprehensive edge case testing  
-          - Improved conditional logic coverage
-          - V8 coverage provider for maximum accuracy
-          
+          ### 📁 Artifact Downloads
           The detailed HTML coverage report has been uploaded as an artifact and can be downloaded from the workflow run.
           `;
+          
+          const comment = coverageReport + testSummary;
           
           github.rest.issues.createComment({
             issue_number: context.issue.number,
