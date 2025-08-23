@@ -24,13 +24,10 @@ export const getRecords = async ({ authData, collection, sort = "created", skipF
         if (!records) { return []; }
         return records.map((record) => _cleanRecord({ record, dirtyFields: skipFields, keyOrder }));
     } catch (err) {
-        // Only log fallback messages if not in test mode
-        if (process.env.TEST_MODE !== 'true') {
-            console.warn(
-                `Error fetching remote records for collection: ${collection.toUpperCase()}.` +
-                "\nSwitching to Fallback mode."
-            );
-        }
+        console.warn(
+            `Error fetching remote records for collection: ${collection.toUpperCase()}.` +
+            "\nSwitching to Fallback mode."
+        );
         return await _fallback(collection);
     }
 };

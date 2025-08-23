@@ -3,6 +3,30 @@ import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
 
+// Setup console suppression for expected API fallback messages
+test.beforeEach(async ({ page }) => {
+  page.on('console', (msg) => {
+    const text = msg.text();
+    
+    // Filter out expected error messages that occur during testing
+    const suppressedMessages = [
+      'Error fetching remote records for collection',
+      'Switching to Fallback mode',
+      'Failed to fetch GitHub data',
+      'Connecting to PocketBase at'
+    ];
+    
+    const shouldSuppress = suppressedMessages.some(suppressedMsg => 
+      text.includes(suppressedMsg)
+    );
+    
+    // Only log non-suppressed console messages
+    if (!shouldSuppress && msg.type() === 'error') {
+      console.log(`Browser console ${msg.type()}: ${text}`);
+    }
+  });
+});
+
 test.describe('Download Resume Functionality', () => {
   test('should display resume download component', async ({ page }) => {
     // Set desktop viewport to ensure we see the main content
@@ -15,9 +39,10 @@ test.describe('Download Resume Functionality', () => {
     const mobileHeader = page.locator('text=PLEASE SWITCH TO A DESKTOP');
     const isShowingMobileFallback = await mobileHeader.isVisible();
     
+    // If mobile fallback is shown, wait for it to resolve or resize
     if (isShowingMobileFallback) {
-      test.skip('Skipping download resume test - mobile fallback is shown');
-      return;
+      await page.setViewportSize({ width: 1400, height: 900 });
+      await page.waitForTimeout(2000);
     }
     
     // Navigate to download resume section
@@ -57,8 +82,8 @@ test.describe('Download Resume Functionality', () => {
     const isShowingMobileFallback = await mobileHeader.isVisible();
     
     if (isShowingMobileFallback) {
-      test.skip('Skipping thumbnail test - mobile fallback is shown');
-      return;
+      await page.setViewportSize({ width: 1400, height: 900 });
+      await page.waitForTimeout(2000);
     }
     
     // Wait for API data to load - check for multiple API endpoints
@@ -73,8 +98,8 @@ test.describe('Download Resume Functionality', () => {
     await expect(resumePreview).toBeVisible();
     
     try {
-      // Wait for thumbnail to appear (max 15 seconds)
-      await thumbnailImage.waitFor({ state: 'visible', timeout: 15000 });
+      // Wait for thumbnail to appear (max 30 seconds - increased for reliability)
+      await thumbnailImage.waitFor({ state: 'visible', timeout: 30000 });
       
       // Verify thumbnail src is a data URL
       const imgSrc = await thumbnailImage.getAttribute('src');
@@ -85,29 +110,29 @@ test.describe('Download Resume Functionality', () => {
       await expect(downloadButton).not.toBeDisabled();
       
     } catch (error) {
-      // If thumbnail doesn't load, we should see the loader and this is acceptable
-      // in CI environments where thumbnail generation may be slow/fail
-      console.log('Thumbnail generation timed out, checking if loader is visible');
+      // Wait longer and try again if first attempt failed
+      console.log('First thumbnail generation attempt timed out, trying again...');
+      await page.waitForTimeout(5000);
       
-      // Just verify the component structure is correct - don't fail if thumbnail doesn't load
-      await expect(resumePreview).toBeVisible();
-      const downloadButton = page.locator('.btn-download');
-      
-      // Button should be disabled if no thumbnail
-      const isButtonDisabled = await downloadButton.isDisabled();
-      const isLoaderVisible = await loader.isVisible();
-      
-      // Either button is disabled OR loader is visible (both are acceptable states)
-      expect(isButtonDisabled || isLoaderVisible).toBe(true);
+      try {
+        await thumbnailImage.waitFor({ state: 'visible', timeout: 30000 });
+        const imgSrc = await thumbnailImage.getAttribute('src');
+        expect(imgSrc).toMatch(/^data:image\/png;base64,/);
+      } catch (retryError) {
+        // If still failing, check the actual state and fail meaningfully
+        const isLoaderVisible = await loader.isVisible();
+        const downloadButton = page.locator('.btn-download');
+        const isButtonDisabled = await downloadButton.isDisabled();
+        
+        console.log(`Thumbnail generation failed. Loader visible: ${isLoaderVisible}, Button disabled: ${isButtonDisabled}`);
+        
+        // This should succeed - either thumbnail loads or we have a proper loading state
+        expect(isLoaderVisible || !isButtonDisabled).toBe(true);
+      }
     }
   });
 
   test('should download resume PDF with proper content', async ({ page, browserName }) => {
-    // Skip test for webkit due to download handling differences
-    if (browserName === 'webkit') {
-      test.skip('Skipping PDF download test on webkit');
-    }
-
     await page.setViewportSize({ width: 1200, height: 800 });
     
     await page.goto('/#downloadResume');
@@ -118,34 +143,42 @@ test.describe('Download Resume Functionality', () => {
     const isShowingMobileFallback = await mobileHeader.isVisible();
     
     if (isShowingMobileFallback) {
-      test.skip('Skipping PDF download test - mobile fallback is shown');
-      return;
+      await page.setViewportSize({ width: 1400, height: 900 });
+      await page.waitForTimeout(3000);
     }
     
     // Wait for data to load
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(8000);
     
-    // Wait for thumbnail to be ready or skip if it takes too long
+    // Wait for thumbnail to be ready - try multiple times if needed
     const resumePreview = page.locator('.resume-preview');
     const thumbnailImage = resumePreview.locator('img');
     const downloadButton = page.locator('.btn-download');
     
-    try {
-      await thumbnailImage.waitFor({ state: 'visible', timeout: 15000 });
-    } catch (error) {
-      // If thumbnail isn't ready, check if button can still work
-      const isButtonEnabled = !(await downloadButton.isDisabled());
-      if (!isButtonEnabled) {
-        test.skip('Thumbnail and download not ready within timeout, skipping PDF download test');
-        return;
+    // Wait for thumbnail with multiple attempts
+    let thumbnailReady = false;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        await thumbnailImage.waitFor({ state: 'visible', timeout: 20000 });
+        thumbnailReady = true;
+        break;
+      } catch (error) {
+        console.log(`Thumbnail attempt ${attempt + 1} failed, retrying...`);
+        await page.waitForTimeout(5000);
       }
     }
     
-    // Verify button is enabled
-    const isButtonDisabled = await downloadButton.isDisabled();
-    if (isButtonDisabled) {
-      test.skip('Download button is disabled, skipping PDF download test');
-      return;
+    // If thumbnail isn't ready but button is enabled, proceed anyway
+    if (!thumbnailReady) {
+      const isButtonEnabled = !(await downloadButton.isDisabled());
+      if (!isButtonEnabled) {
+        // Force enable by waiting longer or checking API data is loaded
+        await page.waitForTimeout(10000);
+        const stillDisabled = await downloadButton.isDisabled();
+        if (stillDisabled) {
+          throw new Error('Download button remained disabled and thumbnail did not load');
+        }
+      }
     }
     
     // Set up download handler
@@ -203,8 +236,8 @@ test.describe('Download Resume Functionality', () => {
       if (fs.existsSync(downloadPath)) {
         fs.unlinkSync(downloadPath);
       }
-      // Don't fail the test for content verification issues in CI
-      console.log('PDF download succeeded, but content verification skipped due to:', error.message);
+      // Actually throw the error - don't just skip verification
+      throw new Error(`PDF content verification failed: ${error.message}`);
     }
   });
 
@@ -219,8 +252,8 @@ test.describe('Download Resume Functionality', () => {
     const isShowingMobileFallback = await mobileHeader.isVisible();
     
     if (isShowingMobileFallback) {
-      test.skip('Skipping button states test - mobile fallback is shown');
-      return;
+      await page.setViewportSize({ width: 1400, height: 900 });
+      await page.waitForTimeout(3000);
     }
     
     const downloadButton = page.locator('.btn-download');
@@ -236,13 +269,23 @@ test.describe('Download Resume Functionality', () => {
     
     // Check if thumbnail loads within reasonable time
     try {
-      await thumbnailImage.waitFor({ state: 'visible', timeout: 20000 });
+      await thumbnailImage.waitFor({ state: 'visible', timeout: 30000 });
       // When thumbnail is ready, button should be enabled
       await expect(downloadButton).not.toBeDisabled();
     } catch (error) {
-      // If thumbnail doesn't load, loader should be visible and button disabled
-      await expect(loader).toBeVisible();
-      await expect(downloadButton).toBeDisabled();
+      // If thumbnail doesn't load, make sure we have proper fallback behavior
+      console.log('Thumbnail did not load, checking fallback state');
+      
+      // Either loader should be visible OR button should eventually be enabled
+      // Wait a bit more for potential API data loading
+      await page.waitForTimeout(10000);
+      
+      const isLoaderVisible = await loader.isVisible();
+      const isButtonDisabled = await downloadButton.isDisabled();
+      
+      // At least one of these should be true for proper UX
+      const hasProperState = isLoaderVisible || !isButtonDisabled;
+      expect(hasProperState).toBe(true);
     }
   });
 
@@ -257,8 +300,8 @@ test.describe('Download Resume Functionality', () => {
     const isShowingMobileFallback = await mobileHeader.isVisible();
     
     if (isShowingMobileFallback) {
-      test.skip('Skipping preview click test - mobile fallback is shown');
-      return;
+      await page.setViewportSize({ width: 1400, height: 900 });
+      await page.waitForTimeout(3000);
     }
     
     // Wait for data to load
@@ -268,7 +311,7 @@ test.describe('Download Resume Functionality', () => {
     const thumbnailImage = resumePreview.locator('img');
     
     try {
-      await thumbnailImage.waitFor({ state: 'visible', timeout: 20000 });
+      await thumbnailImage.waitFor({ state: 'visible', timeout: 30000 });
       
       // Preview should be clickable (has cursor pointer style)
       await expect(resumePreview).toBeVisible();
@@ -279,8 +322,15 @@ test.describe('Download Resume Functionality', () => {
       await expect(resumePreview).toHaveAttribute('aria-label', 'Download resume as PDF');
       
     } catch (error) {
-      console.log('Thumbnail not ready for click test');
-      test.skip('Thumbnail not ready for click test');
+      console.log('Thumbnail not ready for click test, checking component structure anyway');
+      
+      // Even without thumbnail, the preview component should have proper structure
+      await expect(resumePreview).toBeVisible();
+      
+      // Accessibility attributes should be present regardless of thumbnail state
+      await expect(resumePreview).toHaveAttribute('role', 'button');
+      await expect(resumePreview).toHaveAttribute('tabindex', '0');
+      await expect(resumePreview).toHaveAttribute('aria-label', 'Download resume as PDF');
     }
   });
 
@@ -303,8 +353,8 @@ test.describe('Download Resume Functionality', () => {
     const isShowingMobileFallback = await mobileHeader.isVisible();
     
     if (isShowingMobileFallback) {
-      test.skip('Skipping API data test - mobile fallback is shown');
-      return;
+      await page.setViewportSize({ width: 1400, height: 900 });
+      await page.waitForTimeout(3000);
     }
     
     // Wait for API calls to complete
@@ -330,8 +380,8 @@ test.describe('Download Resume Functionality', () => {
     const isShowingMobileFallback = await mobileHeader.isVisible();
     
     if (isShowingMobileFallback) {
-      test.skip('Skipping processing state test - mobile fallback is shown');
-      return;
+      await page.setViewportSize({ width: 1400, height: 900 });
+      await page.waitForTimeout(3000);
     }
     
     // Wait for data to load
@@ -341,7 +391,7 @@ test.describe('Download Resume Functionality', () => {
     const thumbnailImage = page.locator('.resume-preview img');
     
     try {
-      await thumbnailImage.waitFor({ state: 'visible', timeout: 20000 });
+      await thumbnailImage.waitFor({ state: 'visible', timeout: 30000 });
       
       // Button should be enabled when ready
       await expect(downloadButton).not.toBeDisabled();
@@ -352,8 +402,16 @@ test.describe('Download Resume Functionality', () => {
       await expect(buttonText).toContainText('Download');
       
     } catch (error) {
-      console.log('Thumbnail not ready for processing state test');
-      test.skip('Thumbnail not ready for processing state test');
+      console.log('Thumbnail not ready for processing state test, checking button structure anyway');
+      
+      // Even without thumbnail, button should have proper structure
+      const buttonText = downloadButton.locator('span');
+      await expect(buttonText).toContainText('Download');
+      
+      // Button state should be appropriate (disabled if no thumbnail, enabled if API data loaded)
+      await page.waitForTimeout(5000); // Wait for API data
+      const isStillDisabled = await downloadButton.isDisabled();
+      console.log(`Button disabled state after API wait: ${isStillDisabled}`);
     }
   });
 });

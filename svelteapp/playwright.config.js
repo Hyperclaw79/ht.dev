@@ -53,7 +53,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm run build && npx vite preview --port 8000',
+    command: 'npm run build >/dev/null && npx vite preview --port 8000 --logLevel warn',
     port: 8000,
     reuseExistingServer: true,
     timeout: 120 * 1000,
@@ -67,7 +67,6 @@ export default defineConfig({
       DB_PASSWORD: 'test',
       ADMIN_USERNAME: 'admin',
       ADMIN_PASSWORD: 'admin',
-      TEST_MODE: 'true',
     },
   },
 });
