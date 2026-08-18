@@ -1,44 +1,38 @@
 /**
  * @jest-environment node
  */
-
 import { jest } from "@jest/globals";
 
-// Mock the getter function
-jest.unstable_mockModule("src/routes/api/skills/getter.js", () => {
-    return {
-        default: jest.fn().mockResolvedValue([
-            {
-                id: "1",
-                category: "Frontend",
-                name: "JavaScript",
-                level: "Expert"
-            },
-            {
-                id: "2", 
-                category: "Backend",
-                name: "Node.js",
-                level: "Advanced"
-            }
-        ])
-    };
+const getter = jest.fn().mockImplementation(async (_auth, { aggregate } = {}) => {
+    if (aggregate === "category") {
+        return {
+            totalSkills: 2,
+            categories: [{
+                name: "Backend",
+                order: 10,
+                skills: [
+                    { name: "Django", order: 10 },
+                    { name: "FastAPI", order: 20 }
+                ]
+            }]
+        };
+    }
+    return [
+        { category: "Backend", categoryOrder: 10, name: "Django", order: 10 },
+        { category: "Backend", categoryOrder: 10, name: "FastAPI", order: 20 }
+    ];
 });
 
-// Mock environment variables
-jest.unstable_mockModule("$env/dynamic/private", () => {
-    return {
-        env: {
-            DB_EMAIL: "test@example.com",
-            DB_PASSWORD: "testpassword"
-        }
-    };
-});
+jest.unstable_mockModule("src/routes/api/skills/getter.js", () => ({ default: getter }));
+jest.unstable_mockModule("$env/dynamic/private", () => ({
+    env: { DB_EMAIL: "test@example.com", DB_PASSWORD: "testpassword" }
+}));
 
 const { GET, POST, PUT, DELETE } = await import("src/routes/api/skills/+server.js");
+const requestUrl = (query = "") => new URL(`http://localhost/api/skills${query}`);
 
-// Simple tests without complex mocking for now
 describe("Unallowed Methods", () => {
-    it("should throw error with status code 405 for POST, PUT and DELETE", () => {
+    it("returns 405 for POST, PUT and DELETE", () => {
         expect(() => POST()).toThrowError(/Method not allowed/);
         expect(() => PUT()).toThrowError(/Method not allowed/);
         expect(() => DELETE()).toThrowError(/Method not allowed/);
@@ -46,58 +40,40 @@ describe("Unallowed Methods", () => {
 });
 
 describe("GET method", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
+    beforeEach(() => jest.clearAllMocks());
 
-    it("should export GET function", () => {
-        expect(typeof GET).toBe('function');
-    });
-
-    it("should return skills data when authData is provided", async () => {
-        const authData = { email: "test@example.com", password: "testpass" };
-        const response = await GET({ authData });
-        
-        expect(response).toBeInstanceOf(Response);
-        expect(response.headers.get("Content-Type")).toBe("application/json");
-        
-        const data = await response.json();
-        expect(Array.isArray(data)).toBe(true);
-        expect(data).toHaveLength(2);
-        expect(data[0]).toMatchObject({
-            id: "1",
-            category: "Frontend",
-            name: "JavaScript",
-            level: "Expert"
-        });
-    });
-
-    it("should use environment variables when authData is not provided", async () => {
-        const response = await GET({});
-        
-        expect(response).toBeInstanceOf(Response);
-        expect(response.headers.get("Content-Type")).toBe("application/json");
-        
-        const data = await response.json();
-        expect(Array.isArray(data)).toBe(true);
-        expect(data).toHaveLength(2);
-    });
-
-    it("should handle getter function being called with correct parameters", async () => {
+    it("returns raw skills when no aggregate is requested", async () => {
         const authData = { email: "custom@example.com", password: "custompass" };
-        await GET({ authData });
-        
-        const getterModule = await import("src/routes/api/skills/getter.js");
-        expect(getterModule.default).toHaveBeenCalledWith(authData);
+        const response = await GET({ authData, url: requestUrl() });
+        const data = await response.json();
+
+        expect(Array.isArray(data)).toBe(true);
+        expect(data[0]).toMatchObject({ category: "Backend", categoryOrder: 10, name: "Django" });
+        expect(getter).toHaveBeenCalledWith(authData, { aggregate: undefined });
     });
 
-    it("should handle case when no authData is provided by using env vars", async () => {
-        await GET({});
-        
-        const getterModule = await import("src/routes/api/skills/getter.js");
-        expect(getterModule.default).toHaveBeenCalledWith({
-            email: "test@example.com",
-            password: "testpassword"
-        });
+    it("returns API-owned category aggregation for aggregate=category", async () => {
+        const authData = { email: "custom@example.com", password: "custompass" };
+        const response = await GET({ authData, url: requestUrl("?aggregate=category") });
+        const data = await response.json();
+
+        expect(data.totalSkills).toBe(2);
+        expect(data.categories[0].name).toBe("Backend");
+        expect(getter).toHaveBeenCalledWith(authData, { aggregate: "category" });
+    });
+
+    it("uses environment credentials when authData is absent", async () => {
+        await GET({ url: requestUrl("?aggregate=category") });
+        expect(getter).toHaveBeenCalledWith(
+            { email: "test@example.com", password: "testpassword" },
+            { aggregate: "category" }
+        );
+    });
+
+    it("rejects unsupported aggregation modes", async () => {
+        await expect(GET({
+            authData: { email: "x", password: "y" },
+            url: requestUrl("?aggregate=magic")
+        })).rejects.toMatchObject({ status: 400 });
     });
 });

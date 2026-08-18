@@ -1,7 +1,41 @@
 import { test, expect } from "@playwright/test";
 import fs from "fs";
 import path from "path";
-import { promisify } from "util";
+import pdfParse from "pdf-parse/lib/pdf-parse.js";
+import pdfjs from "pdf-parse/lib/pdf.js/v1.10.100/build/pdf.js";
+
+const readPdfGeometry = async (pdfBuffer) => {
+    pdfjs.disableWorker = true;
+    const document = await pdfjs.getDocument(pdfBuffer);
+    const pages = [];
+
+    for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber++) {
+        const page = await document.getPage(pageNumber);
+        const [textContent, annotations] = await Promise.all([
+            page.getTextContent({
+                normalizeWhitespace: false,
+                disableCombineTextItems: true
+            }),
+            page.getAnnotations()
+        ]);
+        pages.push({
+            items: textContent.items.map((item) => ({
+                text: item.str.trim(),
+                x: item.transform[4],
+                y: item.transform[5],
+                width: item.width,
+                height: item.height
+            })).filter((item) => item.text),
+            fontFamilies: [...new Set(
+                Object.values(textContent.styles).map((style) => style.fontFamily)
+            )],
+            annotations
+        });
+    }
+
+    await document.destroy();
+    return pages;
+};
 
 test.describe("Download Resume Functionality", () => {
     test("should display resume download component", async ({ page }) => {
@@ -92,7 +126,7 @@ test.describe("Download Resume Functionality", () => {
         }
     });
 
-    test("should download resume PDF with proper content", async ({ page, browserName }) => {
+    test("should download resume PDF with proper ATS text layer", async ({ page }) => {
         await page.setViewportSize({ width: 1200, height: 800 });
 
         // Navigate to download resume section
@@ -108,7 +142,7 @@ test.describe("Download Resume Functionality", () => {
         const thumbnailImage = resumePreview.locator("img");
         const downloadButton = page.locator(".btn-download");
 
-        await thumbnailImage.waitFor({ state: "visible", timeout: 3000 });
+        await thumbnailImage.waitFor({ state: "visible", timeout: 30000 });
 
         // Set up download handler
         const downloadPromise = page.waitForEvent("download", { timeout: 5000 });
@@ -144,38 +178,137 @@ test.describe("Download Resume Functionality", () => {
         const fileStats = fs.statSync(downloadPath);
         expect(fileStats.size).toBeGreaterThan(30000); // Should be at least 30KB (reduced from 50KB)
 
-        // Read and verify PDF content
+        // Parse the actual PDF text layer. Searching the compressed PDF bytes is
+        // not a meaningful ATS test because visible image text is rasterized and
+        // the searchable text is deliberately overlaid invisibly by the generator.
         try {
-            const fsReadFile = promisify(fs.readFile);
-            const pdfBuffer = await fsReadFile(downloadPath);
+            const pdfBuffer = await fs.promises.readFile(downloadPath);
 
-            // Basic PDF validation - check for PDF header
             const pdfHeader = pdfBuffer.subarray(0, 4).toString();
             expect(pdfHeader).toBe("%PDF");
 
-            // Check for some expected content in the PDF by searching for text strings
-            const pdfContent = pdfBuffer.toString("binary");
+            const parsed = await pdfParse(pdfBuffer);
+            const atsText = parsed.text;
+            const normalizedAtsText = atsText.replace(/\s+/g, " ").trim();
 
             [
-                "Harshith Thota", "Experience", "Projects",
-                "Technical Skills", "Soft Skills",
+                "Harshith Thota", "Experience", "Recent Projects",
+                "Hyperlab", "DigiCloneMCP", "Technical Skills",
+                "Serial", "Communication", "Amazon", "Services", "AWS",
+                "Google", "Kubernetes", "Engine", "GKE",
+                "Model", "Context", "Protocol", "MCP",
                 "Education", "Achievements"
-            ].forEach(text => {
-                expect(pdfContent).toContain(text);
+            ].forEach(text => expect(atsText).toContain(text));
+
+            [
+                "Harshith Thota",
+                "Senior Software Engineer",
+                "Python SQL",
+                "Amazon Web Services (AWS)",
+                "Google Kubernetes Engine (GKE)",
+                "TLS / Certificate Management",
+                "Model Context Protocol (MCP)",
+                "Self-hosted engineering platform spanning service orchestration"
+            ].forEach(text => expect(normalizedAtsText).toContain(text));
+
+            [
+                "HarshithThota",
+                "SeniorSoftwareEngineer",
+                "PythonSQL",
+                "AmazonWebServices",
+                "ModelContextProtocol"
+            ].forEach(text => expect(normalizedAtsText).not.toContain(text));
+
+            ["Soft Skills", "Rust", "OpenTofu", "Ansible"].forEach(text => {
+                expect(atsText).not.toContain(text);
             });
 
-            console.log(`PDF downloaded successfully: ${fileStats.size} bytes`);
+            expect(parsed.numpages).toBe(3);
 
-            // Clean up test file
+            // Geometry sanity checks guard against an ATS-only implementation
+            // that dumps text in a corner or rebuilds unrelated global lines.
+            const pages = await readPdfGeometry(pdfBuffer);
+            pages.forEach((page) => expect(page.fontFamilies).toContain("monospace"));
+            const page2Items = pages[1].items;
+            const item = (text) => page2Items.find((entry) => entry.text === text);
+            const wrappedSkillLines = (text) => {
+                const groups = new Map();
+                page2Items.forEach((entry) => {
+                    const x = entry.x.toFixed(1);
+                    groups.set(x, [...(groups.get(x) || []), entry]);
+                });
+
+                for (const entries of groups.values()) {
+                    const lines = entries.sort((a, b) => b.y - a.y);
+                    for (let start = 0; start < lines.length; start++) {
+                        let joined = "";
+                        for (let end = start; end < lines.length; end++) {
+                            if (end > start) {
+                                const lineGap = lines[end - 1].y - lines[end].y;
+                                if (lineGap < 10 || lineGap > 20) break;
+                            }
+                            joined = `${joined}${joined ? " " : ""}${lines[end].text}`;
+                            if (joined === text) return lines.slice(start, end + 1);
+                            if (!text.startsWith(joined)) break;
+                        }
+                    }
+                }
+                return [];
+            };
+
+            const xCoordinates = page2Items.map((entry) => entry.x);
+            const yCoordinates = page2Items.map((entry) => entry.y);
+            expect(Math.max(...xCoordinates) - Math.min(...xCoordinates)).toBeGreaterThan(500);
+            expect(Math.max(...yCoordinates) - Math.min(...yCoordinates)).toBeGreaterThan(850);
+
+            const projectDescription =
+                "Self-hosted engineering platform spanning service orchestration, " +
+                "CI/CD, local networking, DNS, reverse proxying, observability, " +
+                "identity, documentation, automation, and custom software.";
+            const projectLines = wrappedSkillLines(projectDescription);
+            expect(projectLines.length).toBeGreaterThan(1);
+            projectLines.forEach((line) => {
+                expect(line.x).toBeCloseTo(51, 0);
+                expect(line.width).toBeLessThan(360);
+            });
+            for (let index = 1; index < projectLines.length; index++) {
+                const lineGap = projectLines[index - 1].y - projectLines[index].y;
+                expect(lineGap).toBeGreaterThan(15);
+                expect(lineGap).toBeLessThan(20);
+            }
+
+            const djangoLines = wrappedSkillLines("Django REST Framework (DRF)");
+            const awsLines = wrappedSkillLines("Amazon Web Services (AWS)");
+            [djangoLines, awsLines].forEach((lines) => {
+                expect(lines.length).toBeGreaterThan(1);
+                lines.forEach((line) => expect(line.width).toBeLessThan(110));
+            });
+
+            const shortSkill = page2Items.find((entry) =>
+                entry.text === "Python" && entry.x < 100
+            );
+            const wipStatus = item("WIP");
+            // These bounds are the browser-measured text widths. The previous
+            // implementation appended a space after scaling and overran both.
+            expect(shortSkill.width).toBeLessThan(45);
+            expect(wipStatus.width).toBeLessThan(20);
+            expect(page2Items.filter((entry) => entry.text === "Recent Projects")).toHaveLength(1);
+
+            const page1Urls = pages[0].annotations.map((annotation) => annotation.url);
+            expect(page1Urls).toEqual(expect.arrayContaining([
+                "mailto:harshith.thota7@gmail.com",
+                "https://github.com/hyperclaw79",
+                "https://linkedin.com/in/harshith-thota"
+            ]));
+
+            console.log(`PDF ATS layer verified: ${fileStats.size} bytes`);
             fs.unlinkSync(downloadPath);
         } catch (error) {
-            console.log("PDF content verification failed:", error.message);
-            // Clean up test file even if verification fails
+            console.log("PDF ATS verification failed:", error.message);
             if (fs.existsSync(downloadPath)) {
                 fs.unlinkSync(downloadPath);
             }
-            // Actually throw the error - don't just skip verification
-            throw new Error(`PDF content verification failed: ${error.message}`);
+            throw new Error(`PDF ATS verification failed: ${error.message}`);
         }
     });
 

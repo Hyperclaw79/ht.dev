@@ -37,9 +37,7 @@ Some personal favorite quirks I added which you might wanna use in your own proj
 
 <img src="assets/Tiltable.png" alt="Projects" width="250" />
 
-- Multicolor Progressbar to display Skill Proficiency.
-
-<img src="assets/Progress.png" alt="Progressbar" width="250" />
+- Resume generation uses the same grouped skill data while keeping project selection independent from the global skills inventory.
 </details>
 
 ## 🛠️ Technologies Used

@@ -21,6 +21,14 @@
          --page-margin: 35px;
          --secondary-color: #00BCD4;
          --project-meta-color: #888;
+         --project-status-bg: #00BCD4;
+         --project-status-color: #102125;
+         --skills-shell-bg: #252a2b;
+         --skill-group-bg: #2f3435;
+         --skill-title-bg: #263d40;
+         --skill-item-bg: #384041;
+         --skill-item-border: #526062;
+         --skill-divider: #465154;
          font-family: Arial, sans-serif;
       }
 
@@ -42,6 +50,14 @@
             --achv-subcolor: #888;
             --secondary-color: #007b7b;
             --project-meta-color: #676767;
+            --project-status-bg: #007b7b;
+            --project-status-color: #ffffff;
+            --skills-shell-bg: #aebfc2;
+            --skill-group-bg: #edf2f3;
+            --skill-title-bg: #c3dadd;
+            --skill-item-bg: #d3dfe1;
+            --skill-item-border: #8ea9ad;
+            --skill-divider: #9fb3b6;
          }
       }
 
@@ -117,6 +133,7 @@
 
       .contact-info span {
          text-align: left;
+         padding-bottom: 0.25em;
       }
 
       .contact-info a {
@@ -238,53 +255,12 @@
          margin-left: 10px;
       }
 
-      .education ul {
-         width: fit-content;
-      }
-
-      .section.projects .content .projects {
-         display: grid;
-         grid-template-columns: 1fr;
-         gap: 10px;
-      }
-
-      .project-card {
-         background: var(--company-bg);
-         padding: 10px;
-         border-radius: 10px;
-         position: relative;
-         overflow: hidden;
-      }
-
-      .project-card img {
-         width: 100%;
-         height: auto;
-         border-radius: 10px 10px 0 0;
-         display: block;
-      }
-
-      .project-title {
-         font-size: 18px;
-         font-weight: bold;
-         margin: 10px 0;
-      }
-
-      .project-title a {
-         color: var(--secondary-color);
-         text-decoration: none;
-      }
-
-      .project-description {
-         font-size: 14px;
-         margin: 10px 0;
-      }
-
-      .project-tags {
+      .experience .project-tags {
          display: flex;
          flex-wrap: wrap;
       }
 
-      .project-tag {
+      .experience .project-tag {
          background: var(--secondary-color);
          color: #1f1f1f;
          padding: 5px 10px;
@@ -293,54 +269,121 @@
          font-size: 12px;
       }
 
-      .project-meta {
-         display: flex;
-         justify-content: flex-start;
-         font-size: 12px;
-         color: var(--project-meta-color);
-         margin-bottom: 10px;
-         gap: 20px;
+      .education ul {
+         width: fit-content;
       }
 
-      .project-meta span {
-         display: flex;
-         align-items: center;
-         gap: 5px;
+      .section.projects .content .projects {
+         display: grid;
+         grid-template-columns: 1fr 1fr;
+         gap: 10px;
       }
 
-      .project-meta .icon {
-         display: flex;
-         align-items: center;
-         gap: 5px;
-         margin-right: 10px;
-      }
-
-      .project-meta img {
-         width: 14px;
-         height: 14px;
-         vertical-align: middle;
-      }
-
-      .skills ul {
-         display: flex;
-         flex-wrap: wrap;
-         justify-content: space-between;
-      }
-
-      .skills ul li {
-         display: flex;
-         align-items: center;
-         width: 45%;
+      .project-card {
          background: var(--company-bg);
-         margin-bottom: 10px;
-         padding: 10px;
-         border-radius: 5px;
+         padding: 12px 14px;
+         border-radius: 10px;
+         position: relative;
+         overflow: hidden;
+         min-height: 108px;
+         box-shadow: 0 3px 10px var(--card-shadow);
+         border-left: 2px solid var(--secondary-color);
       }
 
-      .skills img {
-         width: 20px;
-         height: 20px;
-         margin-right: 10px;
+      .project-title {
+         display: flex;
+         align-items: center;
+         justify-content: space-between;
+         gap: 10px;
+         font-size: 18px;
+         font-weight: bold;
+         margin: 0 0 8px;
+      }
+
+      .project-title a,
+      .project-title>span:not(.project-status) {
+         color: var(--secondary-color);
+         text-decoration: none;
+      }
+
+      .project-title .project-status {
+         flex: 0 0 auto;
+         background: var(--project-status-bg);
+         color: var(--project-status-color);
+         border: 1px solid var(--project-status-bg);
+         padding: 3px 7px;
+         border-radius: 4px;
+         font-size: 10px;
+         font-weight: bold;
+         line-height: 1.1;
+         letter-spacing: 0.04em;
+         text-transform: uppercase;
+      }
+
+      .project-description {
+         font-size: 12px;
+         line-height: 1.45;
+         margin: 0;
+      }
+
+      .skills-matrix {
+         display: grid;
+         grid-template-columns: repeat(3, 1fr);
+         background: var(--skills-shell-bg);
+         border: 1px solid var(--skill-item-border);
+         border-radius: 10px;
+         overflow: hidden;
+         box-shadow: 0 3px 10px var(--card-shadow);
+      }
+
+      .skill-group {
+         min-width: 0;
+         min-height: 142px;
+         padding: 0 10px 10px;
+         background: var(--skill-group-bg);
+         border-right: 1px solid var(--skill-divider);
+         border-bottom: 1px solid var(--skill-divider);
+      }
+
+      .skill-group:nth-child(3n) {
+         border-right: none;
+      }
+
+      .skill-group:nth-last-child(-n + 3) {
+         border-bottom: none;
+      }
+
+      .skill-group-title {
+         margin: 0 -10px 9px;
+         padding: 7px 10px;
+         color: var(--secondary-color);
+         background: var(--skill-title-bg);
+         border-bottom: 1px solid var(--skill-item-border);
+         font-size: 12px;
+         font-weight: bold;
+         letter-spacing: 0.07em;
+         text-transform: uppercase;
+      }
+
+      .skill-list {
+         display: grid;
+         grid-template-columns: 1fr 1fr;
+         gap: 5px;
+      }
+
+      .skill-item {
+         display: flex;
+         align-items: center;
+         min-width: 0;
+         min-height: 34px;
+         padding: 6px 7px;
+         background: var(--skill-item-bg);
+         border: 1px solid var(--skill-item-border);
+         border-left: 2px solid var(--secondary-color);
+         border-radius: 4px;
+         font-size: 12px;
+         line-height: 1.25;
+         overflow-wrap: anywhere;
       }
 
       .achievements .content {
@@ -393,7 +436,7 @@
          <div class="details">
             <div class="info">
                <span>Harshith Thota</span>
-               <span>Senior Software Engineer | Python Developer</span>
+               <span>Senior Software Engineer</span>
             </div>
             <div class="contact-info">
                <span>
@@ -448,7 +491,7 @@
       <div class="section projects">
          <div class="section-title">
             <div class="icon"><img src="https://img.icons8.com/ios-filled/20/transparent/project.png"
-                  alt="Projects Icon"></div> <span>Projects</span>
+                  alt="Projects Icon"></div> <span>Recent Projects</span>
          </div>
          <div class="content">
             <div class="projects"></div>
@@ -460,14 +503,7 @@
                   alt="Technical Skills Icon"></div> <span>Technical Skills</span>
          </div>
          <div class="content technical-skills">
-            <ul></ul>
-         </div>
-         <div class="section-title">
-            <div class="icon"><img src="https://img.icons8.com/ios-filled/20/transparent/teamwork.png"
-                  alt="Soft Skills Icon"></div> <span>Soft Skills</span>
-         </div>
-         <div class="content soft-skills">
-            <ul></ul>
+            <div class="skills-matrix"></div>
          </div>
       </div>
       <div class="section education">
@@ -478,7 +514,7 @@
          <div class="content">
             <ul></ul>
          </div>
-      </div>      
+      </div>
       <div class="section achievements">
          <div class="section-title">
             <div class="icon"><img src="https://img.icons8.com/ios-filled/20/transparent/trophy.png"

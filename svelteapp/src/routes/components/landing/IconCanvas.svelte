@@ -4,15 +4,19 @@
 
     const { skills } = Object.fromEntries(getContext("api"));
 
-    const icons = (skillObj) => {
-        return getIconData(skillObj["Technical Skills"].sort(
-            () => Math.random() - 0.5).map((skill) => skill.icon
-        ));
+    const skillList = (payload) => (payload?.categories || [])
+        .flatMap((category) => category.skills || []);
+
+    const icons = (payload) => {
+        const iconPaths = skillList(payload)
+            .map((skill) => skill.icon)
+            .filter(Boolean);
+        return getIconData([...iconPaths].sort(() => Math.random() - 0.5));
     };
 </script>
 
 <div>
-    {#if $skills && $skills["Technical Skills"] && $skills["Soft Skills"]}
+    {#if skillList($skills).some((skill) => skill.icon)}
         {#each icons($skills) as icon}
             <img
                 key={icon.icon}

@@ -253,18 +253,9 @@ describe('Footer component', () => {
         expect(getByText('Spéciàl Çhäracters & Symbols!')).toBeInTheDocument();
     });
 
-    it('should maintain correct year in copyright across year changes', () => {
-        // Mock current year
-        const originalDateNow = Date.now;
-        const mockYear = 2025;
-        Date.now = () => new Date(`${mockYear}-01-01`).getTime();
-        
+    it('should display the current year in copyright', () => {
         const { getByText } = FooterWrapper(Footer);
-        
-        expect(getByText(mockYear.toString())).toBeInTheDocument();
-        
-        // Restore original Date.now
-        Date.now = originalDateNow;
+        expect(getByText(new Date().getFullYear().toString())).toBeInTheDocument();
     });
 
     it('should handle undefined context gracefully', () => {

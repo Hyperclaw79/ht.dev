@@ -5,15 +5,15 @@ import constructUrl from "../../utils";
 let pocket;
 
 export const getRecords = async ({ authData, collection, sort = "created", skipFields, keyOrder }) => {
-    if (!pocket) {
-        const module = await import("$env/dynamic/private");
-        const { env } = module;
-        const dbUrl = constructUrl(env.DB_HOST, env.DB_PORT);
-        console.log(`Connecting to PocketBase at ${dbUrl}...`);
-        pocket = new PocketBase(dbUrl.toString());
-        pocket?.autoCancellation(false);
-    }
     try {
+        if (!pocket) {
+            const module = await import("$env/dynamic/private");
+            const { env } = module;
+            const dbUrl = constructUrl(env.DB_HOST, env.DB_PORT);
+            console.log(`Connecting to PocketBase at ${dbUrl}...`);
+            pocket = new PocketBase(dbUrl.toString());
+            pocket?.autoCancellation(false);
+        }
         if (!pocket.authStore.token) {
             await pocket.admins.authWithPassword(authData.email, authData.password);
         }

@@ -7,7 +7,8 @@ const metadata = [
             icon: "/icons/achievements/udemy.webp"
         },
         year: "2020",
-        image: "/images/pentest.jpg"
+        image: "/images/pentest.jpg",
+        assetZoomable: true
     },
     {
         name: "Distinguished Fellow",
@@ -17,7 +18,8 @@ const metadata = [
             icon: "/icons/achievements/hasura.svg"
         },
         year: "2017",
-        image: "/images/HPDF.jpg"
+        image: "/images/HPDF.jpg",
+        assetZoomable: true
     },
     {
         name: "City Top 100",
