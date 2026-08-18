@@ -261,14 +261,13 @@ test.describe("Download Resume Functionality", () => {
             expect(Math.max(...xCoordinates) - Math.min(...xCoordinates)).toBeGreaterThan(500);
             expect(Math.max(...yCoordinates) - Math.min(...yCoordinates)).toBeGreaterThan(850);
 
-            const projectLines = [
-                "Self-hosted engineering platform spanning service",
-                "orchestration, CI/CD, local networking, DNS, reverse",
-                "proxying, observability, identity, documentation,",
-                "automation, and custom software."
-            ].map(item);
+            const projectDescription =
+                "Self-hosted engineering platform spanning service orchestration, " +
+                "CI/CD, local networking, DNS, reverse proxying, observability, " +
+                "identity, documentation, automation, and custom software.";
+            const projectLines = wrappedSkillLines(projectDescription);
+            expect(projectLines.length).toBeGreaterThan(1);
             projectLines.forEach((line) => {
-                expect(line).toBeTruthy();
                 expect(line.x).toBeCloseTo(51, 0);
                 expect(line.width).toBeLessThan(360);
             });
