@@ -16,7 +16,7 @@
     const achievements = writable([]);
     const experience = writable([]);
     const projects = writable([]);
-    const skills = writable([]);
+    const skills = writable({ categories: [], totalSkills: 0 });
     const socials = writable([]);
     const apiMap = new Map(Object.entries({
         achievements,
@@ -45,7 +45,10 @@
         history.scrollRestoration = "manual";
         location.href = "#landing";
         for (const [key, value] of apiMap) {
-            await fetch(`/api/${key}`).then(
+            const endpoint = key === "skills"
+                ? "/api/skills?aggregate=category"
+                : `/api/${key}`;
+            await fetch(endpoint).then(
                 async (res) => value.set(await res.json())
             );
         }

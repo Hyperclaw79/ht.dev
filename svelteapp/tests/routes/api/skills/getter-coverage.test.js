@@ -3,44 +3,38 @@
  */
 import { jest } from '@jest/globals';
 
-// Mock pbClient to return array format for line 11 coverage
-jest.unstable_mockModule('src/routes/api/pbClient.js', () => {
-    return {
-        getRecords: jest.fn().mockResolvedValue([
-            { category: 'Languages', name: 'JavaScript', level: 'Advanced' },
-            { category: 'Frameworks', name: 'React', level: 'Intermediate' },
-            { category: 'Databases', name: 'MongoDB', level: 'Beginner' }
-        ])
-    };
-});
+const records = [
+    { category: 'Data', categoryOrder: 30, name: 'PostgreSQL', order: 20 },
+    { category: 'Languages', categoryOrder: 10, name: 'Python', order: 20 },
+    { category: 'Languages', categoryOrder: 10, name: 'SQL', order: 10 }
+];
+const getRecords = jest.fn().mockResolvedValue(records);
 
-describe('skills getter - line 11 coverage', () => {
-    it('should categorize array data when Technical Skills key does not exist', async () => {
-        // Import after the mock is set up
-        const getSkills = (await import('src/routes/api/skills/getter.js')).default;
-        
+jest.unstable_mockModule('src/routes/api/pbClient.js', () => ({ getRecords }));
+
+describe('skills getter record path', () => {
+    test('requests category-aware ordering and returns raw records by default', async () => {
+        const { default: getSkills } = await import('src/routes/api/skills/getter.js');
         const authData = { email: 'test@test.com', password: 'test123' };
+
         const result = await getSkills(authData);
-        
-        // Since we mocked getRecords to return array format (no "Technical Skills" key),
-        // this should trigger line 11: return _categorize(records);
-        expect(typeof result).toBe('object');
-        expect(result).not.toBeNull();
-        
-        // The result should be categorized into an object structure
-        expect(result).toHaveProperty('Languages');
-        expect(result).toHaveProperty('Frameworks');
-        expect(result).toHaveProperty('Databases');
-        
-        // Verify categorization worked correctly
-        expect(Array.isArray(result['Languages'])).toBe(true);
-        expect(result['Languages']).toHaveLength(1);
-        expect(result['Languages'][0]).toMatchObject({
-            name: 'JavaScript',
-            level: 'Advanced'
+
+        expect(getRecords).toHaveBeenCalledWith({
+            collection: 'skills',
+            authData,
+            sort: 'categoryOrder,order'
         });
-        
-        // Verify category property was removed
-        expect(result['Languages'][0]).not.toHaveProperty('category');
+        expect(result).toEqual(records);
+    });
+
+    test('aggregates only when aggregate=category is requested', async () => {
+        const { default: getSkills } = await import('src/routes/api/skills/getter.js');
+        const result = await getSkills(
+            { email: 'test@test.com', password: 'test123' },
+            { aggregate: 'category' }
+        );
+
+        expect(result.categories.map(({ name }) => name)).toEqual(['Languages', 'Data']);
+        expect(result.categories[0].skills.map(({ name }) => name)).toEqual(['SQL', 'Python']);
     });
 });

@@ -1,5 +1,8 @@
+/**
+ * @jest-environment jsdom
+ */
 import { jest } from '@jest/globals';
-import { render } from '@testing-library/svelte';
+import { render, waitFor } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
 // Mock external dependencies
@@ -25,6 +28,8 @@ jest.unstable_mockModule('dom-to-image-more', () => ({
         toPng: jest.fn().mockResolvedValue('data:image/png;base64,mock')
     }
 }));
+
+const { default: DownloadResume } = await import('src/routes/components/DownloadResume.svelte');
 
 // Mock fetch globally
 global.fetch = jest.fn();
@@ -181,38 +186,56 @@ describe('DownloadResume', () => {
         expect(formatNumber(NaN)).toBe('0');
     });
 
-    test('getTextPosition calculation logic', () => {
-        const containerMargin = 35;
-        
-        const getTextPosition = (element, pageNum = 0) => {
-            const isSpecialElement = element.isProjectTags || element.isDetails;
-            let adj = !isSpecialElement ? containerMargin : containerMargin / 2;
-            if (pageNum > 0) {
-                adj = containerMargin / 2;
-            }
-            
+    test('PDF baseline centres the font box inside the measured browser line', () => {
+        const getTextPosition = (
+            rect,
+            hostRect,
+            { isProjectTag = false, followsProjectExperience = false } = {}
+        ) => {
+            const fontSize = parseFloat('16px') * 1.075;
+            const pdfDescentRatio = 0.194;
+            const rasterBaselineAdjustment = isProjectTag
+                ? -fontSize * (followsProjectExperience ? 1.5 : 0.72)
+                : 0;
             return {
-                adjustment: adj,
-                fontSize: parseFloat('16px') * 1.075,
-                left: element.left || 0,
-                top: element.top || 0,
-                width: element.width || 100,
-                height: element.height || 20
+                fontSize,
+                left: rect.left - hostRect.left,
+                top: rect.top - hostRect.top +
+                    ((rect.bottom - rect.top) - fontSize) / 2 +
+                    fontSize * (1 - pdfDescentRatio) +
+                    rasterBaselineAdjustment,
+                linkTop: rect.top - hostRect.top,
+                width: rect.right - rect.left,
+                height: rect.bottom - rect.top
             };
         };
 
-        const normalElement = { left: 10, top: 20, width: 100, height: 20 };
-        const specialElement = { left: 10, top: 20, width: 100, height: 20, isProjectTags: true };
+        const position = getTextPosition(
+            { left: 60, top: 91.5, right: 77.703125, bottom: 103.5 },
+            { left: 8, top: 20 }
+        );
+        expect(position).toEqual(expect.objectContaining({
+            left: 52,
+            linkTop: 71.5,
+            width: 17.703125,
+            height: 12
+        }));
+        expect(position.top).toBeCloseTo(82.7632);
+        expect(position.fontSize).toBeCloseTo(17.2);
 
-        const normalPos = getTextPosition(normalElement, 0);
-        expect(normalPos.adjustment).toBe(35);
-        expect(normalPos.fontSize).toBeCloseTo(17.2);
+        const projectTagPosition = getTextPosition(
+            { left: 60, top: 91.5, right: 77.703125, bottom: 103.5 },
+            { left: 8, top: 20 },
+            { isProjectTag: true }
+        );
+        expect(projectTagPosition.top).toBeCloseTo(70.3792);
 
-        const specialPos = getTextPosition(specialElement, 0);
-        expect(specialPos.adjustment).toBe(17.5);
-
-        const secondPagePos = getTextPosition(normalElement, 1);
-        expect(secondPagePos.adjustment).toBe(17.5);
+        const roleTagAfterProjectsPosition = getTextPosition(
+            { left: 60, top: 91.5, right: 77.703125, bottom: 103.5 },
+            { left: 8, top: 20 },
+            { isProjectTag: true, followsProjectExperience: true }
+        );
+        expect(roleTagAfterProjectsPosition.top).toBeCloseTo(56.9632);
     });
 
     test('replaceCssVariables function logic', () => {
@@ -481,27 +504,88 @@ describe('DownloadResume', () => {
         expect(searchable[1].textContent).toBe('Link text');
     });
 
-    test('container margin calculations based on element type', () => {
-        const containerMargin = 35;
-        
-        const calculateMargin = (element, pageNum = 0) => {
-            const isSpecialElement = element.hasClass?.('project-tags') || element.hasClass?.('details');
-            let margin = !isSpecialElement ? containerMargin : containerMargin / 2;
-            if (pageNum > 0) {
-                margin = containerMargin / 2;
-            }
-            return margin;
+    test('horizontal text scaling includes the appended ATS separator', () => {
+        const getHorizontalScale = (text, separatorAfter, measuredWidth, getTextWidth) => {
+            const searchableText = separatorAfter ? `${text} ` : text;
+            return measuredWidth / getTextWidth(searchableText);
         };
 
-        const normalElement = { hasClass: () => false };
-        const projectTagsElement = { hasClass: (cls) => cls === 'project-tags' };
-        const detailsElement = { hasClass: (cls) => cls === 'details' };
+        const getTextWidth = (text) => text.length * 5;
+        expect(getHorizontalScale('WIP', true, 20, getTextWidth)).toBe(1);
+        expect(getHorizontalScale('WIP', false, 20, getTextWidth)).toBeCloseTo(4 / 3);
+    });
 
-        expect(calculateMargin(normalElement, 0)).toBe(35);
-        expect(calculateMargin(projectTagsElement, 0)).toBe(17.5);
-        expect(calculateMargin(detailsElement, 0)).toBe(17.5);
-        expect(calculateMargin(normalElement, 1)).toBe(17.5);
-        expect(calculateMargin(projectTagsElement, 1)).toBe(17.5);
+    test('ATS separators only join spatially adjacent inline objects', () => {
+        const addLineAwareSeparators = (items) => items.map((item, index) => {
+            const next = items[index + 1];
+            const nextIsOnSameLine = next &&
+                Math.abs(item.linkTop - next.linkTop) < 0.5;
+            const horizontalGap = next
+                ? next.left - (item.left + item.width)
+                : Infinity;
+            const nextIsInline = Boolean(nextIsOnSameLine &&
+                horizontalGap >= -0.5 &&
+                horizontalGap <= Math.max(6, item.fontSize * 0.5));
+            return {
+                ...item,
+                separatorAfter: item.separatorAfter &&
+                    (item.semanticSeparator || nextIsInline)
+            };
+        });
+
+        expect(addLineAwareSeparators([
+            { text: 'First', left: 0, width: 40, fontSize: 14, linkTop: 10, separatorAfter: true },
+            { text: 'Inline', left: 44, width: 30, fontSize: 14, linkTop: 10, separatorAfter: true },
+            { text: 'Far column', left: 200, width: 50, fontSize: 14, linkTop: 10, separatorAfter: true },
+            { text: 'Next line', left: 0, width: 50, fontSize: 14, linkTop: 25, separatorAfter: true }
+        ])).toEqual([
+            { text: 'First', left: 0, width: 40, fontSize: 14, linkTop: 10, separatorAfter: true },
+            { text: 'Inline', left: 44, width: 30, fontSize: 14, linkTop: 10, separatorAfter: false },
+            { text: 'Far column', left: 200, width: 50, fontSize: 14, linkTop: 10, separatorAfter: false },
+            { text: 'Next line', left: 0, width: 50, fontSize: 14, linkTop: 25, separatorAfter: false }
+        ]);
+
+        expect(addLineAwareSeparators([
+            {
+                text: 'Python', left: 0, width: 40, fontSize: 14,
+                linkTop: 10, separatorAfter: true, semanticSeparator: true
+            },
+            {
+                text: 'SQL', left: 60, width: 30, fontSize: 14,
+                linkTop: 10, separatorAfter: true, semanticSeparator: true
+            }
+        ])).toEqual([
+            expect.objectContaining({ text: 'Python', separatorAfter: true }),
+            expect.objectContaining({ text: 'SQL', separatorAfter: true })
+        ]);
+    });
+
+    test('maps computed CSS typography to matching built-in PDF fonts', () => {
+        const getPdfFont = ({ fontFamily, fontWeight, fontStyle }) => {
+            const isBold = fontWeight === 'bold' || parseInt(fontWeight, 10) >= 600;
+            const isItalic = ['italic', 'oblique'].includes(fontStyle);
+            return {
+                family: /monospace/i.test(fontFamily) ? 'courier' : 'helvetica',
+                style: isBold && isItalic
+                    ? 'bolditalic'
+                    : isBold
+                        ? 'bold'
+                        : isItalic
+                            ? 'italic'
+                            : 'normal'
+            };
+        };
+
+        expect(getPdfFont({
+            fontFamily: 'monospace',
+            fontWeight: '700',
+            fontStyle: 'italic'
+        })).toEqual({ family: 'courier', style: 'bolditalic' });
+        expect(getPdfFont({
+            fontFamily: 'Arial, sans-serif',
+            fontWeight: '400',
+            fontStyle: 'normal'
+        })).toEqual({ family: 'helvetica', style: 'normal' });
     });
 
     test('fetch operations for resume and education data', async () => {
@@ -615,5 +699,127 @@ describe('DownloadResume', () => {
         incompleteDataSets.forEach((incompleteData, index) => {
             expect(checkDataAvailability(incompleteData)).toBe(false);
         });
+    });
+});
+
+const resumeTemplate = `
+<style>
+:host { --img-color: #ffffff; --bg-color: #111111; --text-color: #eeeeee; }
+:host { --img-color: #000000; --bg-color: #ffffff; --text-color: #111111; }
+</style>
+<div class="container">
+  <div class="header"><div class="contact-info"></div></div>
+  <div class="experience"><ul></ul></div>
+  <div class="section projects"><div class="projects"></div></div>
+  <div class="skills technical-skills"><div class="skills-matrix"></div></div>
+  <div class="education"><ul></ul></div>
+  <div class="section achievements"><div class="content"></div></div>
+  <div class="footer"><span>2026</span></div>
+</div>`;
+
+const stores = (skillPayload) => new Map([
+    ['experience', writable([{
+        name: 'Canary Corp',
+        year: '2026',
+        children: [{ name: 'Engineer', description: '? Canary task', skills: [], children: [] }]
+    }])],
+    ['projects', writable([{
+        title: 'Canary Project',
+        resumeOrder: 1,
+        resumeDescription: 'Canary project description.'
+    }])],
+    ['skills', writable(skillPayload)],
+    ['achievements', writable([{
+        name: 'Canary Award', year: '2026', from: { name: 'Canary Org', icon: '/canary.svg' }
+    }])],
+    ['socials', writable([{ name: 'Canary Social', url: 'https://example.test' }])]
+]);
+
+describe('DownloadResume skill provenance', () => {
+    beforeEach(() => {
+        document.body.innerHTML = '';
+        global.fetch = jest.fn((url) => {
+            if (url === '/resume.html') {
+                return Promise.resolve({ text: () => Promise.resolve(resumeTemplate) });
+            }
+            if (url === '/api/education') {
+                return Promise.resolve({ json: () => Promise.resolve([{
+                    specialization: 'Canary Degree', institution: 'Canary University', period: '2026'
+                }]) });
+            }
+            return Promise.reject(new Error(`Unexpected URL: ${url}`));
+        });
+    });
+
+    test('renders exactly the categories and skills supplied by the API store, including noncanonical values', async () => {
+        const skillPayload = {
+            totalSkills: 2,
+            categories: [{
+                name: 'Canary Category',
+                order: 777,
+                skills: [
+                    { name: 'API_SENTINEL_SKILL', order: 20 },
+                    { name: 'SECOND_SENTINEL', order: 10 }
+                ]
+            }]
+        };
+
+        render(DownloadResume, { context: new Map([['api', stores(skillPayload)]]) });
+
+        await waitFor(() => {
+            const hidden = document.querySelector('.hidden-div');
+            expect(hidden?.shadowRoot).toBeTruthy();
+            const titles = [...hidden.shadowRoot.querySelectorAll('.skill-group-title')]
+                .map((node) => node.textContent.trim());
+            const skills = [...hidden.shadowRoot.querySelectorAll('.skill-item')]
+                .map((node) => node.textContent.trim());
+
+            expect(titles).toEqual(['Canary Category']);
+            expect(skills).toEqual(['SECOND_SENTINEL', 'API_SENTINEL_SKILL']);
+            expect(hidden.shadowRoot.textContent).not.toContain('Languages');
+            expect(hidden.shadowRoot.textContent).not.toContain('Backend');
+        }, { timeout: 3000 });
+    });
+
+    test('does not build a resume when the shared skills store is raw/unaggregated', async () => {
+        const rawSkills = [
+            { category: 'Canary Category', categoryOrder: 10, name: 'RAW_SKILL', order: 10 }
+        ];
+
+        render(DownloadResume, { context: new Map([['api', stores(rawSkills)]]) });
+
+        await new Promise((resolve) => setTimeout(resolve, 650));
+        expect(document.querySelector('.hidden-div')).toBeNull();
+    });
+
+    test('renders LF-separated experience bullets as individual tasks', async () => {
+        const skillPayload = {
+            totalSkills: 1,
+            categories: [{
+                name: 'Canary Category',
+                order: 10,
+                skills: [{ name: 'Canary Skill', order: 10 }]
+            }]
+        };
+        const apiStores = stores(skillPayload);
+        apiStores.get('experience').set([{
+            name: 'Canary Corp',
+            year: '2026',
+            children: [{
+                name: 'Engineer',
+                description: '• First task\n• Second task',
+                skills: [],
+                children: []
+            }]
+        }]);
+
+        render(DownloadResume, { context: new Map([['api', apiStores]]) });
+
+        await waitFor(() => {
+            const hidden = document.querySelector('.hidden-div');
+            const tasks = [...hidden.shadowRoot.querySelectorAll('.role-tasks > li')]
+                .map((node) => node.textContent.trim());
+            expect(tasks).toEqual(['First task', 'Second task']);
+        }, { timeout: 3000 });
     });
 });

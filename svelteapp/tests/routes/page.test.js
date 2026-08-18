@@ -50,7 +50,14 @@ const mockApiResponses = {
         name: 'Test Project',
         tags: ['JavaScript', 'React']
     }],
-    skills: [{ id: 1, name: 'JavaScript' }],
+    skills: {
+        totalSkills: 1,
+        categories: [{
+            name: 'Canary Category',
+            order: 10,
+            skills: [{ name: 'API_SENTINEL_SKILL', order: 10 }]
+        }]
+    },
     socials: [{ id: 1, platform: 'GitHub' }]
 };
 
@@ -63,7 +70,8 @@ describe('Main Page (+page.svelte)', () => {
         // Reset fetch mock
         global.fetch = createMockFunction();
         fetch.mockImplementation((url) => {
-            const endpoint = url.split('/').pop();
+            const parsed = new URL(url, 'http://localhost');
+            const endpoint = parsed.pathname.split('/').pop();
             return Promise.resolve({
                 json: () => Promise.resolve(mockApiResponses[endpoint] || [])
             });
@@ -109,6 +117,15 @@ describe('Main Page (+page.svelte)', () => {
     it('renders without crashing', () => {
         const { container } = render(Page);
         expect(container).toBeTruthy();
+    });
+
+    it('requests the API-owned category aggregation for the shared skills store', async () => {
+        render(Page);
+
+        await waitFor(() => {
+            expect(fetch.calls.some(([url]) => url === '/api/skills?aggregate=category')).toBe(true);
+            expect(fetch.calls.some(([url]) => url === '/api/skills')).toBe(false);
+        }, { timeout: 3000 });
     });
 
     it('creates context with API map', async () => {

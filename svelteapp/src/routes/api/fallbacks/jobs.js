@@ -11,12 +11,14 @@ const experience = [
                     {
                         name: "BlackRock (Client)",
                         type: "Product",
-                        description: `
-                        • Automated a data acquisition pipeline and exposed the service as an API, facilitating the onboarding of a new Vendor.
-                        • Significantly refactored a Quality Check module to prevent thousands of false positives in the exceptions dashboard.
-                        `,
+                        description: "• Led the end-to-end onboarding of a strategic index into a previously unsupported market, architecting calendar-resolution and special-weekend logic and building the first in-house Index Data Pipeline library for non-standard calendars; enabled $10B+ potential AUM inflow and established a reusable foundation for future index onboardings.\r\n" +
+                            "• Own the Index Data Server end-to-end as its SME for a critical service used across multiple business teams. Re-architected its caching strategy from eager full-table refreshes to a prewarmed in-memory cache with on-demand historical loading and asynchronous background refreshes, cutting startup time by more than 10× and materially improving API responsiveness and throughput.\r\n" +
+                            "• Refactored the Quality Check system to exclude dead/unsubscribed indices from position validation and introduced cross-client validation logic, eliminating thousands of false-positive exceptions and substantially improving dashboard accuracy.\r\n" +
+                            "• Built and deployed an automated vendor-data acquisition workflow on BlackRock’s internal ingestion framework, replacing manual SFTP retrieval with REST API-based acquisition and reducing manual effort for business-analysis stakeholders.\r\n" +
+                            "• Mentor junior and newly onboarded engineers through technical guidance, code reviews, and design discussions, helping accelerate ramp-up while maintaining engineering standards.\r\n" +
+                            "• Improved delivery planning by proposing a revised story structure that separated development work from external-team testing, improving visibility into testing bottlenecks and planning accuracy; subsequently took on PI-planning responsibilities to break features into well-scoped, estimable engineering stories.",
                         skills: [
-                            "Python", "Azure ADO", "Aqua Data Studio", "Aladdiin", "Other Proprietary Internal Tools"
+                            "Python", "Azure ADO", "Aqua Data Studio", "Aladdin", "Other Proprietary Internal Tools"
                         ]
                     }
                 ]
@@ -36,12 +38,8 @@ const experience = [
                         name: "Propello",
                         caption: "Cloud based Retail Application",
                         type: "Product",
-                        description: `
-                        • Worked on multiple modules throughout the application.
-                        • Developed custom endpoints using Django Rest framework.
-                        • Collaborated with Front-end developers to create production-ready modules.
-                        • Proactively discussed enhancements and future-proof solutions.
-                        `,
+                        description: "• Worked across multiple modules of Propello, a multi-tenant ERP SaaS application, developing custom backend endpoints using Django REST Framework and collaborating with frontend engineers to deliver production-ready features.\r\n" +
+                            "• Contributed to technical design discussions around maintainability, extensibility, and future product requirements.",
                         skills: [
                             "Python", "Django", "PyTest", "Pylint",
                             "Pep8", "Git", "Jenkins", "Jira"
@@ -51,13 +49,11 @@ const experience = [
                         name: "Epicor Payment Application",
                         caption: "End to End Payment Application",
                         type: "Product",
-                        description: `
-                        • Coded test-driven multithreaded APIs and fixed multiple bugs.
-                        • Worked extensively on EPA integration with Ingenico Pinpads.
-                        • Performed Log Analysis on Kibana.
-                        • Developed multiple workflows using the SAM principle.
-                        • Fixed a critical bug which could’ve bricked multiple Pinpads.
-                        `,
+                        description: "• Developed test-driven, multithreaded APIs and resolved defects across the Epicor Payment Application.\r\n" +
+                            "• Worked extensively on EPA’s integration with Ingenico Pinpads, including fixing a critical date-adjustment defect that could hard-brick certain pinpad models.\r\n" +
+                            "• Developed application orchestration workflows using the State Action Model (SAM) pattern.\r\n" +
+                            "• Diagnosed and investigated application issues through Kibana log analysis.\r\n" +
+                            "• Owned a major Epic for EPPS as its SME, leading extensive refactoring of the cloud-hosted Django application and contributing to adoption by 10 new clients.",
                         skills: [
                             "Python", "PyTest", "Pylint", "Pep8",
                             "Git", "Jenkins", "Kibana", "Jira"
@@ -66,13 +62,10 @@ const experience = [
                     {
                         name: "AWS Authentication PoC",
                         type: "Product",
-                        description: `
-                        • Worked on a PoC to expose Backend functionality of Propello as a Rest API.
-                        • Handson experience with AWS Cognito and Custom Lambda Authorizer for Oauth2 authentication.
-                        • Written Swagger schema for necessary endpoints.
-                        `,
+                        description: "• Built a proof of concept to expose selected Propello backend functionality as external REST APIs, enabling customers to integrate Propello into their own workflows.\r\n" +
+                            "• Implemented OAuth2 authentication using AWS Cognito and a custom Lambda authorizer, and authored Swagger schemas for the exposed endpoints.",
                         skills: [
-                            "Python", "AWS Cognito", "AWS Lambda"
+                            "Python", "AWS Cognito", "AWS Lambda", "Swagger"
                         ]
                     }
                 ]
@@ -80,15 +73,14 @@ const experience = [
             {
                 name: "Data Science Intern",
                 type: "Role",
-                description: `
-                • Collection, cleaning, wrangling, analysis and visualization of Marketing Data as part of ETL pipeline.
-                • Actively participated and improved the company’s website experience during the brand refresh project.
-                `,
+                description: "• Collected, cleaned, wrangled, analyzed, and visualized marketing data as part of an ETL pipeline using Python, SQL, pandas, and Tableau.\r\n" +
+                    "• Contributed to the company website during its brand-refresh project, working across the ASP.NET MVC and Javascript-based web stack.",
                 skills: [
                     "Python", "SQL", "Pandas", "Tableau", "Asp .NET MVC", "C#",
                     "HTML5", "CSS3", "Bootstrap", "JavaScript", "jQuery", "EPiServer",
                     "Jira", "Git"
-                ]
+                ],
+                children: []
             }
         ]
     },
@@ -100,20 +92,19 @@ const experience = [
             {
                 name: "Python Developer and Research Assistant",
                 type: "Role",
-                description: `
-                • Developed data processing software for AIS packets for satellite tracking of ships.
-                • Created scripts to test the reliability of captured packet files.
-                • Created TCP/IP Interface for Ground Station Communication with Defense Satellites.
-                • Researched networking concepts to migrate from Test System – OBC to Cortex – OBC connection chain.
-                • Created error reporting script for packet discrepancies, relational patterns, etc. for real-time GPS data from AIS 
-                Payload.
-                • Mentored 3 interns on regex parsing of AIS packets.
-                `,
+                description: "• Established core in-house software capabilities for the newly formed department as its only software engineer, building systems from scratch that helped enable independent satellite monitoring and control without routine reliance on external organizations.\r\n" +
+                    "• Independently developed a suite of Python tools to process AIS telemetry packets received from satellites, enabling accurate vessel tracking and real-time anomaly detection.\r\n" +
+                    "• Built validation tooling to verify the correctness and completeness of captured packet data before downstream processing.\r\n" +
+                    "• Developed a TCP/IP interface between an administrative control system and the ground station, enabling configuration and command exchange.\r\n" +
+                    "• Led the migration from a simplified test system to the production Cortex ground station, studying complex technical documentation and collaborating with domain experts across defense organizations to correctly decode telemetry encryption and encoding protocols.\r\n" +
+                    "• Mentored three interns on regex-based parsing techniques for AIS telemetry packet formats.\r\n" +
+                    "• Received recognition from senior DRDO scientists for being instrumental in establishing the department’s in-house satellite software capability, as well as for system reliability and rapid delivery.",
                 skills: [
                     "Python", "Regular Expression", "Networking - Socket connection",
                     "TCP/IP", "Serial connections", "TKinter", "Pandas", "Numpy",
                     "Matplotlib"
-                ]
+                ],
+                children: []
             }
         ]
     },
@@ -125,16 +116,14 @@ const experience = [
             {
                 name: "Frontend Developer (Intern)",
                 type: "Role",
-                description: `
-                • Implemented a voting based social media application, election under Hasura's Product Development Fellowship.
-                • Lead and managed a team of 10 with regular coordination and planning.
-                • Acted as a liaison between the team and the mentor.
-                • Found 19 bugs in the company's infrastructure and assisted in fixing them
-                `,
+                description: "• Built Electon, a voting-based social application, as part of Hasura’s Product Development Fellowship.\r\n" +
+                    "• Led and coordinated a team of 10, acting as the primary liaison between the team and its mentor.\r\n" +
+                    "• Identified 19 bugs in Hasura’s infrastructure and assisted with their resolution.",
                 skills: [
                     "Git", "Hasura Framework", "Python", "Django", "Flask",
                     "ReactJS", "Docker", "Kubernetes", "HTML", "CSS"
-                ]
+                ],
+                children: []
             }
         ]
     },
@@ -146,14 +135,12 @@ const experience = [
             {
                 name: "Microchip Programming Intern",
                 type: "Role",
-                description: `
-                • Creation of Automated Sensory Systems on Embedded 8052 Microcontrollers.
-                • Guided fellow intern to learn and improve his code.
-                • Made final optimizations in the created code.
-                `,
+                description: "• Built automated sensory systems on embedded 8052 microcontrollers and performed final code optimizations.\r\n" +
+                    "• Guided a fellow intern in understanding and improving their code.",
                 skills: [
                     "Embedded C", "8052 Microcontroller"
-                ]
+                ],
+                children: []
             }
         ]
     }

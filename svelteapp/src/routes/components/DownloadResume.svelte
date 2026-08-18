@@ -7,12 +7,9 @@
     let hiddenDiv;
     let thumbnailSrc = "";
     let isDownloading = false;
-    const fullSkillList = ["Python"].fill(100);
     const { experience, projects, skills, achievements, socials } = Object.fromEntries(getContext("api"));
     const education = writable([]);
     fetch("/api/education").then((res) => res.json()).then((data) => education.set(data));
-
-    const containerMargin = 35;
 
     const getResumeText = async () => {
         const response = await fetch("/resume.html");
@@ -38,13 +35,17 @@
 
     // Helper function to create and append tasks
     const createTasks = (description, roleTask = false) => {
+        const tasks = description
+            .split(/\r?\n/)
+            .map((task) => task.trim())
+            .filter(Boolean);
         const tasksUl = createElement(
             "ul",
             {
                 classes: ["tasks", ...(roleTask ? ["role-tasks"] : [])],
-                children: description.split("\r\n").map((task) => (
+                children: tasks.map((task) => (
                     createElement("li", {
-                        children: [createElement("span", { text: task.replace("• ", "") })]
+                        children: [createElement("span", { text: task.replace(/^•\s*/, "") })]
                     })
                 ))
             }
@@ -135,126 +136,78 @@
         });
     };
 
-    // Helper function to create the projects section
+    // Helper function to create the recent projects section
     const createProjects = (projectsRoot, prjs) => {
         projectsRoot.innerHTML = "";
-        prjs.forEach((project) => {
-            const projectCard = createElement("div", {
-                classes: ["project-card"],
-                children: [
-                    createElement("div", {
-                        classes: ["project-title"],
-                        children: [
-                            createElement("a", {
-                                text: project.title,
-                                classes: [],
-                                attributes: {
-                                    href: project.htmlUrl || "#",
-                                    target: "_blank",
-                                    rel: "noopener noreferrer"
-                                }
-                            })
-                        ]
-                    })
-                ]
+        prjs
+            .filter((project) => (project.resumeOrder || 0) > 0)
+            .toSorted((a, b) => (a.resumeOrder || 0) - (b.resumeOrder || 0))
+            .forEach((project) => {
+                const titleChildren = [];
+                if (project.htmlUrl) {
+                    titleChildren.push(createElement("a", {
+                        text: project.title,
+                        attributes: {
+                            href: project.htmlUrl,
+                            target: "_blank",
+                            rel: "noopener noreferrer"
+                        }
+                    }));
+                } else {
+                    titleChildren.push(createElement("span", { text: project.title }));
+                }
+
+                if (project.status) {
+                    titleChildren.push(createElement("span", {
+                        text: project.status,
+                        classes: ["project-status"]
+                    }));
+                }
+
+                const projectCard = createElement("div", {
+                    classes: ["project-card"],
+                    children: [
+                        createElement("div", {
+                            classes: ["project-title"],
+                            children: titleChildren
+                        }),
+                        createElement("div", {
+                            text: project.resumeDescription || project.description,
+                            classes: ["project-description"]
+                        })
+                    ]
+                });
+
+                projectsRoot.appendChild(projectCard);
             });
-
-            const watcherCount = project.watcherCount || 0;
-            const forkCount = project.forkCount || 0;
-            const stargazerCount = project.stargazerCount || 0;
-
-            if (watcherCount || forkCount || stargazerCount) {
-                projectCard.appendChild(
-                    createElement("div", {
-                        classes: ["project-meta"],
-                        children: [
-                            createElement("span", {
-                                children: [createElement("div", {
-                                    classes: ["icon"],
-                                    children: [
-                                        createElement("img", {
-                                            attributes: {
-                                                src: "https://img.icons8.com/material-rounded/24/transparent/visible.png",
-                                                alt: "Watchers"
-                                            }
-                                        }),
-                                        createElement("span", {
-                                            text: watcherCount.toLocaleString()
-                                        })
-                                    ]
-                                })]
-                            }),
-                            createElement("span", {
-                                children: [createElement("div", {
-                                    classes: ["icon"],
-                                    children: [
-                                        createElement("img", {
-                                            attributes: {
-                                                src: "https://img.icons8.com/material-outlined/24/transparent/code-fork.png",
-                                                alt: "Forks"
-                                            }
-                                        }),
-                                        createElement("span", {
-                                            text: forkCount.toLocaleString()
-                                        })
-                                    ]
-                                })]
-                            }),
-                            createElement("span", {
-                                children: [createElement("div", {
-                                    classes: ["icon"],
-                                    children: [
-                                        createElement("img", {
-                                            attributes: {
-                                                src: "https://img.icons8.com/material-rounded/24/transparent/star.png",
-                                                alt: "Stars"
-                                            }
-                                        }),
-                                        createElement("span", {
-                                            text: stargazerCount.toLocaleString()
-                                        })
-                                    ]
-                                })]
-                            })
-                        ]
-                    })
-                );
-            }
-
-            projectCard.appendChild(
-                createElement(
-                    "div",
-                    {
-                        text: project.description,
-                        classes: ["project-description"]
-                    }
-                )
-            );
-
-            projectCard.appendChild(createProjectTags(project.tags));
-
-            projectsRoot.appendChild(projectCard);
-        });
     };
 
-    // Helper function to create the skills section
-    const createSkills = (skillsRoot, skls) => {
+    // Helper function to create the grouped skills matrix
+    const createSkills = (skillsRoot, skillPayload) => {
         skillsRoot.innerHTML = "";
-        skls.forEach((skill) => {
-            const sklLi = createElement("li", {
+        (skillPayload?.categories || []).forEach((category) => {
+            const categorySkills = category.skills || [];
+            if (!categorySkills.length) { return; }
+
+            const group = createElement("section", {
+                classes: ["skill-group"],
                 children: [
-                    createElement("img", {
-                        attributes: {
-                            src: skill.icon,
-                            alt: skill.name
-                        }
+                    createElement("div", {
+                        classes: ["skill-group-title"],
+                        text: category.name
                     }),
-                    createElement("span", {
-                        text: skill.name
+                    createElement("div", {
+                        classes: ["skill-list"],
+                        children: [...categorySkills]
+                            .toSorted((a, b) => (a.order || 0) - (b.order || 0))
+                            .map((skill) => createElement("span", {
+                                classes: ["skill-item"],
+                                text: skill.name
+                            }))
                     })
                 ]
             });
-            skillsRoot.appendChild(sklLi);
+            skillsRoot.appendChild(group);
         });
     };
 
@@ -323,24 +276,8 @@
         const projectsRoot = hiddenDiv.shadowRoot.querySelector(".section.projects .projects");
         createProjects(projectsRoot, $projects || []);
 
-        const techSkillsRoot = hiddenDiv.shadowRoot.querySelector(".technical-skills ul");
-        createSkills(
-            techSkillsRoot,
-            ($skills["Technical Skills"] || []).toSorted(
-                (a, b) => (b.confidence * fullSkillList.filter(x => x === b.name).length) - (
-                    a.confidence * fullSkillList.filter(x => x === a.name).length
-                )
-            )
-        );
-
-        const softSkillsRoot =
-            hiddenDiv.shadowRoot.querySelector(".soft-skills ul");
-        createSkills(
-            softSkillsRoot,
-            ($skills["Soft Skills"] || []).toSorted(
-                (a, b) => b.confidence - a.confidence
-            )
-        );
+        const techSkillsRoot = hiddenDiv.shadowRoot.querySelector(".technical-skills .skills-matrix");
+        createSkills(techSkillsRoot, $skills);
 
         const educationRoot = hiddenDiv.shadowRoot.querySelector(".education ul");
         createEducation(educationRoot, $education || []);
@@ -409,32 +346,175 @@
 
     // Function to convert HTML to PDF and trigger download
     const downloadPDF = async () => {
-        const getTextPosition = (element, pageNum = 0) => {
+        const getTextPositions = (element) => {
             const hostRect = element.getRootNode().host.getBoundingClientRect();
 
-            // Build a range over the element's text
             const range = document.createRange();
             range.selectNodeContents(element);
-            let { left: L, top: T, right: R, bottom: B } = range.getBoundingClientRect();
+            const elementRect = range.getBoundingClientRect();
+            const lineRects = Array.from(range.getClientRects())
+                .filter((rect) => rect.width > 0 && rect.height > 0)
+                .reduce((lines, rect) => {
+                    const line = lines.find((candidate) =>
+                        Math.abs(candidate.top - rect.top) < 0.5
+                    );
+                    if (line) {
+                        line.left = Math.min(line.left, rect.left);
+                        line.right = Math.max(line.right, rect.right);
+                        line.bottom = Math.max(line.bottom, rect.bottom);
+                    } else {
+                        lines.push({
+                            left: rect.left,
+                            top: rect.top,
+                            right: rect.right,
+                            bottom: rect.bottom
+                        });
+                    }
+                    return lines;
+                }, []);
             range.detach?.();
 
-            let adj = (!element.closest(".project-tags") && !element.closest(".details")) ? containerMargin : containerMargin / 2;
-            if (pageNum > 0) {
-                adj = containerMargin / 2;
-            }
-            T += adj;
-
             const style = getComputedStyle(element);
+            const fontSize = parseFloat(style.fontSize) * 1.075;
+            const isBold = style.fontWeight === "bold" || parseInt(style.fontWeight, 10) >= 600;
+            const isItalic = ["italic", "oblique"].includes(style.fontStyle);
+            const pdfFontStyle = isBold && isItalic
+                ? "bolditalic"
+                : isBold
+                    ? "bold"
+                    : isItalic
+                        ? "italic"
+                        : "normal";
+            const pdfFontFamily = /monospace/i.test(style.fontFamily)
+                ? "courier"
+                : "helvetica";
+            const url = element.href || "";
+            const normalizeText = (text) => text.replace(/\s+/g, " ").trim();
+            const elementText = normalizeText(element.textContent);
 
-            return {
-                left: L - hostRect.left,
-                top: T - hostRect.top,
-                width: R - L,
-                height: B - T,
-                fontSize: parseFloat(style.fontSize) * 1.075,
-                text: element.textContent,
-                url: element.href || ""
-            };
+            const pdfDescentRatio = pdfFontFamily === "courier" ? 0.194 : 0.207;
+            // dom-to-image renders the inline span inside a padded project tag
+            // about one text-line step above its live browser Range rectangle.
+            // Other elements (including the flex-based skills/status pills) do
+            // not exhibit this foreignObject baseline shift.
+            const projectTag = element.closest(".project-tag");
+            // A role-level tag row that follows project-level experience is
+            // laid out one extra 10px step higher inside dom-to-image's SVG
+            // foreignObject (the Epicor/Data Science row is the current case).
+            // Calibrate that structural variant independently instead of
+            // forcing every tag and ordinary text element onto one baseline.
+            const followsProjectExperience = projectTag &&
+                element.closest(".task-holder") &&
+                element.closest(".company")?.querySelector(".exp_projects");
+            const rasterBaselineAdjustment = projectTag
+                ? -fontSize * (followsProjectExperience ? 1.5 : 0.72)
+                : 0;
+            const createPosition = (rect, text, separatorAfter = true) => ({
+                left: rect.left - hostRect.left,
+                // jsPDF positions text by its baseline, while the browser range
+                // gives us the full rendered line box. Centre the PDF font box
+                // inside that measured line box instead of treating its bottom
+                // edge as the baseline (which shifts selections vertically).
+                top: rect.top - hostRect.top +
+                    ((rect.bottom - rect.top) - fontSize) / 2 +
+                    fontSize * (1 - pdfDescentRatio) +
+                    rasterBaselineAdjustment,
+                linkTop: rect.top - hostRect.top,
+                width: rect.right - rect.left,
+                height: rect.bottom - rect.top,
+                fontSize,
+                pdfFontFamily,
+                pdfFontStyle,
+                text,
+                separatorAfter,
+                semanticSeparator: element.matches(".skill-item") ||
+                    Boolean(element.closest(".project-tag")),
+                url
+            });
+
+            // Preserve the proven one-object-per-leaf behavior when the browser
+            // renders the leaf on one visual line. Only wrapped leaves need the
+            // more granular browser-line measurement below.
+            if (lineRects.length <= 1) {
+                return elementText
+                    ? [createPosition(elementRect, elementText)]
+                    : [];
+            }
+
+            const characters = [];
+            const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+            let textNode;
+            let sourceText = "";
+
+            while ((textNode = walker.nextNode())) {
+                const text = textNode.textContent || "";
+                const nodeStart = sourceText.length;
+                sourceText += text;
+
+                for (let offset = 0; offset < text.length;) {
+                    const character = String.fromCodePoint(text.codePointAt(offset));
+                    const endOffset = offset + character.length;
+                    const characterRange = document.createRange();
+                    characterRange.setStart(textNode, offset);
+                    characterRange.setEnd(textNode, endOffset);
+                    const rect = characterRange.getBoundingClientRect();
+                    characterRange.detach?.();
+
+                    let lineIndex = -1;
+                    if (rect.height > 0) {
+                        lineIndex = lineRects.reduce((closest, line, index) => (
+                            Math.abs(line.top - rect.top) < Math.abs(lineRects[closest].top - rect.top)
+                                ? index
+                                : closest
+                        ), 0);
+                    }
+
+                    characters.push({
+                        character,
+                        sourceStart: nodeStart + offset,
+                        sourceEnd: nodeStart + endOffset,
+                        lineIndex
+                    });
+                    offset = endOffset;
+                }
+            }
+
+            const fragments = lineRects.map((rect, lineIndex) => {
+                const lineCharacters = characters.filter((character) =>
+                    character.lineIndex === lineIndex
+                );
+                const firstCharacter = lineCharacters.find((character) =>
+                    /\S/.test(character.character)
+                );
+                const lastCharacter = [...lineCharacters].reverse().find((character) =>
+                    /\S/.test(character.character)
+                );
+
+                if (!firstCharacter || !lastCharacter) {
+                    return null;
+                }
+
+                return {
+                    ...createPosition(
+                        rect,
+                        normalizeText(lineCharacters.map(({ character }) => character).join(""))
+                    ),
+                    sourceStart: firstCharacter.sourceStart,
+                    sourceEnd: lastCharacter.sourceEnd
+                };
+            }).filter(Boolean);
+
+            return fragments.map((fragment, index) => {
+                const nextFragment = fragments[index + 1];
+                const separatorAfter = !nextFragment || /\s/.test(
+                    sourceText.slice(fragment.sourceEnd, nextFragment.sourceStart)
+                );
+
+                const position = { ...fragment };
+                delete position.sourceStart;
+                delete position.sourceEnd;
+                return { ...position, separatorAfter };
+            });
         };
 
         const createPage = (elements, pageNum = 0) => {
@@ -450,6 +530,10 @@
             });
             shadowRoot.appendChild(newContainer);
             document.body.appendChild(newRoot);
+            return { host: shadowRoot.host, shadowRoot };
+        };
+
+        const measurePageSearchables = ({ host, shadowRoot }) => {
             const searchables = [
                 ...Array.from(shadowRoot.querySelectorAll("*"))
                     .filter(
@@ -459,25 +543,65 @@
                             elem.innerText.trim().length > 0 &&
                             elem.childElementCount === 0
                     )
-            ].map((elem) => getTextPosition(elem, pageNum));
-            return { host: shadowRoot.host, searchables };
+            ].flatMap((elem) => getTextPositions(elem));
+            const positionedSearchables = searchables.map((searchable, index) => {
+                const next = searchables[index + 1];
+                const nextIsOnSameLine = next &&
+                    Math.abs(searchable.linkTop - next.linkTop) < 0.5;
+                const horizontalGap = next
+                    ? next.left - (searchable.left + searchable.width)
+                    : Infinity;
+                const nextIsInline = Boolean(nextIsOnSameLine &&
+                    horizontalGap >= -0.5 &&
+                    horizontalGap <= Math.max(6, searchable.fontSize * 0.5));
+                return {
+                    ...searchable,
+                    // Semantic chips/cells keep an ATS separator even when CSS
+                    // margins put them beyond the generic inline-gap threshold.
+                    // Other elements only join genuinely adjacent inline text;
+                    // a shared Y coordinate alone is not enough for columns.
+                    separatorAfter: searchable.separatorAfter &&
+                        (searchable.semanticSeparator || nextIsInline)
+                };
+            });
+            return { host, shadowRoot, searchables: positionedSearchables };
         };
 
         const splitPages = async () => {
             const containerNode = hiddenDiv.shadowRoot.querySelector(".container");
-            const sections = [...containerNode.children];
-            // Extract header and footer
-            const header = sections.shift().cloneNode(true);
-            const footer = sections.pop().cloneNode(true);
-            const firstPage = [header, sections.shift()];
-            const lastPage = [sections.pop(), footer];
-            lastPage.unshift(sections.pop());
-            // Handle the combination of header and first section
-            const pages = [firstPage, ...sections.map((sect) => [sect]), lastPage].map(
-                (elements, idx) => createPage(elements, idx)
-            );
-            await new Promise((resolve) => setTimeout(resolve, 500));
-            const pageObjects = await Promise.all(pages.map(async (page) => {
+            const header = containerNode.querySelector(".header").cloneNode(true);
+            const experience = containerNode.querySelector(".experience").cloneNode(true);
+            const projects = containerNode.querySelector(".projects").cloneNode(true);
+            const skills = containerNode.querySelector(".skills").cloneNode(true);
+            const education = containerNode.querySelector(".education").cloneNode(true);
+            const achievements = containerNode.querySelector(".achievements").cloneNode(true);
+            const footer = containerNode.querySelector(".footer").cloneNode(true);
+
+            const pages = [
+                [header, experience],
+                [projects, skills],
+                [education, achievements, footer]
+            ].map((elements, idx) => createPage(elements, idx));
+            // The raster and searchable text must be measured from the exact same
+            // settled layout. Cloned icons can change header/section geometry
+            // after insertion, which previously left later text boxes displaced.
+            await Promise.all(pages.flatMap(({ shadowRoot }) =>
+                Array.from(shadowRoot.querySelectorAll("img")).map(async (img) => {
+                    try {
+                        await img.decode?.();
+                    } catch (error) {
+                        // A failed decorative icon must not block PDF generation.
+                    }
+                })
+            ));
+            if (document.fonts?.ready) {
+                await document.fonts.ready;
+            }
+            await new Promise((resolve) => requestAnimationFrame(() =>
+                requestAnimationFrame(resolve)
+            ));
+            const measuredPages = pages.map(measurePageSearchables);
+            const pageObjects = await Promise.all(measuredPages.map(async (page) => {
                 const url = await domtoimage.toPng(page.host);
                 page.host.remove();
                 const img = new Image();
@@ -498,20 +622,32 @@
             const pageObjects = await splitPages();
             const pdf = new Jspdf("p", "pt", [pageObjects[0].width, pageObjects[0].height]);
             pdf.setFontSize(16);
-            pdf.setCharSpace(1);
+            pdf.setCharSpace(0);
             pageObjects.forEach((page, i) => {
                 pdf.addImage(page.url, "PNG", 0, 0, page.width, page.height);
                 page.searchables.forEach((searchable) => {
+                    pdf.setFont(searchable.pdfFontFamily, searchable.pdfFontStyle);
                     pdf.setFontSize(searchable.fontSize);
                     try {
-                        pdf.text(searchable.text, searchable.left, searchable.top, {
+                        const searchableText = searchable.separatorAfter
+                            ? `${searchable.text} `
+                            : searchable.text;
+                        // Include the separator in the width calculation. It is
+                        // part of the PDF text item, so excluding it made Chrome's
+                        // selection highlight overrun every measured browser rect.
+                        const naturalWidth = pdf.getTextWidth(searchableText);
+                        const horizontalScale = naturalWidth > 0
+                            ? searchable.width / naturalWidth
+                            : 1;
+
+                        pdf.text(searchableText, searchable.left, searchable.top, {
                             renderingMode: "invisible",
-                            maxWidth: 640
+                            horizontalScale
                         });
                         if (searchable.url) {
                             pdf.link(
                                 searchable.left,
-                                searchable.top,
+                                searchable.linkTop,
                                 searchable.width,
                                 searchable.height,
                                 { url: searchable.url }
@@ -538,9 +674,8 @@
 
     $: if (
         $experience.length &&
-        $projects.length &&
-        $skills["Technical Skills"]?.length &&
-        $skills["Soft Skills"]?.length &&
+        $projects.some((project) => (project.resumeOrder || 0) > 0) &&
+        $skills?.categories?.some((category) => category.skills?.length) &&
         $achievements.length &&
         $socials.length
     ) {
