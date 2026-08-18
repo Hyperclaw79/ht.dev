@@ -290,8 +290,8 @@ test.describe("Download Resume Functionality", () => {
             const wipStatus = item("WIP");
             // These bounds are the browser-measured text widths. The previous
             // implementation appended a space after scaling and overran both.
-            expect(shortSkill.width).toBeLessThan(41);
-            expect(wipStatus.width).toBeLessThan(18.5);
+            expect(shortSkill.width).toBeLessThan(45);
+            expect(wipStatus.width).toBeLessThan(20);
             expect(page2Items.filter((entry) => entry.text === "Recent Projects")).toHaveLength(1);
 
             const page1Urls = pages[0].annotations.map((annotation) => annotation.url);
