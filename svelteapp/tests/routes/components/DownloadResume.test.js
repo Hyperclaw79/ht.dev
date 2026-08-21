@@ -717,12 +717,14 @@ const resumeTemplate = `
   <div class="footer"><span>2026</span></div>
 </div>`;
 
-const stores = (skillPayload) => new Map([
-    ['experience', writable([{
-        name: 'Canary Corp',
-        year: '2026',
-        children: [{ name: 'Engineer', description: '? Canary task', skills: [], children: [] }]
-    }])],
+const defaultExperience = [{
+    name: 'Canary Corp',
+    year: '2026',
+    children: [{ name: 'Engineer', description: '? Canary task', skills: [], children: [] }]
+}];
+
+const stores = (skillPayload, experiencePayload = defaultExperience) => new Map([
+    ['experience', writable(experiencePayload)],
     ['projects', writable([{
         title: 'Canary Project',
         resumeOrder: 1,
@@ -778,6 +780,46 @@ describe('DownloadResume skill provenance', () => {
             expect(skills).toEqual(['SECOND_SENTINEL', 'API_SENTINEL_SKILL']);
             expect(hidden.shadowRoot.textContent).not.toContain('Languages');
             expect(hidden.shadowRoot.textContent).not.toContain('Backend');
+        }, { timeout: 3000 });
+    });
+
+    test('uses a role date override and otherwise falls back to the parent job date', async () => {
+        const experience = [{
+            name: 'Canary Corp',
+            year: '2020-12 – 2023-08',
+            children: [
+                {
+                    name: 'Promoted Role',
+                    year: '2021-06 – 2023-08',
+                    description: '',
+                    skills: [],
+                    children: []
+                },
+                {
+                    name: 'Inherited Role',
+                    description: '',
+                    skills: [],
+                    children: []
+                }
+            ]
+        }];
+        const skillPayload = {
+            totalSkills: 1,
+            categories: [{
+                name: 'Canary Category',
+                order: 1,
+                skills: [{ name: 'Canary Skill', order: 1 }]
+            }]
+        };
+
+        render(DownloadResume, { context: new Map([['api', stores(skillPayload, experience)]]) });
+
+        await waitFor(() => {
+            const hidden = document.querySelector('.hidden-div');
+            expect(hidden?.shadowRoot).toBeTruthy();
+            const periods = [...hidden.shadowRoot.querySelectorAll('.experience .period')]
+                .map((node) => node.textContent.trim());
+            expect(periods).toEqual(['2021-06 – 2023-08', '2020-12 – 2023-08']);
         }, { timeout: 3000 });
     });
 
