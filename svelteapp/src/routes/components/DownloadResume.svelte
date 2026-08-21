@@ -95,7 +95,7 @@
                 }));
                 jobLi.appendChild(createElement("span", {
                     classes: ["period"],
-                    text: job.year
+                    text: role.year || job.year
                 }));
 
                 if (role.children && role.children.length > 0) {

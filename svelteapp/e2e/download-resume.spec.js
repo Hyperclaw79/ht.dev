@@ -126,7 +126,7 @@ test.describe("Download Resume Functionality", () => {
         }
     });
 
-    test("should download resume PDF with proper ATS text layer", async ({ page }) => {
+    test("should download resume PDF with proper ATS text layer", async ({ page }, testInfo) => {
         await page.setViewportSize({ width: 1200, height: 800 });
 
         // Navigate to download resume section
@@ -163,7 +163,7 @@ test.describe("Download Resume Functionality", () => {
         expect(download.suggestedFilename()).toBe("Harshith Thota Resume.pdf");
 
         // Save the downloaded file for content verification
-        const downloadPath = path.join(process.cwd(), "test-downloads", download.suggestedFilename());
+        const downloadPath = testInfo.outputPath(download.suggestedFilename());
 
         // Ensure download directory exists
         const downloadDir = path.dirname(downloadPath);
@@ -189,7 +189,10 @@ test.describe("Download Resume Functionality", () => {
 
             const parsed = await pdfParse(pdfBuffer);
             const atsText = parsed.text;
-            const normalizedAtsText = atsText.replace(/\s+/g, " ").trim();
+            const normalizedAtsText = atsText
+                .replace(/[\u2013\u2014]/g, "-")
+                .replace(/\s+/g, " ")
+                .trim();
 
             [
                 "Harshith Thota", "Experience", "Recent Projects",
@@ -210,6 +213,22 @@ test.describe("Download Resume Functionality", () => {
                 "Model Context Protocol (MCP)",
                 "Self-hosted engineering platform spanning service orchestration"
             ].forEach(text => expect(normalizedAtsText).toContain(text));
+
+            // Epicor contains two roles whose dates override the parent job's
+            // 2020-12 - 2023-08 range. Keep these assertions paired with the
+            // role names so a repeated parent date cannot satisfy the test.
+            expect(normalizedAtsText).toContain(
+                "Product Developer 2021-04 - 2023-08"
+            );
+            expect(normalizedAtsText).toContain(
+                "Data Science Intern 2020-12 - 2021-03"
+            );
+            expect(normalizedAtsText).not.toContain(
+                "Product Developer 2020-12 - 2023-08"
+            );
+            expect(normalizedAtsText).not.toContain(
+                "Data Science Intern 2020-12 - 2023-08"
+            );
 
             [
                 "HarshithThota",

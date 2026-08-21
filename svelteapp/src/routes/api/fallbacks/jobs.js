@@ -33,6 +33,7 @@ const experience = [
             {
                 name: "Product Developer",
                 type: "Role",
+                year: "2021-04 – 2023-08",
                 children: [
                     {
                         name: "Propello",
@@ -73,6 +74,7 @@ const experience = [
             {
                 name: "Data Science Intern",
                 type: "Role",
+                year: "2020-12 – 2021-03",
                 description: "• Collected, cleaned, wrangled, analyzed, and visualized marketing data as part of an ETL pipeline using Python, SQL, pandas, and Tableau.\r\n" +
                     "• Contributed to the company website during its brand-refresh project, working across the ASP.NET MVC and Javascript-based web stack.",
                 skills: [
